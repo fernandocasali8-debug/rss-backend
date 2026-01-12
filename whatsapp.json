@@ -1,0 +1,17 @@
+{
+  "enabled": false,
+  "accessToken": "",
+  "phoneNumberId": "",
+  "wabaId": "",
+  "recipientNumber": "",
+  "templateName": "",
+  "templateLanguage": "pt_BR",
+  "rules": {
+    "feedIds": [],
+    "requireWords": [],
+    "blockWords": [],
+    "onlyWithLink": true,
+    "maxPerDay": 10,
+    "minIntervalMinutes": 60
+  }
+}

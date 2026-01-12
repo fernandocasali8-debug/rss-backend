@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "geo": "BR",
+  "maxItems": 10,
+  "refreshMinutes": 10
+}

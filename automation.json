@@ -1,0 +1,29 @@
+{
+  "credentials": {
+    "apiKey": "Y487S36tOi9UVnAADFYXV8JZQ",
+    "apiSecret": "uWo5N8dN3M4xuJd1EnISSiFumO4uGsFb3ImRULQvrvMf74aotE",
+    "accessToken": "45605450-QtJ83iwLuPnSz8doSCscU3E4zDl84Q5C97MdRpPzk",
+    "accessSecret": "pPaj5Zq6axeYWCCK8Gp5ifFe26wprwmrqGIBW7C2FpeIB"
+  },
+  "rules": {
+    "enabled": false,
+    "feedIds": [
+      "1820a7b5-bd6f-40a5-81cd-f07325c6659e",
+      "1d6cfe1c-5191-496f-9f02-4bccd7c54b48",
+      "e986d2d5-57ec-48e0-a0d4-b6cfbeea7eda",
+      "a293750e-e9ff-4896-9250-d866fc6fea30",
+      "d35996f2-c53a-4d15-a4b0-a9ae2a45ca6a"
+    ],
+    "requireWords": [],
+    "blockWords": [],
+    "onlyWithLink": true,
+    "maxPerDay": 16,
+    "minIntervalMinutes": 90,
+    "quietHours": {
+      "enabled": true,
+      "start": "07:00",
+      "end": "22:00"
+    },
+    "template": "{title} {link}"
+  }
+}

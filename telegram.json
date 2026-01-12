@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "botToken": "",
+  "chatId": "",
+  "template": "{title}\n{link}",
+  "rules": {
+    "feedIds": [],
+    "requireWords": [],
+    "blockWords": [],
+    "onlyWithLink": true,
+    "maxPerDay": 20,
+    "minIntervalMinutes": 10
+  }
+}

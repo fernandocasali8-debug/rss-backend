@@ -1,0 +1,386 @@
+[
+  {
+    "id": "1820a7b5-bd6f-40a5-81cd-f07325c6659e",
+    "name": "Policia Federal - Google",
+    "url": "https://www.google.com.br/alerts/feeds/03795826088094337049/6638234389084958239",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "1d6cfe1c-5191-496f-9f02-4bccd7c54b48",
+    "name": "Termo Eduardo Bolsonaro, no Google.",
+    "url": "https://www.google.com.br/alerts/feeds/03795826088094337049/18365083896827299362",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "e986d2d5-57ec-48e0-a0d4-b6cfbeea7eda",
+    "name": "Câmara dos Deputados",
+    "url": "https://www.google.com.br/alerts/feeds/03795826088094337049/19677246348060520",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "f45da00d-0916-4d3a-92c4-73e36ae6b12e",
+    "name": "Gazeta do Povo - Política",
+    "url": "https://www.gazetadopovo.com.br/feed/rss/republica.xml",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "fbe2fe2d-3a98-408b-aa47-4579234cd557",
+    "name": "Folha - últimas notícias",
+    "url": "https://www.gazetadopovo.com.br/feed/rss/ultimas-noticias.xml",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "a293750e-e9ff-4896-9250-d866fc6fea30",
+    "name": "EBC",
+    "url": "https://agenciabrasil.ebc.com.br/radioagencia-nacional/rss/ultimasnoticias/feed.xml",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "092af404-8699-4a57-9079-3b3e89c31aad",
+    "name": "EBC - Rádio",
+    "url": "https://agenciabrasil.ebc.com.br/radioagencia-nacional/rss/ultimasnoticias/feed.xml",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "7ed3d939-4691-4da0-8d53-eecf7b2dd3d8",
+    "name": "Metropoles",
+    "url": "http://localhost:4000/rss?url=https%3A%2F%2Fwww.metropoles.com%2F",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "d35996f2-c53a-4d15-a4b0-a9ae2a45ca6a",
+    "name": "Banco Master - Google",
+    "url": "https://www.google.com.br/alerts/feeds/03795826088094337049/12045070519413427681",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "6b3d3844-6b52-4b35-bb3e-19d2449d85ad",
+    "name": "Folha- última hora",
+    "url": "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "fc2d33e8-f9c6-47a6-98c7-480afd003f94",
+    "name": "Pentagon",
+    "url": "https://www.war.gov/DesktopModules/ArticleCS/RSS.ashx?max=10&ContentType=1&Site=945",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "9d9d2252-c8bf-4178-b0e1-2bf67b1e84b9",
+    "name": "G1",
+    "url": "https://g1.globo.com/rss/g1/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "e943ad5f-31da-4db1-af8b-c84a01d24ecc",
+    "name": "UOL Noticias",
+    "url": "https://rss.uol.com.br/feed/noticias.xml",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "6d5c25cc-5d8d-4db7-ab0e-444365284b56",
+    "name": "Estadão",
+    "url": "https://www.estadao.com.br/rss/",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "c22258da-21a4-4844-bb46-5c161b60413d",
+    "name": "Agencia Brasil",
+    "url": "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "13041485-db7a-49a4-8d6e-10f05c4fe0f2",
+    "name": "CartaCapital",
+    "url": "https://www.cartacapital.com.br/rss/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "6cdec878-1462-4572-8508-8e38e98817c8",
+    "name": "Exame",
+    "url": "https://exame.com/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "8a2d23e0-01e9-412d-b6c3-c6b839c958d4",
+    "name": "Veja",
+    "url": "https://veja.abril.com.br/rss/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "795edf61-8132-4a40-a197-34ad65784d29",
+    "name": "Poder360",
+    "url": "https://www.poder360.com.br/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "25d76827-85d9-4418-b0c1-5e41cd5a1543",
+    "name": "Congresso em Foco",
+    "url": "https://congressoemfoco.uol.com.br/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "af55b0f2-252d-4f81-91f3-43ada7683525",
+    "name": "Nexo Jornal",
+    "url": "https://www.nexojornal.com.br/rss.xml",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "4a3eecc1-4eec-485b-9fb6-255f1a98fce6",
+    "name": "R7 Noticias",
+    "url": "https://noticias.r7.com/feed.xml",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "84a7b23b-731e-418f-9831-cbb00a29bb74",
+    "name": "Terra Noticias",
+    "url": "https://www.terra.com.br/rss/",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "7782245e-08b6-4c3d-b752-4069876336b5",
+    "name": "IG Ultimo Segundo",
+    "url": "https://ultimosegundo.ig.com.br/rss",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "39b1f786-c9a4-4d74-98e8-3e43d07de641",
+    "name": "Band",
+    "url": "https://www.band.uol.com.br/rss",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "a4ec23ca-f38f-4f8f-998e-ad975c95689c",
+    "name": "SBT News",
+    "url": "https://www.sbtnews.com.br/rss",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "7bde1249-ad99-40a3-8727-5b11d88b4d0b",
+    "name": "Gazeta do Povo",
+    "url": "https://www.gazetadopovo.com.br/rss/",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "0cef38b2-941d-47b1-9cbb-4703e21a6e08",
+    "name": "O Antagonista",
+    "url": "https://oantagonista.com.br/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "a14324f1-dba1-497f-a0f0-fde9ff30f267",
+    "name": "Revista Oeste",
+    "url": "https://revistaoeste.com/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "a91ac793-c2e6-4d64-a646-ae7606ceab3a",
+    "name": "Brasil 247",
+    "url": "https://www.brasil247.com/rss",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "b448c72b-e962-4c48-b9ae-33ed122300ee",
+    "name": "Diario do Centro do Mundo",
+    "url": "https://www.diariodocentrodomundo.com.br/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "0c70bc27-676a-47f5-8593-51c8c3732516",
+    "name": "Jornal GGN",
+    "url": "https://jornalggn.com.br/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "10baf15b-2d0f-4ca7-bf04-5a5a715caa21",
+    "name": "Aos Fatos",
+    "url": "https://www.aosfatos.org/rss/",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "5b7f6722-8834-48de-a476-ce3437d7283d",
+    "name": "Agencia Publica",
+    "url": "https://apublica.org/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "adab240c-a11a-47d5-958d-f5481cb764eb",
+    "name": "Metropoles",
+    "url": "https://www.metropoles.com/rss",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "54c57cf9-8abe-498d-8eb8-23191aec6355",
+    "name": "Correio Braziliense",
+    "url": "https://www.correiobraziliense.com.br/rss",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "a8471a62-8699-458e-8925-51865f210e69",
+    "name": "Valor Economico",
+    "url": "https://valor.globo.com/rss",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "41b3d358-d6fa-4217-b427-af79ca9b7c0c",
+    "name": "InfoMoney",
+    "url": "https://www.infomoney.com.br/feed/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "5c011df6-d03a-4693-83fe-a39137c857c9",
+    "name": "Canaltech",
+    "url": "https://canaltech.com.br/rss/",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "234af071-2c51-4012-ba9e-75f66fd87020",
+    "name": "UOL Notícias",
+    "url": "https://noticias.uol.com.br/rss.xml",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "b183b6fa-8daf-46e9-b019-9556c8f62a9f",
+    "name": "Band",
+    "url": "http://localhost:4000/rss?url=https%3A%2F%2Fwww.band.com.br%2F",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "ec853fff-0db3-48f7-aa6e-600e4481f547",
+    "name": "Agencia Brasil",
+    "url": "https://agenciabrasil.ebc.com.br/rss",
+    "showOnTimeline": false,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "adaa1182-2bb3-47e4-83d7-f2f186879a97",
+    "name": "Metrópoles | O seu portal de notícias",
+    "url": "http://localhost:4000/rss/generated/ab131847-a95d-4ef3-a278-bf9b3d5b547b",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "acc971fb-6cc8-4865-9a48-0cd905993e76",
+    "name": "Uol",
+    "url": "http://localhost:4000/rss/generated/b440140c-d239-4423-a41f-1429601af4ec",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "35130769-a74c-41e8-b1b7-1174dd88c244",
+    "name": "Estadão",
+    "url": "http://localhost:4000/rss/generated/342c8d95-90ee-419b-a281-b117d49790e6",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "a8501bf2-de8c-4946-a2f1-65feb911d4c2",
+    "name": "Brasil 247",
+    "url": "http://localhost:4000/rss/generated/ac209434-5e55-42d4-8dfe-c5e34ffab1f6",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "286eb9b3-a85b-4041-a2d5-fc0f3d9aedbb",
+    "name": "Investing",
+    "url": "http://localhost:4000/rss/generated/6fcc3b70-19ff-4f3d-8ae6-b0088d7639ff",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  },
+  {
+    "id": "ab75d3ab-ba0e-4e5c-bd7b-6ce77435830b",
+    "name": "Sbt News",
+    "url": "http://localhost:4000/rss/generated/9c893d02-3431-4ccf-ba75-fed4f40c0af8",
+    "showOnTimeline": true,
+    "sourceUrl": "",
+    "language": "pt"
+  }
+]

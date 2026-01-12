@@ -1,0 +1,32 @@
+[
+  {
+    "id": "2abcbe7e-c902-445a-aa47-7e234321b78f",
+    "name": "Direita padrao",
+    "description": "Seguranca, economia, valores tradicionais.",
+    "topics": [
+      "economia",
+      "seguranca",
+      "politica",
+      "valores"
+    ],
+    "requireWords": [],
+    "blockWords": [],
+    "feedIds": [],
+    "blockedFeedIds": [],
+    "onlyWithLink": true,
+    "diversity": 20,
+    "alignment": 70,
+    "maxItems": 40,
+    "lookbackHours": 48,
+    "language": "",
+    "region": "",
+    "useAi": true,
+    "axes": {
+      "economic": 50,
+      "social": 50,
+      "institutional": 50
+    },
+    "createdAt": "2026-01-07T18:23:16.574Z",
+    "updatedAt": "2026-01-07T18:23:16.574Z"
+  }
+]

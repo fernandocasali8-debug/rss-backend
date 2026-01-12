@@ -1,0 +1,36 @@
+[
+  {
+    "id": "8cb6ad31-0dc1-4dd2-9a93-1d9c14ec0c00",
+    "name": "time azul",
+    "description": "azul azul",
+    "ownerEmail": "fernandocasali8@gmail.com",
+    "members": [
+      {
+        "id": "b559330c-eb9f-494e-8410-8ed16107c511",
+        "name": "e88899527",
+        "email": "e88899527@gmail.com",
+        "role": "viewer",
+        "active": true,
+        "createdAt": "2026-01-11T02:25:13.056Z",
+        "updatedAt": "2026-01-11T02:25:13.056Z"
+      },
+      {
+        "id": "7ba0b496-0fa6-49c9-9998-c302744b0dc4",
+        "name": "João",
+        "email": "business@empresa.com",
+        "role": "editor",
+        "active": true,
+        "createdAt": "2026-01-11T01:49:15.938Z",
+        "updatedAt": "2026-01-11T02:10:45.229Z"
+      }
+    ],
+    "feedIds": [],
+    "alerts": {
+      "recipients": [],
+      "criticalKeywords": []
+    },
+    "createdAt": "2026-01-11T01:48:15.652Z",
+    "updatedAt": "2026-01-11T07:59:33.974Z",
+    "tasks": []
+  }
+]

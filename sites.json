@@ -1,0 +1,46 @@
+{
+  "sites": [
+    {
+      "slug": "meu-site",
+      "title": "Noticias em destaque",
+      "subtitle": "Atualizacoes automaticas do leitor de RSS",
+      "primaryColor": "#0f172a",
+      "accentColor": "#f97316",
+      "backgroundColor": "#ffffff",
+      "surfaceColor": "#ffffff",
+      "textColor": "#262626",
+      "themeMode": "dark",
+      "fontFamily": "\"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif",
+      "automationEnabled": true,
+      "showTicker": true,
+      "maxItems": 80,
+      "menuLinks": [
+        {
+          "label": "Inicio",
+          "url": "asdas"
+        },
+        {
+          "label": "oaaadd",
+          "url": "asdas"
+        }
+      ],
+      "tags": [],
+      "rules": {
+        "feedIds": [
+          "1820a7b5-bd6f-40a5-81cd-f07325c6659e",
+          "1d6cfe1c-5191-496f-9f02-4bccd7c54b48",
+          "e986d2d5-57ec-48e0-a0d4-b6cfbeea7eda",
+          "f45da00d-0916-4d3a-92c4-73e36ae6b12e",
+          "fbe2fe2d-3a98-408b-aa47-4579234cd557",
+          "d35996f2-c53a-4d15-a4b0-a9ae2a45ca6a",
+          "6b3d3844-6b52-4b35-bb3e-19d2449d85ad",
+          "092af404-8699-4a57-9079-3b3e89c31aad",
+          "a293750e-e9ff-4896-9250-d866fc6fea30"
+        ],
+        "requireWords": [],
+        "blockWords": [],
+        "onlyWithLink": true
+      }
+    }
+  ]
+}

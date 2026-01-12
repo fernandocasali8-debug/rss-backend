@@ -1,0 +1,32 @@
+[
+  {
+    "id": "b2050bd6-d953-47bf-84a1-5a7dceca6bd8",
+    "name": "Banco Master",
+    "keywords": [
+      "Banco Master"
+    ],
+    "matchMode": "any",
+    "enabled": true,
+    "createdAt": "2026-01-04T16:50:09.169Z"
+  },
+  {
+    "id": "5c8ece29-aaca-4dd0-86e1-746f34534a16",
+    "name": "Bolsonaro",
+    "keywords": [
+      "Bolsonaro"
+    ],
+    "matchMode": "all",
+    "enabled": true,
+    "createdAt": "2026-01-04T04:00:14.469Z"
+  },
+  {
+    "id": "a858f24b-7de4-4aac-9f51-1f0d1da7daa1",
+    "name": "Venezuela",
+    "keywords": [
+      "Venezuela"
+    ],
+    "matchMode": "any",
+    "enabled": true,
+    "createdAt": "2026-01-04T03:10:21.025Z"
+  }
+]

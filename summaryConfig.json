@@ -1,0 +1,6 @@
+{
+  "enabled": false,
+  "time": "08:00",
+  "maxItems": 7,
+  "lookbackHours": 24
+}

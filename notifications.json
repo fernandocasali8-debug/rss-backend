@@ -1,0 +1,30 @@
+[
+  {
+    "id": "d147493a-05dd-439c-ba0d-2f1fa62b785f",
+    "type": "task",
+    "email": "e88899527@gmail.com",
+    "title": "Nova tarefa atribuida",
+    "message": "teste",
+    "meta": {
+      "teamId": "8cb6ad31-0dc1-4dd2-9a93-1d9c14ec0c00",
+      "teamName": "time azul",
+      "taskId": "ae6a0f48-4002-425f-bd5d-9843ed87884e"
+    },
+    "read": true,
+    "createdAt": "2026-01-11T07:23:05.210Z"
+  },
+  {
+    "id": "08a91c89-4fae-46e8-a2b5-1788e9d4338e",
+    "type": "task",
+    "email": "e88899527@gmail.com",
+    "title": "Nova tarefa atribuida",
+    "message": "Tarefa",
+    "meta": {
+      "teamId": "8cb6ad31-0dc1-4dd2-9a93-1d9c14ec0c00",
+      "teamName": "time azul",
+      "taskId": "510a949a-7a79-47a5-88a4-ecb107ac0e9c"
+    },
+    "read": true,
+    "createdAt": "2026-01-11T04:31:22.063Z"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "8d37eaaf-ccf6-4fc5-b190-c290922edabd",
+    "name": "e88899527",
+    "email": "e88899527@gmail.com",
+    "role": "viewer",
+    "plan": "business",
+    "active": true,
+    "createdAt": "2026-01-11T02:25:13.055Z",
+    "updatedAt": "2026-01-11T02:25:13.055Z"
+  },
+  {
+    "id": "plan-starter",
+    "name": "Usuario Starter",
+    "email": "starter@empresa.com",
+    "role": "viewer",
+    "plan": "starter",
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "admin-fernando",
+    "name": "Fernando Casali",
+    "email": "fernandocasali8@gmail.com",
+    "role": "admin",
+    "plan": "enterprise",
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "plan-pro",
+    "name": "Usuario Pro",
+    "email": "pro@empresa.com",
+    "role": "editor",
+    "plan": "pro",
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "plan-business",
+    "name": "Usuario Business",
+    "email": "business@empresa.com",
+    "role": "admin",
+    "plan": "business",
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "plan-enterprise",
+    "name": "Usuario Enterprise",
+    "email": "enterprise@empresa.com",
+    "role": "admin",
+    "plan": "enterprise",
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]

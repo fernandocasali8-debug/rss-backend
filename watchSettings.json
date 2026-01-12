@@ -1,0 +1,11 @@
+{
+  "default": {
+    "recencyWeight": 70,
+    "viewMode": "compact",
+    "timeRange": "24h",
+    "sortMode": "recent",
+    "topicFilter": "all",
+    "newOnly": false
+  },
+  "users": {}
+}

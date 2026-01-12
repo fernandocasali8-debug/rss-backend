@@ -1,0 +1,56 @@
+[
+  {
+    "id": "9c893d02-3431-4ccf-ba75-fed4f40c0af8",
+    "url": "https://sbtnews.sbt.com.br/",
+    "title": "Sbt News",
+    "itemsCount": 25,
+    "fileName": "sbtnews-sbt-com-br-2026-01-08T19-36-46-995Z.xml",
+    "createdAt": "2026-01-08T19:36:46.997Z",
+    "updatedAt": "2026-01-08T19:36:46.997Z"
+  },
+  {
+    "id": "6fcc3b70-19ff-4f3d-8ae6-b0088d7639ff",
+    "url": "https://br.investing.com/",
+    "title": "Investing",
+    "itemsCount": 25,
+    "fileName": "br-investing-com-2026-01-08T18-58-23-590Z.xml",
+    "createdAt": "2026-01-08T18:58:23.592Z",
+    "updatedAt": "2026-01-08T18:58:23.592Z"
+  },
+  {
+    "id": "ac209434-5e55-42d4-8dfe-c5e34ffab1f6",
+    "url": "https://www.brasil247.com",
+    "title": "Brasil 247",
+    "itemsCount": 25,
+    "fileName": "brasil247-com-2026-01-08T18-56-48-071Z.xml",
+    "createdAt": "2026-01-08T18:56:48.073Z",
+    "updatedAt": "2026-01-08T18:56:48.073Z"
+  },
+  {
+    "id": "342c8d95-90ee-419b-a281-b117d49790e6",
+    "url": "https://www.estadao.com.br",
+    "title": "Estadão",
+    "itemsCount": 25,
+    "fileName": "estadao-com-br-2026-01-08T18-55-08-712Z.xml",
+    "createdAt": "2026-01-08T18:55:08.714Z",
+    "updatedAt": "2026-01-08T18:55:08.714Z"
+  },
+  {
+    "id": "b440140c-d239-4423-a41f-1429601af4ec",
+    "url": "https://www.uol.com.br/",
+    "title": "UOL",
+    "itemsCount": 25,
+    "fileName": "uol-com-br-2026-01-08T07-22-10-679Z.xml",
+    "createdAt": "2026-01-08T07:22:10.681Z",
+    "updatedAt": "2026-01-08T07:22:10.681Z"
+  },
+  {
+    "id": "ab131847-a95d-4ef3-a278-bf9b3d5b547b",
+    "url": "https://www.metropoles.com/",
+    "title": "Metrópoles | O seu portal de notícias",
+    "itemsCount": 25,
+    "fileName": "metropoles-com-2026-01-08T07-17-37-784Z.xml",
+    "createdAt": "2026-01-08T07:17:37.785Z",
+    "updatedAt": "2026-01-08T07:17:37.785Z"
+  }
+]

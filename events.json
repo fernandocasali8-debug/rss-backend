@@ -1,0 +1,1602 @@
+[
+  {
+    "id": "f7956293-7746-4146-8c2b-6359a6c01e02",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:36:28.266Z"
+  },
+  {
+    "id": "1c1a3431-d0a2-4ed1-a6e9-84172bfea02f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:23:24.232Z"
+  },
+  {
+    "id": "fb552437-edfa-47ec-ae0c-bfc037d3ead6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Client network socket disconnected before secure TLS connection was established",
+    "timestamp": "2026-01-12T19:23:18.450Z"
+  },
+  {
+    "id": "10aacca8-65ac-44dc-98b7-72cc48d57824",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:22:25.581Z"
+  },
+  {
+    "id": "6154a777-525d-41e9-8899-7bdc70cbed2c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Client network socket disconnected before secure TLS connection was established",
+    "timestamp": "2026-01-12T19:22:18.881Z"
+  },
+  {
+    "id": "c1c4f732-091b-4ade-a2a9-693fe1d14266",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:21:26.501Z"
+  },
+  {
+    "id": "130ecadc-7ad3-45dc-ab07-9f9a6ded64d6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Client network socket disconnected before secure TLS connection was established",
+    "timestamp": "2026-01-12T19:21:19.901Z"
+  },
+  {
+    "id": "f6a2f316-c0ab-487d-9a74-0362a68deb7e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:21:15.733Z"
+  },
+  {
+    "id": "734ff266-9c01-43c1-936a-d92c14dac262",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:20:34.788Z"
+  },
+  {
+    "id": "6e6827c0-d5a8-4c47-bf68-ad04cfbb3e18",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:20:21.420Z"
+  },
+  {
+    "id": "12a30f3a-dbc7-494c-8fe7-1060ead6f938",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:20:21.226Z"
+  },
+  {
+    "id": "dad77115-d0e6-407b-b57f-10f4ebaceb7e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:55.309Z"
+  },
+  {
+    "id": "05b57f55-6a16-4d1f-a82b-8e0b101052f3",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:55.065Z"
+  },
+  {
+    "id": "df9fb7d8-2257-4e7d-8da1-1dbe06133e1c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:54.552Z"
+  },
+  {
+    "id": "1d352221-4ba4-45d5-b587-0385a7024d2a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:54.372Z"
+  },
+  {
+    "id": "1ca59a97-f6c3-46e4-8432-80573e62ea04",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:52.925Z"
+  },
+  {
+    "id": "c548c94f-d03a-4fa0-878c-c1a51a4a5022",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:52.763Z"
+  },
+  {
+    "id": "cc39e6f6-ce1d-434d-b59e-8325a3db913e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:52.540Z"
+  },
+  {
+    "id": "9f7386e8-70b0-4533-a3e6-1c7765c7a3a2",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:52.342Z"
+  },
+  {
+    "id": "f535a41d-f93b-496e-9538-75fe85988bbd",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:49.726Z"
+  },
+  {
+    "id": "5ad2f4e7-d670-41fe-a96b-7f38fd47f19d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:49.277Z"
+  },
+  {
+    "id": "7dd0a991-d650-4e86-96f7-592f6f4d740d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Client network socket disconnected before secure TLS connection was established",
+    "timestamp": "2026-01-12T19:19:43.783Z"
+  },
+  {
+    "id": "fcee624d-c903-4a15-9b40-17a44a184330",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:43.496Z"
+  },
+  {
+    "id": "42ddb985-f825-43b9-aa8e-e3151bd6eb30",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:43.308Z"
+  },
+  {
+    "id": "4a8d1aa0-edd0-4f00-9408-29ff1d9bd886",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:40.619Z"
+  },
+  {
+    "id": "21717c01-3e73-48f9-a629-41461487c879",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:40.402Z"
+  },
+  {
+    "id": "647cda16-832c-4a66-9435-d38af3ee0d18",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:39.646Z"
+  },
+  {
+    "id": "4836e05b-7b0d-432f-9fd4-36938f4fa5d2",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:39.413Z"
+  },
+  {
+    "id": "c28db725-e5c4-4363-ba00-21002c943f2c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:36.779Z"
+  },
+  {
+    "id": "307db54e-d3f9-42cb-9a00-63669097a57d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:36.595Z"
+  },
+  {
+    "id": "dad4abe2-d2b1-4cc1-91ef-09c62f5c709e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:35.356Z"
+  },
+  {
+    "id": "0c5f4842-6b92-4c2c-b00e-153386578a55",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:29.990Z"
+  },
+  {
+    "id": "042f8f25-8730-4c69-8de4-3f08fc320dc1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:29.321Z"
+  },
+  {
+    "id": "89387307-a228-41b9-b7a0-83c765126735",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:29.135Z"
+  },
+  {
+    "id": "4ec54554-e161-4038-866f-4cb225acb93e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:25.618Z"
+  },
+  {
+    "id": "d6c5720d-76bd-4868-b3b9-af1c6b9ca5b6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:19:25.427Z"
+  },
+  {
+    "id": "e7a5fd2d-edd3-491d-b140-5e730936618b",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Client network socket disconnected before secure TLS connection was established",
+    "timestamp": "2026-01-12T19:19:24.547Z"
+  },
+  {
+    "id": "cc786abd-142a-4805-8ce7-759d45101a90",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:22.887Z"
+  },
+  {
+    "id": "5a9193a6-28f2-4d1d-a3e9-06f5e60e4bcb",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:21.540Z"
+  },
+  {
+    "id": "b8bc8c11-4f59-4dff-9b37-ba2b4261a1cf",
+    "level": "info",
+    "source": "ai",
+    "message": "Reescrita gerada.",
+    "detail": "Exame | Fundador da Nvidia revela tipo de startup que criaria hoje — e aponta caminho para quem quer inovar",
+    "timestamp": "2026-01-12T19:19:20.584Z"
+  },
+  {
+    "id": "b14b8d45-3706-4a4b-862a-4f3d2858367c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:19:04.447Z"
+  },
+  {
+    "id": "1e638544-f87b-4a73-ad86-8b1b5ac9efa6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:16:10.366Z"
+  },
+  {
+    "id": "c1e657b7-5328-41fd-9cdd-842064119434",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:15:59.995Z"
+  },
+  {
+    "id": "416cf8a8-8307-48b4-a6b6-ab65b4e24623",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:15:57.809Z"
+  },
+  {
+    "id": "7229400b-3c70-4c5d-9d80-c09c60433c4f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:15:48.853Z"
+  },
+  {
+    "id": "3a294c03-c4ec-423f-9793-f2a64e29d6f8",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:15:47.928Z"
+  },
+  {
+    "id": "35656a83-0f50-4c4c-b46a-37317a556fd5",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:15:36.518Z"
+  },
+  {
+    "id": "e8468fe7-1172-4445-a44d-56aa185ce606",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:15:13.751Z"
+  },
+  {
+    "id": "f34bae78-cf66-41df-bf0c-cc17d22cb139",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Nexo Jornal | https://www.nexojornal.com.br/rss.xml | Timeout ao carregar feed.",
+    "timestamp": "2026-01-12T19:15:13.096Z"
+  },
+  {
+    "id": "46f0b12b-d321-48c7-b8d5-3c9b5302840a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Client network socket disconnected before secure TLS connection was established",
+    "timestamp": "2026-01-12T19:15:00.153Z"
+  },
+  {
+    "id": "8d9abda2-c093-406e-9ade-9b0533d64ea7",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:12:05.286Z"
+  },
+  {
+    "id": "748ce5f2-2bc5-40c9-839e-ab3ae084cc67",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | socket hang up",
+    "timestamp": "2026-01-12T19:11:59.224Z"
+  },
+  {
+    "id": "5ae3514f-a1f4-45a9-857e-0c5f836aaf58",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:11:57.810Z"
+  },
+  {
+    "id": "2ae1526f-011b-4849-be7d-9b12a1be29b8",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 5\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-12T19:11:45.337Z"
+  },
+  {
+    "id": "ac92965e-82fa-4790-8796-89271f23578f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | socket hang up",
+    "timestamp": "2026-01-12T19:11:39.060Z"
+  },
+  {
+    "id": "fa426f74-44da-4042-ac34-49079efbb789",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T22:51:02.575Z"
+  },
+  {
+    "id": "5c5a525e-b780-42b8-985a-ab558ee4322c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T22:49:48.178Z"
+  },
+  {
+    "id": "b22bd409-b7ff-4ede-9b13-1c8511776dd4",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T22:21:40.532Z"
+  },
+  {
+    "id": "ce84563b-d81e-41a4-b38e-296e855acfcd",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T20:58:34.421Z"
+  },
+  {
+    "id": "82ac24f9-7b3d-4ff7-93da-3f4565ec912d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T20:58:27.746Z"
+  },
+  {
+    "id": "f3807288-2aa6-48bb-ac8b-037f9433c88e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T20:58:14.793Z"
+  },
+  {
+    "id": "f5d3dbbd-ae96-4448-a527-980afb6acef4",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:57:05.412Z"
+  },
+  {
+    "id": "bccd4f58-e9a9-43b2-9bca-f31ea8156fb1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:52:04.924Z"
+  },
+  {
+    "id": "43e5880e-f2ad-4926-be1b-64e9e0b38174",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:47:06.014Z"
+  },
+  {
+    "id": "fe39040b-c441-49cf-bfc2-b5a0034d9346",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:42:04.712Z"
+  },
+  {
+    "id": "55302f1e-23e5-467d-80af-95869119769e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:37:06.028Z"
+  },
+  {
+    "id": "6a9cc232-22b5-4572-ba82-8c5cea828a91",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:36:59.682Z"
+  },
+  {
+    "id": "c04caaac-8149-4710-9f4a-6f140ca4db8f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:32:05.669Z"
+  },
+  {
+    "id": "bc17dc5b-eaba-4135-83b8-f56bfda83627",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:31:59.124Z"
+  },
+  {
+    "id": "9aa61b1b-c0dc-4a66-873d-36a973a63300",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:27:04.827Z"
+  },
+  {
+    "id": "8bae9064-b343-438b-8c13-ce9ec94632e1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:26:58.903Z"
+  },
+  {
+    "id": "3519a2c6-f74a-41a9-8bc1-b1cc1677cb2f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:22:59.557Z"
+  },
+  {
+    "id": "acfed4c2-a3da-4dfe-a22d-ca587b9d4565",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:22:05.340Z"
+  },
+  {
+    "id": "db52adfa-3041-477c-bd50-43bc49c32017",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:21:59.554Z"
+  },
+  {
+    "id": "43ffd225-29a1-49b7-97cc-dc99331e6a18",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:17:58.442Z"
+  },
+  {
+    "id": "c94d4fb3-2ac8-429f-86b5-bd8665af6a7a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:17:06.442Z"
+  },
+  {
+    "id": "469a2f03-7be6-4a69-abf0-9095fb2efd82",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:13:14.442Z"
+  },
+  {
+    "id": "c850e9ec-eff5-4529-897a-b40ee7cd6108",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:13:13.429Z"
+  },
+  {
+    "id": "c4754767-4d7e-4229-813f-9cd44f3e43d7",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:13:01.270Z"
+  },
+  {
+    "id": "d2149d79-9893-4bca-ae67-3229135465d3",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:12:06.412Z"
+  },
+  {
+    "id": "7a0154e8-c84b-4221-aa94-9a7d241767bd",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:07:05.028Z"
+  },
+  {
+    "id": "b2d35fe2-c436-4c74-8464-19709fde2a3c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:02:16.994Z"
+  },
+  {
+    "id": "0bd6db1b-ffae-4bab-8976-a45b173bc5be",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:02:12.160Z"
+  },
+  {
+    "id": "0c963184-2a72-4714-b871-7cdb528fa085",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:02:02.175Z"
+  },
+  {
+    "id": "335d9cca-e8e4-4395-a399-a4585d84c194",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:01:57.630Z"
+  },
+  {
+    "id": "60deaeac-a07c-4c57-a6d6-e3c1f1e63a09",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:01:46.696Z"
+  },
+  {
+    "id": "7ae4f249-f67c-4cf4-8a60-4aa3597235a6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:01:38.721Z"
+  },
+  {
+    "id": "78f179fa-42c3-4762-9d70-dbe64d96bac9",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:01:16.248Z"
+  },
+  {
+    "id": "fefecad6-8a12-41e2-9c90-8e1085d9d607",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:01:11.292Z"
+  },
+  {
+    "id": "a875b5a5-960d-4638-8921-5f4312d7b7e8",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:00:28.359Z"
+  },
+  {
+    "id": "81f51b23-e75d-42ab-b1df-70328d811926",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T08:00:23.743Z"
+  },
+  {
+    "id": "2f99a57d-f494-47bd-8752-348b4060afec",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T08:00:17.588Z"
+  },
+  {
+    "id": "7566f3da-2fd0-41f1-a75e-b221b96eedba",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:59:22.451Z"
+  },
+  {
+    "id": "49e4bd1b-e302-4b4f-8c8b-523978a719d1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T07:59:18.036Z"
+  },
+  {
+    "id": "ecb9cd78-9fc6-4b96-aeb5-49b4eaec992c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:57:03.614Z"
+  },
+  {
+    "id": "d5999356-4f5a-4b0e-8746-585dca333aa2",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:52:28.536Z"
+  },
+  {
+    "id": "06181421-4199-43d3-91ce-9a84d78fff93",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:52:13.739Z"
+  },
+  {
+    "id": "31b028f8-d138-4378-b080-0e347d64fa67",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:52:01.497Z"
+  },
+  {
+    "id": "1eea3860-0a17-452f-acc9-92ce3189a5ac",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:51:59.354Z"
+  },
+  {
+    "id": "6a7a8cf9-4ac5-492b-9b48-fea001088b6d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:51:59.107Z"
+  },
+  {
+    "id": "2dc2d449-bc03-45c7-ba07-aab0561ef72a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:51:45.741Z"
+  },
+  {
+    "id": "7e5162aa-bf22-4b97-9f30-83e53dc0c39f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:47:55.093Z"
+  },
+  {
+    "id": "f3b24f10-260c-441b-af74-6160df42865f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:42:55.446Z"
+  },
+  {
+    "id": "9007b18c-d962-46e7-9cdb-a48032bace93",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:42:27.263Z"
+  },
+  {
+    "id": "a9101c42-dab8-4fdf-98c3-37e6afca66fa",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:37:55.266Z"
+  },
+  {
+    "id": "4c583a49-34b8-4348-a407-8bde87e427b2",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:37:25.061Z"
+  },
+  {
+    "id": "f2f05121-9d76-43c6-b7cd-7d02ac9be905",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:32:58.356Z"
+  },
+  {
+    "id": "ac53d80f-7f91-47f9-8ff7-98f88e17331c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:32:22.709Z"
+  },
+  {
+    "id": "822cb9b0-e421-475b-b2d6-b9fcca3170f1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T07:32:16.753Z"
+  },
+  {
+    "id": "c92b1ef8-4f93-4503-a17d-aba88386434b",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:27:53.738Z"
+  },
+  {
+    "id": "855231a0-74e7-429c-8ced-337d2103e535",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:27:21.489Z"
+  },
+  {
+    "id": "3420f472-62fb-4026-b244-e1eab25885a7",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:23:14.720Z"
+  },
+  {
+    "id": "0da5b229-a96a-4bdf-8f78-a5d886db0af1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:23:03.731Z"
+  },
+  {
+    "id": "de73b4b4-a4b8-4bd4-ba56-776e1e7962bd",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:22:53.155Z"
+  },
+  {
+    "id": "55652e5f-474f-4773-abae-e35b2fb42ca3",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:22:38.547Z"
+  },
+  {
+    "id": "afb06784-8cca-42aa-8ff3-54b04bd3fe39",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:22:34.998Z"
+  },
+  {
+    "id": "fd03e961-2077-4e92-bb28-97af0d59a214",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:22:24.555Z"
+  },
+  {
+    "id": "6ce6a37b-116c-429e-a9ce-7b1e82b45bec",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:19:54.812Z"
+  },
+  {
+    "id": "1d9db3de-ab8c-464d-b9cd-3efff11533d2",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:16:37.462Z"
+  },
+  {
+    "id": "0ec2bf28-09b0-4ebd-9294-67bf8a16c3f6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:11:37.481Z"
+  },
+  {
+    "id": "2ebed04e-11ca-401a-bcec-9582a4c4937b",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:06:36.575Z"
+  },
+  {
+    "id": "f6cdfb3e-e424-4850-aec7-5af568e2e659",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T07:06:31.176Z"
+  },
+  {
+    "id": "5a7a3c5f-a359-4e52-9519-e3f5006f16c0",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T07:01:44.505Z"
+  },
+  {
+    "id": "49948b5c-034c-48c9-b64f-7133772b467f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "CartaCapital | https://www.cartacapital.com.br/rss/ | Timeout ao carregar feed.",
+    "timestamp": "2026-01-11T07:01:41.107Z"
+  },
+  {
+    "id": "1bd0936c-a98b-4f88-903d-63b478c25a89",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T07:01:31.011Z"
+  },
+  {
+    "id": "26652c56-105b-4cae-a55b-8c516be81e95",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:56:46.134Z"
+  },
+  {
+    "id": "aa2f61b4-36e2-44c1-b816-b257d99eee6e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:56:38.027Z"
+  },
+  {
+    "id": "413f8bd7-bdc9-46ee-aedf-92c35b8c0754",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:51:35.544Z"
+  },
+  {
+    "id": "b03b1417-e6b2-4867-ad51-bc744127538e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:46:35.301Z"
+  },
+  {
+    "id": "f4bed0b1-f4b0-4f9c-a4fd-beec5a769f2e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:46:31.145Z"
+  },
+  {
+    "id": "52e0e0a2-c075-4a1c-9a0b-88ed6dc8b030",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:41:35.264Z"
+  },
+  {
+    "id": "9f3cf252-917f-4de2-8c5b-a2950d18c01c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:41:30.953Z"
+  },
+  {
+    "id": "10b9ae17-caea-404a-8136-8f36613e80fe",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:36:35.866Z"
+  },
+  {
+    "id": "2ac92284-4251-4414-ace2-c51741b038ab",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:36:30.776Z"
+  },
+  {
+    "id": "d1c5e0df-213f-4a49-bd2f-7355e9f04507",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:31:36.326Z"
+  },
+  {
+    "id": "523a78c8-4e2f-4c85-8af6-94a3f317e863",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:31:30.941Z"
+  },
+  {
+    "id": "849aaba0-2fba-4305-ab6f-6633a1e168ad",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:26:36.020Z"
+  },
+  {
+    "id": "7d38a89f-e085-44c3-b693-828b9bbd2242",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:26:30.602Z"
+  },
+  {
+    "id": "4b9155a8-2c9e-4049-be1a-ebb3f710d01e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:21:36.021Z"
+  },
+  {
+    "id": "e722e2cd-07f9-4638-9905-4ec846726810",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:21:30.879Z"
+  },
+  {
+    "id": "fb454f7a-5b11-461c-8c2e-bf13a9d901d6",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:16:35.550Z"
+  },
+  {
+    "id": "435b3105-be37-40fc-8261-cad9edb931fb",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:11:35.547Z"
+  },
+  {
+    "id": "99034242-aff7-44cd-958c-dd92cf5662c4",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:06:35.807Z"
+  },
+  {
+    "id": "31168ceb-34b8-4003-8a78-42d3392926c1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T06:01:34.272Z"
+  },
+  {
+    "id": "a11105a8-4418-462b-b668-a88c249b2813",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T06:01:30.128Z"
+  },
+  {
+    "id": "d549ca3c-9bea-42d1-8f96-00b3ec1ae78a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:56:35.305Z"
+  },
+  {
+    "id": "706dbec7-1992-4b6b-9d0a-f23986a3a059",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:51:34.877Z"
+  },
+  {
+    "id": "ea3ec51d-b257-4577-8206-60e2a5f26482",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T05:51:30.601Z"
+  },
+  {
+    "id": "990ad7a1-fba5-40aa-8aa8-213f8009483d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:46:36.774Z"
+  },
+  {
+    "id": "29672dc5-38e1-4136-a115-6e24eed17942",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:41:36.671Z"
+  },
+  {
+    "id": "0968b8ab-2fde-4e9b-b5f0-374efa1ee629",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:36:36.155Z"
+  },
+  {
+    "id": "2fd14a3a-5f55-4dba-b183-e9d7e80a8908",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:32:36.123Z"
+  },
+  {
+    "id": "3003480a-4d13-457f-a3a9-2bd614b26318",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T05:32:28.727Z"
+  },
+  {
+    "id": "1bfbaa0a-6b85-4658-9686-c50ba14b4abe",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:31:37.433Z"
+  },
+  {
+    "id": "06594323-f54a-41a5-bfbd-8082e6e83043",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:31:07.582Z"
+  },
+  {
+    "id": "1ded309a-545a-4a78-85ad-3f1c6a93e220",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:26:35.438Z"
+  },
+  {
+    "id": "cd4888b1-4967-49fd-935c-196774f72caf",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:21:39.873Z"
+  },
+  {
+    "id": "7823dd4f-dc99-4222-bb09-e783acdf102a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T05:21:30.750Z"
+  },
+  {
+    "id": "b96de4cc-7b80-40dc-b994-e9131d865370",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:17:33.328Z"
+  },
+  {
+    "id": "271d0148-4be7-42f7-a980-a9b5728a8110",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:16:34.748Z"
+  },
+  {
+    "id": "daa0488b-99ff-45d2-afa0-f26438050c1b",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T05:16:30.440Z"
+  },
+  {
+    "id": "b0ef0e90-1087-4189-b5fe-4a6d8d6761f2",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:12:27.664Z"
+  },
+  {
+    "id": "008544c0-8ad2-451b-8f4c-b9d091fe5e75",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T05:12:21.172Z"
+  },
+  {
+    "id": "709aa992-05a0-4b0c-bae0-7e6b009b9d9c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:11:39.931Z"
+  },
+  {
+    "id": "2d81542b-19a1-4df7-9100-17ab2484fb8b",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T05:11:35.501Z"
+  },
+  {
+    "id": "9e4706ee-8578-4013-8a34-499387ff2919",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:06:38.102Z"
+  },
+  {
+    "id": "80f6e261-7472-4163-9f3c-3a4f74b34509",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T05:01:36.240Z"
+  },
+  {
+    "id": "10959c64-aeba-4da3-b0ca-f2c64353c1fe",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:57:40.340Z"
+  },
+  {
+    "id": "4b09249b-950d-4440-9fad-65e0c435dc4a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:57:34.758Z"
+  },
+  {
+    "id": "bb948021-8d26-4b05-82aa-1c166a5e76e5",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:56:42.140Z"
+  },
+  {
+    "id": "9e19e374-a589-4b0e-a815-d21879115db9",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:52:37.643Z"
+  },
+  {
+    "id": "16c1e9ff-efce-4c7b-8677-600cde83e668",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:51:37.733Z"
+  },
+  {
+    "id": "75a72481-a95e-4a33-93c1-7acf0f43685a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:48:54.954Z"
+  },
+  {
+    "id": "423200a9-a4f2-4ff5-b762-5a82a6942930",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:46:35.667Z"
+  },
+  {
+    "id": "96b59f7f-3699-4e02-8910-f7b56ab7461f",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:42:34.148Z"
+  },
+  {
+    "id": "fab61ffa-fe7f-490d-b787-147aaf483042",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:42:28.561Z"
+  },
+  {
+    "id": "676950db-24d5-4f99-8884-c70390ad5afd",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:41:35.275Z"
+  },
+  {
+    "id": "caae3235-a756-4beb-a29c-7460fa364690",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:41:30.319Z"
+  },
+  {
+    "id": "1436ebb7-c66c-4596-b1b2-dae57850d797",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:39:13.094Z"
+  },
+  {
+    "id": "88321ff4-25a3-4701-be15-cb084665272d",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:39:08.104Z"
+  },
+  {
+    "id": "8c0815bb-d965-4e6d-9cb5-ddaa288237df",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:36:34.694Z"
+  },
+  {
+    "id": "40e3f5ea-453a-4adb-a0b0-586a0f1bea20",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:36:30.369Z"
+  },
+  {
+    "id": "12642345-305e-4db0-95b3-c89626330c03",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:32:10.087Z"
+  },
+  {
+    "id": "a765635a-b9fe-4374-891c-84315bf8d46e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:32:05.663Z"
+  },
+  {
+    "id": "331575bd-b618-42aa-92e4-5ba125be7dbf",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:31:52.323Z"
+  },
+  {
+    "id": "52df21bb-f21d-4ef2-ba8e-b4e21e07c1a1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:31:50.629Z"
+  },
+  {
+    "id": "8d16a256-fa7b-4c92-98db-6816c7f938ea",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:31:43.916Z"
+  },
+  {
+    "id": "b9d5d4c8-900d-4d68-8168-b478e0b1c44e",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:31:43.887Z"
+  },
+  {
+    "id": "b2da94bc-b6ca-407d-87a2-eafb3910a443",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:31:38.104Z"
+  },
+  {
+    "id": "d9a4eff6-9e1d-45b2-a8b9-d3a2d4b5c786",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:31:31.305Z"
+  },
+  {
+    "id": "5271598b-0739-4002-8840-39f1c69cf2ab",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:28:45.414Z"
+  },
+  {
+    "id": "2818c1b3-c600-4b1a-aec1-e9c5104f7de8",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:28:40.136Z"
+  },
+  {
+    "id": "a63a6d0f-a00a-48ba-b067-f8e8a729428c",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:27:11.809Z"
+  },
+  {
+    "id": "d78687b0-33fb-4c99-ada1-de314d1e0c58",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "G1 | https://g1.globo.com/rss/g1/ | Non-whitespace before first tag.\nLine: 0\nColumn: 1\nChar: \u001f",
+    "timestamp": "2026-01-11T04:27:05.664Z"
+  },
+  {
+    "id": "aed4dc52-1c0d-4fda-b493-8fae664c30db",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:23:45.290Z"
+  },
+  {
+    "id": "3dfd212c-201c-4b36-8e1b-3cabdfc390f4",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:22:22.637Z"
+  },
+  {
+    "id": "83223b82-f56b-4649-a5a9-afdc01d29f4a",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:18:46.809Z"
+  },
+  {
+    "id": "853a4aab-2a2d-4cdd-83ed-83acccee07ac",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:17:12.721Z"
+  },
+  {
+    "id": "f0eba903-3700-4b25-81fc-97db8a566133",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:13:45.055Z"
+  },
+  {
+    "id": "fb20a36d-ffb2-4358-8161-4b5e828c61c1",
+    "level": "error",
+    "source": "rss",
+    "message": "Falha ao ler feed.",
+    "detail": "Brasil 247 | https://www.brasil247.com/rss | Invalid character in entity name\nLine: 12\nColumn: 65\nChar: =",
+    "timestamp": "2026-01-11T04:12:13.036Z"
+  }
+]

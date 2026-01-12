@@ -1,0 +1,30 @@
+{
+  "enabled": true,
+  "rules": [
+    {
+      "name": "Politica",
+      "keywords": ["politica", "congresso", "governo", "eleicao"],
+      "matchAll": false
+    },
+    {
+      "name": "Economia",
+      "keywords": ["economia", "mercado", "inflacao", "juros"],
+      "matchAll": false
+    },
+    {
+      "name": "Tecnologia",
+      "keywords": ["tecnologia", "software", "ia", "inteligencia artificial"],
+      "matchAll": false
+    },
+    {
+      "name": "Esportes",
+      "keywords": ["futebol", "esporte", "campeonato", "gol"],
+      "matchAll": false
+    },
+    {
+      "name": "Saude",
+      "keywords": ["saude", "medicina", "hospital", "vacina"],
+      "matchAll": false
+    }
+  ]
+}
