@@ -6154,6 +6154,7 @@ app.post('/billing/payment', async (req, res) => {
     }
 
     const idempotencyKey = `pay_${plan.id}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    console.log('MP payment request', { planId: plan.id, payment_method_id, idempotencyKey });
     const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
