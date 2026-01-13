@@ -6126,13 +6126,12 @@ app.post('/billing/payment', async (req, res) => {
     if (!MP_ACCESS_TOKEN) {
       return res.status(500).json({ ok: false, message: 'Gateway nao configurado.' });
     }
-    if (!token || !payment_method_id) {
+    if (!payment_method_id) {
       return res.status(400).json({ ok: false, message: 'Dados de pagamento incompletos.' });
     }
 
     const payload = {
       transaction_amount: plan.price,
-      token,
       payment_method_id,
       installments: Number(installments) || 1,
       description: `Plano ${plan.name} - Radar de Noticias`,
@@ -6144,6 +6143,15 @@ app.post('/billing/payment', async (req, res) => {
         planId: plan.id
       }
     };
+    if (token) {
+      payload.token = token;
+    }
+    if (payer?.identification?.type && payer?.identification?.number) {
+      payload.payer.identification = {
+        type: payer.identification.type,
+        number: payer.identification.number
+      };
+    }
 
     const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
