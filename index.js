@@ -1,4 +1,4 @@
-// Backend básico Node.js/Express para gerenciar feeds RSS
+﻿// Backend bÃ¡sico Node.js/Express para gerenciar feeds RSS
 
 require('dotenv').config();
 
@@ -25,6 +25,8 @@ const app = express();
 const port = 4000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const IS_SECURE_FRONTEND = FRONTEND_URL.startsWith('https://');
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || '';
+const MP_PUBLIC_KEY = process.env.MP_PUBLIC_KEY || '';
 
 const normalizeRedirectPath = (value) => {
   if (typeof value !== 'string') return '/app';
@@ -165,6 +167,7 @@ const isPublicRoute = (req) => {
   if (req.path.startsWith('/auth/')) return true;
   if (req.path === '/auth/google') return true;
   if (req.path === '/auth/me') return true;
+  if (req.path.startsWith('/billing')) return true;
   if (req.method === 'GET') {
     if (req.path.startsWith('/public/')) return true;
     if (req.path === '/rss') return true;
@@ -827,7 +830,7 @@ app.post('/google/drive/backup', async (req, res) => {
 
 
 
-// Persistência em arquivo
+// PersistÃªncia em arquivo
 const { loadFeeds, saveFeeds } = require('./feedsStorage');
 const normalizeFeedLanguage = (value) => (value === 'auto' ? 'auto' : 'pt');
 const normalizeFeed = (feed) => ({
@@ -1731,9 +1734,9 @@ function renderTemplate(template, item) {
   if (text.length <= 280) return text;
   const reserved = safeLink ? (safeLink.length + 1) : 0;
   const maxTitle = Math.max(0, 280 - reserved - 1);
-  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}…` : safeTitle;
+  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}â€¦` : safeTitle;
   text = template.replace('{title}', trimmedTitle).replace('{link}', safeLink).trim();
-  return text.length > 280 ? text.slice(0, 277) + '…' : text;
+  return text.length > 280 ? text.slice(0, 277) + 'â€¦' : text;
 }
 
 function getDailyKey(date) {
@@ -2089,7 +2092,7 @@ async function runDailySummary() {
   logEvent({
     level: 'info',
     source: 'summary',
-    message: 'Resumo diário gerado.',
+    message: 'Resumo diÃ¡rio gerado.',
     detail: `Itens: ${items.length}`
   });
 }
@@ -2166,14 +2169,14 @@ async function runAlerts() {
 
 function getAutomationEligibility() {
   if (!automationConfig.rules.enabled) {
-    return { ok: false, reason: 'Automação desativada.' };
+    return { ok: false, reason: 'AutomaÃ§Ã£o desativada.' };
   }
   if (!hasTwitterCredentials(automationConfig)) {
     return { ok: false, reason: 'Credenciais incompletas.' };
   }
   const now = new Date();
   if (withinQuietHours(automationConfig.rules.quietHours, now)) {
-    return { ok: false, reason: 'Dentro do horário silencioso.' };
+    return { ok: false, reason: 'Dentro do horÃ¡rio silencioso.' };
   }
 
   if (!automationState.dailyDate || automationState.dailyDate !== getDailyKey(now)) {
@@ -2182,13 +2185,13 @@ function getAutomationEligibility() {
   }
 
   if (automationState.dailyCount >= automationConfig.rules.maxPerDay) {
-    return { ok: false, reason: 'Limite diário atingido.' };
+    return { ok: false, reason: 'Limite diÃ¡rio atingido.' };
   }
 
   if (automationState.lastPostedAt) {
     const elapsed = (now.getTime() - new Date(automationState.lastPostedAt).getTime()) / 60000;
     if (elapsed < automationConfig.rules.minIntervalMinutes) {
-      return { ok: false, reason: 'Aguardando intervalo mínimo.' };
+      return { ok: false, reason: 'Aguardando intervalo mÃ­nimo.' };
     }
   }
 
@@ -2255,7 +2258,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL inválida.'));
+      return reject(new Error('URL invÃ¡lida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -2277,7 +2280,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
           res.resume();
-          return reject(new Error('Falha ao carregar página.'));
+          return reject(new Error('Falha ao carregar pÃ¡gina.'));
         }
         let data = '';
         res.setEncoding('utf8');
@@ -2289,7 +2292,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     );
     req.on('error', reject);
     req.on('timeout', () => {
-      req.destroy(new Error('Timeout ao carregar página.'));
+      req.destroy(new Error('Timeout ao carregar pÃ¡gina.'));
     });
   });
 }
@@ -2303,7 +2306,7 @@ function fetchBuffer(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL inválida.'));
+      return reject(new Error('URL invÃ¡lida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -2439,8 +2442,8 @@ function fetchJson(targetUrl) {
 
 function weatherCodeToText(code) {
   const map = {
-    0: 'Céu limpo',
-    1: 'Predomínio de sol',
+    0: 'CÃ©u limpo',
+    1: 'PredomÃ­nio de sol',
     2: 'Parcialmente nublado',
     3: 'Nublado',
     45: 'Neblina',
@@ -2461,14 +2464,14 @@ function weatherCodeToText(code) {
     96: 'Tempestade com granizo',
     99: 'Tempestade intensa'
   };
-  return map[code] || 'Tempo instável';
+  return map[code] || 'Tempo instÃ¡vel';
 }
 
 async function getWeatherForCity(city) {
   const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`;
   const geo = await fetchJson(geoUrl);
   if (!geo || !geo.results || !geo.results.length) {
-    throw new Error('Cidade não encontrada.');
+    throw new Error('Cidade nÃ£o encontrada.');
   }
   const location = geo.results[0];
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo`;
@@ -3618,7 +3621,7 @@ function sanitizeHashtag(tag) {
   return String(tag)
     .replace(/#/g, '')
     .replace(/\s+/g, '')
-    .replace(/[^a-zA-Z0-9À-ÿ_]/g, '')
+    .replace(/[^a-zA-Z0-9Ã€-Ã¿_]/g, '')
     .trim();
 }
 
@@ -3633,7 +3636,7 @@ function parseHashtagResponse(raw, maxTags) {
   } catch (e) {
     // ignore
   }
-  const matches = String(raw).match(/#[\wÀ-ÿ]+/g);
+  const matches = String(raw).match(/#[\wÃ€-Ã¿]+/g);
   if (matches && matches.length) {
     return matches.map(sanitizeHashtag).filter(Boolean).slice(0, limit);
   }
@@ -3648,7 +3651,7 @@ function buildHashtagPrompt(text, maxTags) {
   const limit = Math.min(5, Math.max(1, Number(maxTags) || 3));
   return [
     `Gere ${limit} hashtags em portugues do Brasil, curtas e relevantes.`,
-    'Evite hashtags genéricas. Use termos especificos do tema.',
+    'Evite hashtags genÃ©ricas. Use termos especificos do tema.',
     'Responda apenas com um JSON array de strings.',
     `Texto: """${text}"""`
   ].join('\n');
@@ -3975,7 +3978,7 @@ async function generateRssFromSite(targetUrl) {
     urlObj.hostname;
   const description =
     $('meta[name="description"]').attr('content') ||
-    `Notícias recentes de ${urlObj.hostname}`;
+    `NotÃ­cias recentes de ${urlObj.hostname}`;
 
   const items = extractCandidates($, urlObj.toString())
     .slice(0, 20)
@@ -4036,7 +4039,7 @@ app.post('/feeds/status', async (req, res) => {
 app.post('/feeds', (req, res) => {
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   if (!name || !url) {
-    return res.status(400).json({ error: 'Nome e URL são obrigatórios.' });
+    return res.status(400).json({ error: 'Nome e URL sÃ£o obrigatÃ³rios.' });
   }
   const newFeed = { id: uuidv4(), name, url, showOnTimeline: !!showOnTimeline, sourceUrl: sourceUrl || '', language: normalizeFeedLanguage(language) };
   feeds.push(newFeed);
@@ -4057,7 +4060,7 @@ app.put('/feeds/:id', (req, res) => {
   const { id } = req.params;
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   const feed = feeds.find(f => f.id === id);
-  if (!feed) return res.status(404).json({ error: 'Feed não encontrado.' });
+  if (!feed) return res.status(404).json({ error: 'Feed nÃ£o encontrado.' });
   if (name !== undefined) feed.name = name;
   if (url !== undefined) feed.url = url;
   if (showOnTimeline !== undefined) feed.showOnTimeline = !!showOnTimeline;
@@ -5135,8 +5138,8 @@ app.post('/automation/test', async (req, res) => {
   try {
     const client = createTwitterClient(automationConfig);
     const stamp = new Date().toISOString();
-    const text = `Teste de automação RSS (${stamp})`;
-    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + '…' : text);
+    const text = `Teste de automaÃ§Ã£o RSS (${stamp})`;
+    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + 'â€¦' : text);
     logEvent({
       level: 'info',
       source: 'automation',
@@ -5169,7 +5172,7 @@ app.post('/automation/post', async (req, res) => {
   }
   try {
     const client = createTwitterClient(automationConfig);
-    const trimmed = text.length > 280 ? text.slice(0, 277) + '…' : text;
+    const trimmed = text.length > 280 ? text.slice(0, 277) + 'â€¦' : text;
     await client.v2.tweet(trimmed);
     const now = new Date();
     const postedId = payload.id || payload.link || payload.guid || payload.title;
@@ -5556,7 +5559,7 @@ app.get('/site/:slug', (req, res) => {
   const slug = normalizeSlug(req.params.slug);
   const site = (siteStore.sites || []).find(entry => entry.slug === slug);
   if (!site) {
-    res.status(404).json({ ok: false, message: 'Site nÆo encontrado.' });
+    res.status(404).json({ ok: false, message: 'Site nÃ†o encontrado.' });
     return;
   }
   res.json(site);
@@ -5924,7 +5927,7 @@ app.put('/tags', (req, res) => {
   res.json({ ok: true });
 });
 
-// Previsão do tempo
+// PrevisÃ£o do tempo
 app.get('/weather', async (req, res) => {
   const citiesParam = req.query.cities || '';
   const cities = String(citiesParam)
@@ -5949,7 +5952,7 @@ app.get('/weather', async (req, res) => {
       logEvent({
         level: 'warning',
         source: 'weather',
-        message: 'Falha ao buscar previsão do tempo.',
+        message: 'Falha ao buscar previsÃ£o do tempo.',
         detail: `${city} | ${err.message || err}`
       });
     }
@@ -6012,11 +6015,110 @@ app.get('/public/watch', async (req, res) => {
   }
 });
 
-// Gerar RSS a partir de uma página
+// Gerar RSS a partir de uma pÃ¡gina
+const BILLING_PLANS = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: 39,
+    description: 'Para uso individual e acompanhamento essencial.',
+    features: ['Linha do tempo', 'Salvos', '10 fontes monitoradas'],
+    highlight: false
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 99,
+    description: 'Para quem precisa de mais sinais e organizacao.',
+    features: ['Resumo diario', 'Tendencias', 'Acompanhamentos', '50 fontes monitoradas'],
+    highlight: true
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    price: 249,
+    description: 'Para equipes com fluxo editorial estruturado.',
+    features: ['Times', 'Repositorio', 'Automacoes', '200 fontes monitoradas'],
+    highlight: false
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    price: 499,
+    description: 'Para operacoes criticas com volume elevado.',
+    features: ['Tudo do Business', 'SLA dedicado', 'Suporte prioritario'],
+    highlight: false
+  }
+];
+
+app.get('/billing/config', (req, res) => {
+  res.json({ publicKey: MP_PUBLIC_KEY || '' });
+});
+
+app.get('/billing/plans', (req, res) => {
+  res.json({ currency: 'BRL', plans: BILLING_PLANS });
+});
+
+app.post('/billing/checkout', async (req, res) => {
+  try {
+    const { planId, email } = req.body || {};
+    const plan = BILLING_PLANS.find((item) => item.id === planId);
+    if (!plan) {
+      return res.status(400).json({ ok: false, message: 'Plano invalido.' });
+    }
+    if (!MP_ACCESS_TOKEN) {
+      return res.status(500).json({ ok: false, message: 'Gateway nao configurado.' });
+    }
+
+    const payload = {
+      items: [
+        {
+          title: `Plano ${plan.name} - Radar de Noticias`,
+          quantity: 1,
+          currency_id: 'BRL',
+          unit_price: plan.price
+        }
+      ],
+      metadata: {
+        planId: plan.id
+      },
+      external_reference: `plan_${plan.id}_${Date.now()}`,
+      auto_return: 'approved',
+      back_urls: {
+        success: `${FRONTEND_URL}/beta?checkout=success`,
+        failure: `${FRONTEND_URL}/beta?checkout=failure`,
+        pending: `${FRONTEND_URL}/beta?checkout=pending`
+      }
+    };
+
+    if (email) {
+      payload.payer = { email: String(email) };
+    }
+
+    const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!mpResponse.ok) {
+      const errBody = await mpResponse.text();
+      return res.status(502).json({ ok: false, message: 'Falha ao iniciar pagamento.', detail: errBody });
+    }
+
+    const data = await mpResponse.json();
+    res.json({ ok: true, preferenceId: data.id });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: 'Falha ao iniciar pagamento.' });
+  }
+});
 app.get('/rss', async (req, res) => {
   const { url } = req.query;
   if (!url) {
-    return res.status(400).json({ error: 'URL é obrigatória.' });
+    return res.status(400).json({ error: 'URL Ã© obrigatÃ³ria.' });
   }
   try {
     const rss = await generateRssFromSite(url);
@@ -6044,14 +6146,14 @@ app.get('/rss', async (req, res) => {
       message: 'Falha ao gerar RSS a partir do site.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'Não foi possível gerar RSS.' });
+    res.status(500).json({ error: 'NÃ£o foi possÃ­vel gerar RSS.' });
   }
   });
 
 app.post('/rss/generate', async (req, res) => {
   const { url, maxItems, useAi, title, language } = req.body || {};
   if (!url) {
-    return res.status(400).json({ error: 'URL é obrigatória.' });
+    return res.status(400).json({ error: 'URL Ã© obrigatÃ³ria.' });
   }
   try {
     const robots = await fetchRobotsTxt(url);
@@ -6088,7 +6190,7 @@ app.post('/rss/generate', async (req, res) => {
       message: 'Falha ao gerar RSS inteligente.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'Não foi possível gerar RSS.' });
+    res.status(500).json({ error: 'NÃ£o foi possÃ­vel gerar RSS.' });
   }
 });
 
@@ -6104,11 +6206,11 @@ app.get('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS não encontrado.' });
+    return res.status(404).json({ error: 'RSS nÃ£o encontrado.' });
   }
   const filePath = path.join(GENERATED_RSS_DIR, entry.fileName);
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'Arquivo RSS não encontrado.' });
+    return res.status(404).json({ error: 'Arquivo RSS nÃ£o encontrado.' });
   }
   const xml = fs.readFileSync(filePath, 'utf-8');
   res.set('Content-Type', 'application/rss+xml; charset=utf-8');
@@ -6119,7 +6221,7 @@ app.delete('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS não encontrado.' });
+    return res.status(404).json({ error: 'RSS nÃ£o encontrado.' });
   }
   removeGeneratedFile(entry);
   generatedRssIndex = generatedRssIndex.filter(item => item.id !== id);
@@ -6137,7 +6239,7 @@ app.post('/saved', (req, res) => {
   const item = req.body || {};
   const id = item.id || item.link || item.guid || item.title;
   if (!id) {
-    return res.status(400).json({ error: 'Item inválido.' });
+    return res.status(400).json({ error: 'Item invÃ¡lido.' });
   }
   const existing = savedItems.find(saved => saved.id === id);
   if (existing) return res.status(200).json(existing);
@@ -6554,17 +6656,17 @@ app.get('/aggregate', async (req, res) => {
         message: 'Falha ao ler feed.',
         detail: `${feed.name} | ${feed.url} | ${e.message || e}`
       });
-      // Ignora feeds que não puderam ser lidos
+      // Ignora feeds que nÃ£o puderam ser lidos
     }
   }
-  // Ordena por data, se disponível
+  // Ordena por data, se disponÃ­vel
   aggregated.sort((a, b) => {
     const dateA = new Date(a.pubDate || a.isoDate || 0);
     const dateB = new Date(b.pubDate || b.isoDate || 0);
     return dateB - dateA;
   });
 
-  // Deduplicação por título normalizado
+  // DeduplicaÃ§Ã£o por tÃ­tulo normalizado
   const grouped = [];
   const seen = new Map();
   for (const item of aggregated) {
@@ -6647,12 +6749,13 @@ setInterval(() => {
     logEvent({
       level: 'error',
       source: 'summary',
-      message: 'Falha ao gerar resumo diário.',
+      message: 'Falha ao gerar resumo diÃ¡rio.',
       detail: err.message || String(err)
     });
   });
 }, 60000);
 const { loadTags, saveTags } = require('./tagStorage');
 let tagConfig = loadTags();
+
 
 
