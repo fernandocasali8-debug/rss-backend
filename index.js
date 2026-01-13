@@ -6153,10 +6153,12 @@ app.post('/billing/payment', async (req, res) => {
       };
     }
 
+    const idempotencyKey = `pay_${plan.id}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
     const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        'X-Idempotency-Key': idempotencyKey,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
