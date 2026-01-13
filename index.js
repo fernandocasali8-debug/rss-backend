@@ -6115,6 +6115,59 @@ app.post('/billing/checkout', async (req, res) => {
     res.status(500).json({ ok: false, message: 'Falha ao iniciar pagamento.' });
   }
 });
+
+app.post('/billing/payment', async (req, res) => {
+  try {
+    const { planId, token, payment_method_id, installments, payer } = req.body || {};
+    const plan = BILLING_PLANS.find((item) => item.id === planId);
+    if (!plan) {
+      return res.status(400).json({ ok: false, message: 'Plano invalido.' });
+    }
+    if (!MP_ACCESS_TOKEN) {
+      return res.status(500).json({ ok: false, message: 'Gateway nao configurado.' });
+    }
+    if (!token || !payment_method_id) {
+      return res.status(400).json({ ok: false, message: 'Dados de pagamento incompletos.' });
+    }
+
+    const payload = {
+      transaction_amount: plan.price,
+      token,
+      payment_method_id,
+      installments: Number(installments) || 1,
+      description: `Plano ${plan.name} - Radar de Noticias`,
+      statement_descriptor: 'RADAR NOTICIAS',
+      payer: {
+        email: payer?.email || ''
+      },
+      metadata: {
+        planId: plan.id
+      }
+    };
+
+    const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await mpResponse.json();
+    if (!mpResponse.ok) {
+      return res.status(502).json({
+        ok: false,
+        message: 'Falha ao processar pagamento.',
+        detail: data
+      });
+    }
+
+    res.json({ ok: true, status: data.status, detail: data });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: 'Falha ao processar pagamento.' });
+  }
+});
 app.get('/rss', async (req, res) => {
   const { url } = req.query;
   if (!url) {
