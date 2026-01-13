@@ -3636,7 +3636,7 @@ function parseHashtagResponse(raw, maxTags) {
   } catch (e) {
     // ignore
   }
-  const matches = String(raw).match(/#[\wÃ€-Ã¿]+/g);
+  const matches = String(raw).match(/#[\p{L}\p{N}_]+/gu);
   if (matches && matches.length) {
     return matches.map(sanitizeHashtag).filter(Boolean).slice(0, limit);
   }
