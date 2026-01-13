@@ -6164,6 +6164,11 @@ app.post('/billing/payment', async (req, res) => {
 
     const data = await mpResponse.json();
     if (!mpResponse.ok) {
+      console.error('MP payment error', {
+        status: mpResponse.status,
+        statusText: mpResponse.statusText,
+        response: data
+      });
       return res.status(502).json({
         ok: false,
         message: 'Falha ao processar pagamento.',
