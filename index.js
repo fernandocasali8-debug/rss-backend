@@ -3621,7 +3621,7 @@ function sanitizeHashtag(tag) {
   return String(tag)
     .replace(/#/g, '')
     .replace(/\s+/g, '')
-    .replace(/[^a-zA-Z0-9Ã€-Ã¿_]/g, '')
+    .replace(/[^\p{L}\p{N}_]/gu, '')
     .trim();
 }
 
