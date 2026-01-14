@@ -27,6 +27,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const IS_SECURE_FRONTEND = FRONTEND_URL.startsWith('https://');
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || '';
 const MP_PUBLIC_KEY = process.env.MP_PUBLIC_KEY || '';
+const NITTER_BASE = process.env.NITTER_BASE || 'https://nitter.net';
 
 const normalizeRedirectPath = (value) => {
   if (typeof value !== 'string') return '/app';
@@ -220,6 +221,7 @@ const isPublicRoute = (req) => {
   if (req.method === 'GET') {
     if (req.path.startsWith('/public/')) return true;
     if (req.path === '/rss') return true;
+    if (req.path === '/x/rss') return true;
     if (req.path.startsWith('/rss/generated/')) return true;
     if (req.path.startsWith('/site/')) return true;
     if (req.path === '/polymarket/events') return true;
@@ -4063,6 +4065,62 @@ async function generateRssFromSite(targetUrl) {
     '</rss>'
   ].join('');
 }
+
+const normalizeXHandle = (input) => {
+  let value = String(input || '').trim();
+  if (!value) return '';
+  if (value.startsWith('@')) {
+    value = value.slice(1);
+  }
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    try {
+      const url = new URL(value);
+      const parts = url.pathname.split('/').filter(Boolean);
+      if (parts.length) {
+        value = parts[0];
+      }
+    } catch (err) {
+      return '';
+    }
+  }
+  if (value.includes('/')) {
+    value = value.split('/')[0];
+  }
+  value = value.replace(/^@/, '').trim();
+  if (!/^[A-Za-z0-9_]{1,15}$/.test(value)) return '';
+  return value;
+};
+
+const buildXFeedUrl = (handle) => {
+  const base = NITTER_BASE.replace(/\/$/, '');
+  return `${base}/${handle}/rss`;
+};
+
+app.get('/x/rss', async (req, res) => {
+  const raw = String(req.query.user || req.query.url || '').trim();
+  const handle = normalizeXHandle(raw);
+  if (!handle) {
+    return res.status(400).json({ error: 'Informe um @usuario ou URL do perfil.' });
+  }
+  const feedUrl = buildXFeedUrl(handle);
+  try {
+    const response = await fetch(feedUrl, {
+      headers: {
+        'User-Agent': 'rss-backend/1.0',
+        'Accept': 'application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
+      }
+    });
+    const body = await response.text();
+    if (!response.ok) {
+      return res.status(502).json({ error: 'Falha ao carregar RSS externo.' });
+    }
+    res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+    res.set('X-Source-Url', feedUrl);
+    return res.send(body);
+  } catch (err) {
+    return res.status(502).json({ error: 'Falha ao gerar RSS do X.' });
+  }
+});
 
 // Listar todos os feeds
 app.get('/feeds', (req, res) => {
