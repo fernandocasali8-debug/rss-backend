@@ -133,11 +133,60 @@ app.get('/auth/me', (req, res) => {
     return res.json({ user: null });
   }
   const email = String(req.user.email || '').toLowerCase();
-  const meta = users.find(user => user.email === email) || {};
+  let meta = users.find(user => user.email === email);
+  const now = new Date().toISOString();
+  if (!meta) {
+    meta = {
+      id: uuidv4(),
+      name: req.user.name || '',
+      email,
+      role: 'viewer',
+      plan: 'starter',
+      active: true,
+      authProvider: 'google',
+      authId: req.user.id || '',
+      lastLoginAt: now,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    users.push(meta);
+    saveUsers(users);
+  } else {
+    let changed = false;
+    if (req.user.name && meta.name !== req.user.name) {
+      meta.name = req.user.name;
+      changed = true;
+    }
+    if (meta.authProvider !== 'google') {
+      meta.authProvider = 'google';
+      changed = true;
+    }
+    if (req.user.id && meta.authId !== req.user.id) {
+      meta.authId = req.user.id;
+      changed = true;
+    }
+    const previousLoginAt = meta.lastLoginAt ? Date.parse(meta.lastLoginAt) : 0;
+    const shouldUpdateLoginAt = !Number.isFinite(previousLoginAt)
+      || (Date.now() - previousLoginAt) > 5 * 60 * 1000;
+    if (shouldUpdateLoginAt) {
+      meta.lastLoginAt = now;
+      changed = true;
+    }
+    if (changed) {
+      meta.updatedAt = now;
+      saveUsers(users);
+    }
+  }
+  const trialEndsAt = meta.trialEndsAt ? Date.parse(meta.trialEndsAt) : null;
+  const trialExpired = trialEndsAt ? Date.now() > trialEndsAt : false;
   const safeMeta = {
     role: meta.role || 'viewer',
     plan: meta.plan || 'starter',
-    active: meta.active !== false
+    active: meta.active !== false,
+    trialStartedAt: meta.trialStartedAt || null,
+    trialEndsAt: meta.trialEndsAt || null,
+    trialExpired,
+    billingModalSeenAt: meta.billingModalSeenAt || null
   };
   return res.json({ user: { ...req.user, ...safeMeta } });
 });
@@ -6183,6 +6232,43 @@ app.post('/billing/payment', async (req, res) => {
   } catch (err) {
     res.status(500).json({ ok: false, message: 'Falha ao processar pagamento.' });
   }
+});
+
+app.post('/billing/trial/start', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ ok: false, message: 'Nao autorizado.' });
+  }
+  const email = String(req.user.email || '').toLowerCase();
+  const meta = users.find(user => user.email === email);
+  if (!meta) {
+    return res.status(404).json({ ok: false, message: 'Usuario nao encontrado.' });
+  }
+  const now = Date.now();
+  meta.trialStartedAt = new Date(now).toISOString();
+  meta.trialEndsAt = new Date(now + 7 * 24 * 60 * 60 * 1000).toISOString();
+  meta.billingModalSeenAt = new Date(now).toISOString();
+  meta.updatedAt = new Date().toISOString();
+  saveUsers(users);
+  return res.json({
+    ok: true,
+    trialStartedAt: meta.trialStartedAt,
+    trialEndsAt: meta.trialEndsAt
+  });
+});
+
+app.post('/billing/modal/seen', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ ok: false, message: 'Nao autorizado.' });
+  }
+  const email = String(req.user.email || '').toLowerCase();
+  const meta = users.find(user => user.email === email);
+  if (!meta) {
+    return res.status(404).json({ ok: false, message: 'Usuario nao encontrado.' });
+  }
+  meta.billingModalSeenAt = new Date().toISOString();
+  meta.updatedAt = new Date().toISOString();
+  saveUsers(users);
+  return res.json({ ok: true });
 });
 app.get('/rss', async (req, res) => {
   const { url } = req.query;
