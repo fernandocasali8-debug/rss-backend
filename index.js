@@ -28,6 +28,10 @@ const IS_SECURE_FRONTEND = FRONTEND_URL.startsWith('https://');
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || '';
 const MP_PUBLIC_KEY = process.env.MP_PUBLIC_KEY || '';
 const NITTER_BASE = process.env.NITTER_BASE || 'https://nitter.net';
+const NITTER_FALLBACKS = (process.env.NITTER_FALLBACKS || '')
+  .split(',')
+  .map(item => item.trim())
+  .filter(Boolean);
 
 const normalizeRedirectPath = (value) => {
   if (typeof value !== 'string') return '/app';
@@ -4091,8 +4095,8 @@ const normalizeXHandle = (input) => {
   return value;
 };
 
-const buildXFeedUrl = (handle) => {
-  const base = NITTER_BASE.replace(/\/$/, '');
+const buildXFeedUrl = (baseUrl, handle) => {
+  const base = String(baseUrl || '').replace(/\/$/, '');
   return `${base}/${handle}/rss`;
 };
 
@@ -4102,29 +4106,33 @@ app.get('/x/rss', async (req, res) => {
   if (!handle) {
     return res.status(400).json({ error: 'Informe um @usuario ou URL do perfil.' });
   }
-  const feedUrl = buildXFeedUrl(handle);
-  try {
-    const response = await fetch(feedUrl, {
-      headers: {
-        'User-Agent': 'rss-backend/1.0',
-        'Accept': 'application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
+  const candidates = [NITTER_BASE, ...NITTER_FALLBACKS].filter(Boolean);
+  for (const base of candidates) {
+    const feedUrl = buildXFeedUrl(base, handle);
+    try {
+      const response = await fetch(feedUrl, {
+        headers: {
+          'User-Agent': 'rss-backend/1.0',
+          'Accept': 'application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+      const body = await response.text();
+      if (!response.ok || !body || !body.includes('<rss')) {
+        continue;
       }
-    });
-    const body = await response.text();
-    if (!response.ok) {
-      return res.status(502).json({ error: 'Falha ao carregar RSS externo.' });
+      res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+      res.set('X-Source-Url', feedUrl);
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      res.set('Surrogate-Control', 'no-store');
+      res.set('ETag', Date.now().toString());
+      return res.status(200).send(body);
+    } catch (err) {
+      // try next base
     }
-    res.set('Content-Type', 'application/rss+xml; charset=utf-8');
-    res.set('X-Source-Url', feedUrl);
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
-    res.set('ETag', Date.now().toString());
-    return res.status(200).send(body);
-  } catch (err) {
-    return res.status(502).json({ error: 'Falha ao gerar RSS do X.' });
   }
+  return res.status(502).json({ error: 'Falha ao gerar RSS do X.' });
 });
 
 // Listar todos os feeds
