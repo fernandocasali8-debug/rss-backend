@@ -4116,7 +4116,12 @@ app.get('/x/rss', async (req, res) => {
     }
     res.set('Content-Type', 'application/rss+xml; charset=utf-8');
     res.set('X-Source-Url', feedUrl);
-    return res.send(body);
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+    res.set('ETag', Date.now().toString());
+    return res.status(200).send(body);
   } catch (err) {
     return res.status(502).json({ error: 'Falha ao gerar RSS do X.' });
   }
