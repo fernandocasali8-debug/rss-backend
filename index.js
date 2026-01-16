@@ -148,6 +148,8 @@ app.get('/auth/me', (req, res) => {
       role: 'viewer',
       plan: 'starter',
       active: true,
+      approved: false,
+      approvedAt: null,
       authProvider: 'google',
       authId: req.user.id || '',
       lastLoginAt: now,
@@ -164,6 +166,11 @@ app.get('/auth/me', (req, res) => {
     }
     if (meta.authProvider !== 'google') {
       meta.authProvider = 'google';
+      changed = true;
+    }
+    if (meta.approved === undefined) {
+      meta.approved = meta.role === 'admin';
+      meta.approvedAt = meta.approved ? now : null;
       changed = true;
     }
     if (req.user.id && meta.authId !== req.user.id) {
@@ -188,6 +195,8 @@ app.get('/auth/me', (req, res) => {
     role: meta.role || 'viewer',
     plan: meta.plan || 'starter',
     active: meta.active !== false,
+    approved: meta.approved === true,
+    approvedAt: meta.approvedAt || null,
     trialStartedAt: meta.trialStartedAt || null,
     trialEndsAt: meta.trialEndsAt || null,
     trialExpired,
@@ -237,6 +246,17 @@ app.use((req, res, next) => {
   if (isPublicRoute(req)) return next();
   if (req.isAuthenticated && req.isAuthenticated()) return next();
   return res.status(401).json({ error: 'Nao autorizado.' });
+});
+
+app.use((req, res, next) => {
+  if (isPublicRoute(req)) return next();
+  const email = String(req.user?.email || '').toLowerCase();
+  if (!email) return res.status(401).json({ error: 'Nao autorizado.' });
+  const meta = users.find(user => user.email === email);
+  if (!meta) return res.status(401).json({ error: 'Nao autorizado.' });
+  if (meta.role === 'admin') return next();
+  if (meta.approved === true) return next();
+  return res.status(403).json({ error: 'Aguardando liberacao do administrador.' });
 });
 
 
@@ -903,7 +923,9 @@ let users = loadUsers().map((user) => ({
   ...user,
   role: normalizeUserRole(user.role),
   plan: normalizePlan(user.plan),
-  active: user.active !== false
+  active: user.active !== false,
+  approved: user.approved === undefined ? true : user.approved === true,
+  approvedAt: user.approvedAt || null
 }));
 
 const { loadTeams, saveTeams } = require('./teamsStorage');
@@ -4100,12 +4122,47 @@ const buildXFeedUrl = (baseUrl, handle) => {
   return `${base}/${handle}/rss`;
 };
 
+const fetchRssBody = async (url) => {
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'rss-backend/1.0',
+      'Accept': 'application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
+    }
+  });
+  const body = await response.text();
+  if (!response.ok || !body || !body.includes('<rss')) return null;
+  return body;
+};
+
+const fetchRssViaJina = async (url) => {
+  const target = url.replace(/^https?:\/\//, '');
+  const proxyUrl = `https://r.jina.ai/http://${target}`;
+  return fetchRssBody(proxyUrl);
+};
+
+const buildTwtrssUrl = (handle) => (
+  `https://twitrss.me/twitter_user_to_rss/?user=${encodeURIComponent(handle)}`
+);
+
+const bodyIndicatesNotFound = (body) => {
+  if (!body) return false;
+  const needle = String(body).toLowerCase();
+  return (
+    needle.includes('not found')
+    || needle.includes('user not found')
+    || needle.includes('does not exist')
+    || needle.includes('non e stato trovato nulla')
+    || needle.includes('non è stato trovato nulla')
+  );
+};
+
 app.get('/x/rss', async (req, res) => {
   const raw = String(req.query.user || req.query.url || '').trim();
   const handle = normalizeXHandle(raw);
   if (!handle) {
     return res.status(400).json({ error: 'Informe um @usuario ou URL do perfil.' });
   }
+  let lastBody = '';
   const candidates = [NITTER_BASE, ...NITTER_FALLBACKS].filter(Boolean);
   for (const base of candidates) {
     const feedUrl = buildXFeedUrl(base, handle);
@@ -4117,20 +4174,60 @@ app.get('/x/rss', async (req, res) => {
         }
       });
       const body = await response.text();
-      if (!response.ok || !body || !body.includes('<rss')) {
+      lastBody = body || '';
+      if (!response.ok) {
+        if (bodyIndicatesNotFound(lastBody)) {
+          return res.status(404).json({ error: 'Conta nao encontrada ou protegida no X.' });
+        }
         continue;
       }
+      if (body && body.includes('<rss')) {
+        res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+        res.set('X-Source-Url', feedUrl);
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('Surrogate-Control', 'no-store');
+        res.set('ETag', Date.now().toString());
+        return res.status(200).send(body);
+      }
+      if (bodyIndicatesNotFound(lastBody)) {
+        return res.status(404).json({ error: 'Conta nao encontrada ou protegida no X.' });
+      }
+      const proxied = await fetchRssViaJina(feedUrl);
+      if (proxied) {
+        res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+        res.set('X-Source-Url', feedUrl);
+        res.set('X-Proxy-Url', `https://r.jina.ai/http/${feedUrl.replace(/^https?:\/\//, '')}`);
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('Surrogate-Control', 'no-store');
+        res.set('ETag', Date.now().toString());
+        return res.status(200).send(proxied);
+      }
+    } catch (err) {
+      // try next base
+    }
+  }
+  const twtrssUrl = buildTwtrssUrl(handle);
+  try {
+    const body = await fetchRssBody(twtrssUrl);
+    if (body) {
       res.set('Content-Type', 'application/rss+xml; charset=utf-8');
-      res.set('X-Source-Url', feedUrl);
+      res.set('X-Source-Url', twtrssUrl);
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       res.set('Surrogate-Control', 'no-store');
       res.set('ETag', Date.now().toString());
       return res.status(200).send(body);
-    } catch (err) {
-      // try next base
     }
+  } catch (err) {
+    // ignore
+  }
+  if (bodyIndicatesNotFound(lastBody)) {
+    return res.status(404).json({ error: 'Conta nao encontrada ou protegida no X.' });
   }
   return res.status(502).json({ error: 'Falha ao gerar RSS do X.' });
 });
@@ -4311,6 +4408,15 @@ const normalizeUserPayload = (payload, current = {}) => {
   if (payload.active !== undefined) {
     next.active = payload.active !== false;
   }
+  if (payload.approved !== undefined) {
+    next.approved = payload.approved === true;
+    if (next.approved && !next.approvedAt) {
+      next.approvedAt = new Date().toISOString();
+    }
+    if (!next.approved) {
+      next.approvedAt = null;
+    }
+  }
   return next;
 };
 
@@ -4354,6 +4460,8 @@ app.post('/admin/users', (req, res) => {
     role: normalizeUserRole(payload.role),
     plan: normalizePlan(payload.plan),
     active: payload.active !== false,
+    approved: payload.approved === undefined ? true : payload.approved === true,
+    approvedAt: payload.approved === false ? null : new Date().toISOString(),
     createdAt: now,
     updatedAt: now
   });
