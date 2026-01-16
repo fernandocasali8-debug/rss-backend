@@ -17,6 +17,7 @@ const { Readability } = require('@mozilla/readability');
 const cheerio = require('cheerio');
 const http = require('http');
 const https = require('https');
+const { WebSocketServer } = require('ws');
 const { URL } = require('url');
 const iconv = require('iconv-lite');
 const nodemailer = require('nodemailer');
@@ -32,6 +33,8 @@ const NITTER_FALLBACKS = (process.env.NITTER_FALLBACKS || '')
   .split(',')
   .map(item => item.trim())
   .filter(Boolean);
+const LIVE_ROOM_TTL_MS = 60 * 60 * 1000;
+const LIVE_ROOM_MAX = 5;
 
 const normalizeRedirectPath = (value) => {
   if (typeof value !== 'string') return '/app';
@@ -238,7 +241,9 @@ const isPublicRoute = (req) => {
     if (req.path.startsWith('/rss/generated/')) return true;
     if (req.path.startsWith('/site/')) return true;
     if (req.path === '/polymarket/events') return true;
+    if (req.path.startsWith('/live/rooms/')) return true;
   }
+  if (req.path === '/live/ws') return true;
   return false;
 };
 
@@ -257,6 +262,72 @@ app.use((req, res, next) => {
   if (meta.role === 'admin') return next();
   if (meta.approved === true) return next();
   return res.status(403).json({ error: 'Aguardando liberacao do administrador.' });
+});
+
+const liveRooms = new Map();
+
+const generateLiveCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i += 1) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+};
+
+const getLiveRoom = (code) => {
+  const room = liveRooms.get(code);
+  if (!room) return null;
+  if (Date.now() > room.expiresAt) {
+    room.clients.forEach((client) => {
+      try {
+        client.ws.close();
+      } catch (e) {
+        // ignore
+      }
+    });
+    liveRooms.delete(code);
+    return null;
+  }
+  return room;
+};
+
+app.post('/live/rooms', (req, res) => {
+  if (!req.user?.email) {
+    return res.status(401).json({ error: 'Nao autorizado.' });
+  }
+  let code = generateLiveCode();
+  while (liveRooms.has(code)) {
+    code = generateLiveCode();
+  }
+  const now = Date.now();
+  const room = {
+    code,
+    createdAt: now,
+    expiresAt: now + LIVE_ROOM_TTL_MS,
+    hostEmail: String(req.user.email || '').toLowerCase(),
+    clients: new Map()
+  };
+  liveRooms.set(code, room);
+  res.json({
+    ok: true,
+    code,
+    expiresAt: new Date(room.expiresAt).toISOString()
+  });
+});
+
+app.get('/live/rooms/:code', (req, res) => {
+  const code = String(req.params.code || '').trim().toUpperCase();
+  const room = getLiveRoom(code);
+  if (!room) {
+    return res.status(404).json({ ok: false, error: 'Sala nao encontrada.' });
+  }
+  res.json({
+    ok: true,
+    code: room.code,
+    expiresAt: new Date(room.expiresAt).toISOString(),
+    participants: room.clients.size
+  });
 });
 
 
@@ -7030,9 +7101,116 @@ app.get('/aggregate', async (req, res) => {
   res.json(grouped);
 });
 
-app.listen(port, () => {
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: '/live/ws' });
+
+const sendLiveMessage = (ws, payload) => {
+  if (!ws || ws.readyState !== ws.OPEN) return;
+  ws.send(JSON.stringify(payload));
+};
+
+const broadcastLive = (room, payload, exceptId = '') => {
+  room.clients.forEach((client, clientId) => {
+    if (clientId === exceptId) return;
+    sendLiveMessage(client.ws, payload);
+  });
+};
+
+wss.on('connection', (ws, req) => {
+  const url = new URL(req.url || '', `http://localhost:${port}`);
+  const code = String(url.searchParams.get('code') || '').trim().toUpperCase();
+  const role = String(url.searchParams.get('role') || 'guest').toLowerCase();
+  const name = String(url.searchParams.get('name') || '').trim();
+  const clientId = String(url.searchParams.get('clientId') || uuidv4());
+  const room = getLiveRoom(code);
+  if (!room) {
+    ws.close(1008, 'Sala invalida');
+    return;
+  }
+  if (room.clients.size >= LIVE_ROOM_MAX) {
+    ws.close(1013, 'Sala cheia');
+    return;
+  }
+  room.clients.set(clientId, {
+    ws,
+    name: name || `Convidado ${room.clients.size + 1}`,
+    role: role === 'host' ? 'host' : 'guest',
+    joinedAt: new Date().toISOString()
+  });
+
+  const peers = Array.from(room.clients.entries())
+    .filter(([id]) => id !== clientId)
+    .map(([id, peer]) => ({ id, name: peer.name, role: peer.role }));
+  sendLiveMessage(ws, {
+    type: 'welcome',
+    id: clientId,
+    code: room.code,
+    expiresAt: room.expiresAt,
+    peers
+  });
+  broadcastLive(room, {
+    type: 'peer-joined',
+    id: clientId,
+    name: room.clients.get(clientId).name,
+    role: room.clients.get(clientId).role
+  }, clientId);
+
+  ws.on('message', (raw) => {
+    let payload = null;
+    try {
+      payload = JSON.parse(raw.toString());
+    } catch (e) {
+      return;
+    }
+    if (!payload || typeof payload !== 'object') return;
+    if (payload.type === 'signal' && payload.to) {
+      const target = room.clients.get(payload.to);
+      if (!target) return;
+      sendLiveMessage(target.ws, {
+        type: 'signal',
+        from: clientId,
+        data: payload.data
+      });
+      return;
+    }
+    if (payload.type === 'broadcast' && payload.data) {
+      broadcastLive(room, {
+        type: 'broadcast',
+        from: clientId,
+        data: payload.data
+      }, clientId);
+    }
+  });
+
+  ws.on('close', () => {
+    const roomNow = liveRooms.get(code);
+    if (!roomNow) return;
+    roomNow.clients.delete(clientId);
+    broadcastLive(roomNow, { type: 'peer-left', id: clientId });
+    if (roomNow.clients.size === 0 && Date.now() > roomNow.expiresAt) {
+      liveRooms.delete(code);
+    }
+  });
+});
+
+server.listen(port, () => {
   console.log(`Servidor RSS backend rodando em http://localhost:${port}`);
 });
+
+setInterval(() => {
+  const now = Date.now();
+  liveRooms.forEach((room, code) => {
+    if (now < room.expiresAt) return;
+    room.clients.forEach((client) => {
+      try {
+        client.ws.close();
+      } catch (e) {
+        // ignore
+      }
+    });
+    liveRooms.delete(code);
+  });
+}, 30000);
 
 setInterval(() => {
   tryPostAutomation().catch((err) => {
