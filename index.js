@@ -264,6 +264,95 @@ app.use((req, res, next) => {
   return res.status(403).json({ error: 'Aguardando liberacao do administrador.' });
 });
 
+app.get('/system/status', (req, res) => {
+  const aiProvider = aiConfig?.provider || 'openai';
+  let aiKeyOk = false;
+  if (aiProvider === 'openai') aiKeyOk = Boolean(aiConfig?.openai?.apiKey);
+  if (aiProvider === 'gemini') aiKeyOk = Boolean(aiConfig?.gemini?.apiKey);
+  if (aiProvider === 'copilot') aiKeyOk = Boolean(aiConfig?.copilot?.apiKey && aiConfig?.copilot?.baseUrl);
+
+  const aiStatus = aiConfig?.enabled
+    ? (aiKeyOk ? 'ok' : 'warn')
+    : 'off';
+
+  const youtubeStatus = youtubeConfig?.enabled
+    ? (youtubeConfig?.apiKey ? 'ok' : 'warn')
+    : 'off';
+
+  const email = String(req.user?.email || '').toLowerCase();
+  const sheetsUser = getSheetsConfigForUser(email);
+  const driveUser = getDriveConfigForUser(email);
+
+  const sheetsStatus = sheetsOAuthEnabled
+    ? (sheetsUser?.tokens ? 'ok' : 'warn')
+    : 'warn';
+
+  const driveStatus = driveOAuthEnabled
+    ? (driveUser?.tokens ? 'ok' : 'warn')
+    : 'warn';
+
+  const items = [
+    {
+      key: 'google-auth',
+      label: 'Login Google',
+      status: GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET ? 'ok' : 'warn',
+      detail: GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET ? 'Credenciais ativas' : 'Faltam credenciais'
+    },
+    {
+      key: 'session',
+      label: 'Sessao',
+      status: SESSION_SECRET ? 'ok' : 'warn',
+      detail: SESSION_SECRET ? 'Segredo configurado' : 'SESSION_SECRET ausente'
+    },
+    {
+      key: 'ai',
+      label: 'IA',
+      status: aiStatus,
+      detail: aiStatus === 'off'
+        ? 'IA desativada'
+        : (aiKeyOk ? `Fornecedor: ${aiProvider}` : `Fornecedor: ${aiProvider} sem chave`)
+    },
+    {
+      key: 'fact-check',
+      label: 'Checagem',
+      status: FACT_CHECK_API_KEY ? 'ok' : 'warn',
+      detail: FACT_CHECK_API_KEY ? 'Chave ativa' : 'Chave ausente'
+    },
+    {
+      key: 'youtube',
+      label: 'YouTube',
+      status: youtubeStatus,
+      detail: youtubeStatus === 'off'
+        ? 'Integracao desativada'
+        : (youtubeConfig?.apiKey ? 'API ativa' : 'API sem chave')
+    },
+    {
+      key: 'billing',
+      label: 'Pagamentos',
+      status: MP_ACCESS_TOKEN ? 'ok' : 'warn',
+      detail: MP_ACCESS_TOKEN ? 'Gateway ativo' : 'Gateway nao configurado'
+    },
+    {
+      key: 'sheets',
+      label: 'Google Sheets',
+      status: sheetsStatus,
+      detail: sheetsOAuthEnabled
+        ? (sheetsUser?.tokens ? 'Conectado' : 'OAuth ok, falta conectar')
+        : 'OAuth nao configurado'
+    },
+    {
+      key: 'drive',
+      label: 'Google Drive',
+      status: driveStatus,
+      detail: driveOAuthEnabled
+        ? (driveUser?.tokens ? 'Conectado' : 'OAuth ok, falta conectar')
+        : 'OAuth nao configurado'
+    }
+  ];
+
+  res.json({ ok: true, items });
+});
+
 const liveRooms = new Map();
 
 const generateLiveCode = () => {
