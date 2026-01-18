@@ -1048,6 +1048,7 @@ const { loadTrends, saveTrends } = require('./trendsStorage');
 let trendsConfig = loadTrends();
 const { loadYouTube, saveYouTube } = require('./youtubeStorage');
 let youtubeConfig = loadYouTube();
+const FACT_CHECK_API_KEY = String(process.env.FACT_CHECK_API_KEY || '').trim();
 const { loadSites, saveSites, defaultSite } = require('./siteStorage');
 let siteStore = loadSites();
 const { loadSitePosts, saveSitePosts } = require('./sitePostsStorage');
@@ -5756,6 +5757,46 @@ app.put('/youtube/config', (req, res) => {
   res.json(youtubeConfig);
 });
 
+app.get('/factcheck/search', async (req, res) => {
+  const query = String(req.query.query || '').trim();
+  if (!query) return res.status(400).json({ ok: false, message: 'Informe um termo para checagem.' });
+  if (!FACT_CHECK_API_KEY) {
+    return res.status(400).json({ ok: false, message: 'Chave da API de checagem ausente.' });
+  }
+  try {
+    const url = new URL('https://factchecktools.googleapis.com/v1alpha1/claims:search');
+    url.searchParams.set('query', query);
+    url.searchParams.set('key', FACT_CHECK_API_KEY);
+    url.searchParams.set('pageSize', '5');
+    url.searchParams.set('languageCode', 'pt-BR');
+    const response = await fetch(url.toString());
+    const data = await response.json().catch(() => null);
+    if (!response.ok || data?.error) {
+      const message = data?.error?.message || 'Falha ao consultar checagens.';
+      return res.status(502).json({ ok: false, message });
+    }
+    const claims = Array.isArray(data?.claims) ? data.claims : [];
+    const items = claims.map((claim, index) => {
+      const reviews = Array.isArray(claim?.claimReview) ? claim.claimReview : [];
+      return {
+        id: claim?.id || claim?.claim || String(index),
+        text: String(claim?.text || claim?.claim || '').trim(),
+        claimant: String(claim?.claimant || '').trim(),
+        reviews: reviews.map((review) => ({
+          publisher: String(review?.publisher?.name || 'Fonte').trim(),
+          title: String(review?.title || '').trim(),
+          url: String(review?.url || '').trim(),
+          rating: String(review?.textualRating || '').trim(),
+          reviewDate: String(review?.reviewDate || '').trim()
+        })).filter((review) => review.url)
+      };
+    }).filter((item) => item.text || item.reviews.length);
+    return res.json({ ok: true, items });
+  } catch (err) {
+    return res.status(500).json({ ok: false, message: err.message || 'Falha ao consultar checagens.' });
+  }
+});
+
 app.get('/youtube/search', async (req, res) => {
   const query = String(req.query.query || '').trim();
   if (!query) {
@@ -7131,10 +7172,11 @@ wss.on('connection', (ws, req) => {
     ws.close(1013, 'Sala cheia');
     return;
   }
+  const normalizedRole = role === 'host' ? 'host' : (role === 'viewer' ? 'viewer' : 'guest');
   room.clients.set(clientId, {
     ws,
-    name: name || `Convidado ${room.clients.size + 1}`,
-    role: role === 'host' ? 'host' : 'guest',
+    name: name || (normalizedRole === 'host' ? 'Host' : `Convidado ${room.clients.size + 1}`),
+    role: normalizedRole,
     joinedAt: new Date().toISOString()
   });
 
