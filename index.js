@@ -1445,6 +1445,8 @@ const { loadWatchAlerts, saveWatchAlerts } = require('./watchAlertsStorage');
 let watchAlerts = loadWatchAlerts();
 const { loadWatchSettings, saveWatchSettings } = require('./watchSettingsStorage');
 let watchSettings = loadWatchSettings();
+const { loadWatchReportState, saveWatchReportState } = require('./watchReportStateStorage');
+let watchReportState = loadWatchReportState();
 const MAX_WATCH_ALERTS = 500;
 const watchAlertKeys = new Set();
 const { loadInfluencers, saveInfluencers } = require('./influencerStorage');
@@ -3252,6 +3254,20 @@ function normalizeWatchKeywords(list) {
   return list.map(word => String(word || '').trim()).filter(Boolean);
 }
 
+const WATCH_REPORT_RANGES = ['1h', '2h', '3h', '24h'];
+
+function normalizeWatchReportSettings(payload) {
+  const next = payload && typeof payload === 'object' ? payload : {};
+  return {
+    range: WATCH_REPORT_RANGES.includes(next.range) ? next.range : '1h',
+    maxItems: clampNumber(next.maxItems, 1, 20, 5),
+    useAi: next.useAi !== false,
+    aiRewrite: next.aiRewrite !== false,
+    autoEnabled: !!next.autoEnabled,
+    autoIntervalHours: clampNumber(next.autoIntervalHours, 1, 24, 3)
+  };
+}
+
 function normalizeWatchSettings(payload) {
   const next = payload || {};
   return {
@@ -3260,7 +3276,8 @@ function normalizeWatchSettings(payload) {
     timeRange: ['24h', '7d', 'all'].includes(next.timeRange) ? next.timeRange : '24h',
     sortMode: ['recent', 'relevant'].includes(next.sortMode) ? next.sortMode : 'recent',
     topicFilter: typeof next.topicFilter === 'string' ? next.topicFilter : 'all',
-    newOnly: !!next.newOnly
+    newOnly: !!next.newOnly,
+    report: normalizeWatchReportSettings(next.report)
   };
 }
 
@@ -3342,6 +3359,156 @@ function updateWatchAlerts(items) {
   watchAlerts = [...nextAlerts, ...watchAlerts].slice(0, MAX_WATCH_ALERTS);
   saveWatchAlerts(watchAlerts);
   return nextAlerts.length;
+}
+
+function resolveWatchReportRange(rangeKey) {
+  if (rangeKey === '2h') return 2;
+  if (rangeKey === '3h') return 3;
+  if (rangeKey === '24h') return 24;
+  return 1;
+}
+
+function getWatchReportRangeLabel(rangeKey) {
+  if (rangeKey === '2h') return 'ultimas 2 horas';
+  if (rangeKey === '3h') return 'ultimas 3 horas';
+  if (rangeKey === '24h') return 'ultimo dia';
+  return 'ultima hora';
+}
+
+function getWatchReportItems(rangeKey, maxItems) {
+  const hours = resolveWatchReportRange(rangeKey);
+  const cutoff = Date.now() - (hours * 60 * 60 * 1000);
+  const items = (watchAlerts || [])
+    .filter(alert => {
+      const date = new Date(alert.matchedAt || alert.item?.pubDate || alert.item?.isoDate || 0).getTime();
+      return Number.isFinite(date) && date >= cutoff;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.matchedAt || a.item?.pubDate || a.item?.isoDate || 0).getTime();
+      const dateB = new Date(b.matchedAt || b.item?.pubDate || b.item?.isoDate || 0).getTime();
+      return (dateB || 0) - (dateA || 0);
+    })
+    .slice(0, Math.max(1, maxItems || 5));
+
+  return items.map(alert => ({
+    ...alert.item,
+    topicName: alert.topicName || '',
+    matchedAt: alert.matchedAt
+  }));
+}
+
+function buildWatchReportFallback(items, rangeKey, maxChars) {
+  const label = getWatchReportRangeLabel(rangeKey);
+  const header = `Relatorio de acompanhamentos (${label})`;
+  const lines = items.map((item) => {
+    const parts = getAutomationDateParts(item);
+    const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
+    const title = (item.title || '').replace(/\s+/g, ' ').trim();
+    const summary = getClippingSummary(item);
+    const metaParts = [];
+    if (source) metaParts.push(source);
+    if (parts.dateText) metaParts.push(parts.dateText);
+    if (parts.timeText) metaParts.push(parts.timeText);
+    if (item.topicName) metaParts.push(item.topicName);
+    const meta = metaParts.length ? '(' + metaParts.join(' - ') + ')' : '';
+    const lineParts = ['-', title, summary ? '-- ' + summary : '', meta].filter(Boolean);
+    return lineParts.join(' ').replace(/\s+/g, ' ').trim();
+  });
+  return trimText([header, ...lines].join('
+'), maxChars);
+}
+
+function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
+  const label = getWatchReportRangeLabel(rangeKey);
+  const lines = items.map((item, index) => {
+    const parts = getAutomationDateParts(item);
+    const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
+    const title = normalizeAiInput(item.title);
+    const snippet = normalizeAiInput(item.contentSnippet || item.snippet || '');
+    const metaParts = [];
+    if (source) metaParts.push(source);
+    if (parts.dateText) metaParts.push(parts.dateText);
+    if (parts.timeText) metaParts.push(parts.timeText);
+    if (item.topicName) metaParts.push(item.topicName);
+    const meta = metaParts.length ? metaParts.join(' - ') : '';
+    return (index + 1) + '. ' + title + ' | ' + snippet + ' | ' + meta;
+  });
+  const limit = Math.max(400, Math.min(10000, Number(maxChars) || 4000));
+  const rewriteText = aiRewrite ? 'Reescreva o texto e organize em formato de report.' : 'Mantenha o texto fiel e objetivo.';
+  return [
+    'Voce e um editor de clipping.',
+    `Crie um relatorio em pt-BR para acompanhamentos (${label}).`,
+    rewriteText,
+    'Cada item deve conter: manchete, um resumo curto (1 frase), e Fonte + data + hora + tema.',
+    'Nao inclua links. Use bullets. Tom informativo e profissional.',
+    'Limite maximo: ' + limit + ' caracteres.',
+    '',
+    ...lines
+  ].join('
+');
+}
+
+async function generateWatchReport(options) {
+  const settings = options || {};
+  const rangeKey = settings.range || '1h';
+  const maxItems = settings.maxItems || 5;
+  const maxChars = getAutomationMaxChars();
+  const items = getWatchReportItems(rangeKey, maxItems);
+  if (!items.length) {
+    return { items: [], report: 'Sem resultados para o periodo selecionado.' };
+  }
+
+  let report = buildWatchReportFallback(items, rangeKey, maxChars);
+  if (settings.useAi && aiConfig.enabled && canUseAiProvider(aiConfig)) {
+    const prompt = buildWatchReportPrompt(items, rangeKey, maxChars, settings.aiRewrite !== false);
+    let aiText = '';
+    if (aiConfig.provider === 'openai') {
+      aiText = await runPromptWithOpenAi(prompt, aiConfig.openai);
+    } else if (aiConfig.provider === 'gemini') {
+      aiText = await runPromptWithGemini(prompt, aiConfig.gemini);
+    } else if (aiConfig.provider === 'copilot') {
+      aiText = await runPromptWithCopilot(prompt, aiConfig.copilot);
+    }
+    if (aiText) {
+      report = trimText(aiText, maxChars);
+    }
+  }
+
+  return { items, report };
+}
+
+async function postWatchReport(settings) {
+  if (!hasTwitterCredentials(automationConfig)) {
+    throw new Error('Credenciais do X/Twitter ausentes.');
+  }
+  const result = await generateWatchReport(settings);
+  if (!result.report) {
+    throw new Error('Relatorio vazio.');
+  }
+  const client = createTwitterClient(automationConfig);
+  const resp = await client.v2.tweet(result.report);
+  const postedId = resp?.data?.id || null;
+  watchReportState.lastPostedAt = new Date().toISOString();
+  watchReportState.lastReport = result.report;
+  watchReportState.lastRange = settings.range || '1h';
+  watchReportState.lastItemCount = result.items.length;
+  if (postedId) watchReportState.lastTweetId = postedId;
+  saveWatchReportState(watchReportState);
+  return { postedId, report: result.report, items: result.items };
+}
+
+async function runWatchReportAutomation() {
+  const settings = getWatchSettingsForUser();
+  const reportSettings = settings.report || {};
+  if (!reportSettings.autoEnabled) return;
+  if (!hasTwitterCredentials(automationConfig)) return;
+  const now = new Date();
+  const last = watchReportState.lastPostedAt ? new Date(watchReportState.lastPostedAt) : null;
+  const intervalHours = reportSettings.autoIntervalHours || 3;
+  if (last && (now.getTime() - last.getTime()) < (intervalHours * 60 * 60 * 1000)) {
+    return;
+  }
+  await postWatchReport(reportSettings);
 }
 
 function computeTags(item) {
@@ -7638,6 +7805,53 @@ app.get('/watch/alerts', (req, res) => {
   res.json(items.slice(0, limit));
 });
 
+app.get('/watch/report/preview', async (req, res) => {
+  try {
+    const userId = req.query.userId || req.headers['x-user-id'];
+    const settings = getWatchSettingsForUser(userId);
+    const reportSettings = normalizeWatchReportSettings({
+      ...(settings.report || {}),
+      range: req.query.range || (settings.report && settings.report.range) || '1h'
+    });
+    const result = await generateWatchReport(reportSettings);
+    res.json({
+      ok: true,
+      range: reportSettings.range,
+      generatedAt: new Date().toISOString(),
+      items: result.items,
+      report: result.report
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: 'Falha ao gerar relatorio.' });
+  }
+});
+
+app.post('/watch/report/post', async (req, res) => {
+  try {
+    const userId = req.query.userId || req.headers['x-user-id'];
+    const settings = getWatchSettingsForUser(userId);
+    const reportSettings = normalizeWatchReportSettings({
+      ...(settings.report || {}),
+      ...(req.body || {})
+    });
+    const result = await postWatchReport(reportSettings);
+    logEvent({
+      level: 'info',
+      source: 'watch-report',
+      message: 'Relatorio publicado no X/Twitter.',
+      detail: `Itens: ${result.items.length}`
+    });
+    res.json({
+      ok: true,
+      postedId: result.postedId,
+      items: result.items,
+      report: result.report
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: err.message || 'Falha ao publicar relatorio.' });
+  }
+});
+
 app.post('/watch/refresh', async (req, res) => {
   try {
     const items = await buildAggregatedItems();
@@ -7829,6 +8043,17 @@ setInterval(() => {
       level: 'error',
       source: 'automation',
       message: 'Falha ao publicar no X/Twitter.',
+      detail: err.message || String(err)
+    });
+  });
+}, 60000);
+
+setInterval(() => {
+  runWatchReportAutomation().catch((err) => {
+    logEvent({
+      level: 'error',
+      source: 'watch-report',
+      message: 'Falha ao publicar relatorio.',
       detail: err.message || String(err)
     });
   });
