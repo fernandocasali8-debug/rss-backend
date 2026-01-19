@@ -18,18 +18,21 @@ function loadAutomation() {
       rules: {
         enabled: false,
         feedIds: [],
+        useWatchTopics: false,
+        useAiSummary: false,
+        aiMode: 'twitter_cta',
         requireWords: [],
         blockWords: [],
-      onlyWithLink: true,
-      maxPerDay: 5,
-      enforceDailyCap16: false,
-      minIntervalMinutes: 30,
+        onlyWithLink: true,
+        maxPerDay: 5,
+        enforceDailyCap16: false,
+        minIntervalMinutes: 30,
         quietHours: {
           enabled: false,
           start: '22:00',
           end: '07:00'
         },
-        template: '{title} {link}'
+        template: '{title} - {source} {date} {time} {link}'
       }
     };
   }

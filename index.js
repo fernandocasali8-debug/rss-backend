@@ -1362,7 +1362,45 @@ let events = loadEvents();
 const MAX_EVENTS = 200;
 
 const { loadAutomation, saveAutomation } = require('./automationStorage');
-let automationConfig = loadAutomation();
+const DEFAULT_AUTOMATION_CONFIG = {
+  credentials: {
+    apiKey: '',
+    apiSecret: '',
+    accessToken: '',
+    accessSecret: ''
+  },
+  rules: {
+    enabled: false,
+    feedIds: [],
+    useWatchTopics: false,
+    useAiSummary: false,
+    aiMode: 'twitter_cta',
+    requireWords: [],
+    blockWords: [],
+    onlyWithLink: true,
+    maxPerDay: 5,
+    minIntervalMinutes: 30,
+    quietHours: {
+      enabled: false,
+      start: '22:00',
+      end: '07:00'
+    },
+    template: '{title} - {source} {date} {time} {link}'
+  }
+};
+
+const normalizeAutomation = (input = {}) => ({
+  credentials: {
+    ...DEFAULT_AUTOMATION_CONFIG.credentials,
+    ...(input.credentials || {})
+  },
+  rules: {
+    ...DEFAULT_AUTOMATION_CONFIG.rules,
+    ...(input.rules || {})
+  }
+});
+
+let automationConfig = normalizeAutomation(loadAutomation());
 
 const { loadState, saveState } = require('./automationStateStorage');
 let automationState = loadState();
@@ -2222,15 +2260,74 @@ async function runTelegramAutomation() {
   }
 }
 
+function getAutomationItemId(item) {
+  return item.key || item.link || item.guid || item.title;
+}
+
+function getAutomationDateParts(item) {
+  const raw = item.pubDate || item.isoDate || item.matchedAt || item.createdAt;
+  if (!raw) return { dateText: '', timeText: '' };
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return { dateText: '', timeText: '' };
+  const pad = (value) => String(value).padStart(2, '0');
+  const dateText = `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+  const timeText = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return { dateText, timeText };
+}
+
+function buildAutomationSuffix(item) {
+  const { dateText, timeText } = getAutomationDateParts(item);
+  const source = (item.feedName || item.sourceName || '').replace(/\\s+/g, ' ').trim();
+  const parts = [];
+  if (source) parts.push(source);
+  if (dateText) parts.push(dateText);
+  if (timeText) parts.push(timeText);
+  return parts.length ? `Fonte: ${parts.join(' - ')}` : '';
+}
+
+function trimTweet(text) {
+  const cleaned = String(text || '').replace(/\\s+/g, ' ').trim();
+  if (cleaned.length <= 280) return cleaned;
+  return cleaned.slice(0, 277) + '...';
+}
+
+function appendSuffix(baseText, suffix) {
+  if (!suffix) return trimTweet(baseText);
+  const glue = baseText.includes('\\n') ? '\\n' : ' ';
+  const combined = `${baseText}${glue}${suffix}`.trim();
+  if (combined.length <= 280) return combined;
+  const available = 280 - (suffix.length + glue.length);
+  if (available <= 0) return trimTweet(suffix);
+  const trimmedBase = trimTweet(baseText).slice(0, available).trim();
+  return `${trimmedBase}${glue}${suffix}`.trim();
+}
+
 function renderTemplate(template, item) {
   const safeTitle = (item.title || '').replace(/\s+/g, ' ').trim();
   const safeLink = item.link || '';
-  let text = template.replace('{title}', safeTitle).replace('{link}', safeLink).trim();
+  const safeSource = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
+  const safeTopic = (item.topicName || '').replace(/\s+/g, ' ').trim();
+  const { dateText, timeText } = getAutomationDateParts(item);
+  let text = template
+    .replace('{title}', safeTitle)
+    .replace('{link}', safeLink)
+    .replace('{source}', safeSource)
+    .replace('{date}', dateText)
+    .replace('{time}', timeText)
+    .replace('{topic}', safeTopic)
+    .trim();
   if (text.length <= 280) return text;
   const reserved = safeLink ? (safeLink.length + 1) : 0;
   const maxTitle = Math.max(0, 280 - reserved - 1);
   const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}â€¦` : safeTitle;
-  text = template.replace('{title}', trimmedTitle).replace('{link}', safeLink).trim();
+  text = template
+    .replace('{title}', trimmedTitle)
+    .replace('{link}', safeLink)
+    .replace('{source}', safeSource)
+    .replace('{date}', dateText)
+    .replace('{time}', timeText)
+    .replace('{topic}', safeTopic)
+    .trim();
   return text.length > 280 ? text.slice(0, 277) + 'â€¦' : text;
 }
 
@@ -2685,7 +2782,10 @@ function getAutomationEligibility() {
 
   if (automationState.lastPostedAt) {
     const elapsed = (now.getTime() - new Date(automationState.lastPostedAt).getTime()) / 60000;
-    if (elapsed < automationConfig.rules.minIntervalMinutes) {
+    const minInterval = automationConfig.rules.useWatchTopics
+      ? Math.max(automationConfig.rules.minIntervalMinutes, 180)
+      : automationConfig.rules.minIntervalMinutes;
+    if (elapsed < minInterval) {
       return { ok: false, reason: 'Aguardando intervalo mÃ­nimo.' };
     }
   }
@@ -2699,6 +2799,40 @@ async function getAutomationCandidate() {
 
   const aggregated = await buildAggregatedItems();
 
+  if (automationConfig.rules.useWatchTopics) {
+    updateWatchAlerts(aggregated);
+    if (!watchTopics.length) {
+      return { candidate: null, reason: 'Nenhum acompanhamento configurado.' };
+    }
+    const postedSet = new Set(automationState.postedIds || []);
+    const candidateAlert = (watchAlerts || []).find(alert => {
+      if (!alert || !alert.item) return false;
+      const enriched = {
+        ...alert.item,
+        topicId: alert.topicId,
+        topicName: alert.topicName,
+        matchedAt: alert.matchedAt,
+        key: alert.key
+      };
+      const id = getAutomationItemId(enriched);
+      if (!id || postedSet.has(id)) return false;
+      return matchRules(enriched, automationConfig.rules);
+    });
+    if (!candidateAlert) {
+      return { candidate: null, reason: 'Nenhum item novo elegivel.' };
+    }
+    return {
+      candidate: {
+        ...candidateAlert.item,
+        topicId: candidateAlert.topicId,
+        topicName: candidateAlert.topicName,
+        matchedAt: candidateAlert.matchedAt,
+        key: candidateAlert.key
+      },
+      reason: ''
+    };
+  }
+
   let items = aggregated;
   if (automationConfig.rules.feedIds && automationConfig.rules.feedIds.length) {
     const allowedUrls = new Set(
@@ -2710,12 +2844,12 @@ async function getAutomationCandidate() {
   items = items.filter(item => matchRules(item, automationConfig.rules));
   const postedSet = new Set(automationState.postedIds || []);
   const candidate = items.find(item => {
-    const id = item.link || item.guid || item.title;
+    const id = getAutomationItemId(item);
     return id && !postedSet.has(id);
   });
 
   if (!candidate) {
-    return { candidate: null, reason: 'Nenhum item novo eleg?vel.' };
+    return { candidate: null, reason: 'Nenhum item novo elegivel.' };
   }
 
   return { candidate, reason: '' };
@@ -2728,13 +2862,32 @@ async function tryPostAutomation() {
   const now = new Date();
   const client = createTwitterClient(automationConfig);
 
-  const tweetText = renderTemplate(automationConfig.rules.template, candidate);
+  let tweetText = renderTemplate(automationConfig.rules.template, candidate);
+  let aiText = '';
+  if (automationConfig.rules.useAiSummary && aiConfig.enabled && canUseAiProvider(aiConfig)) {
+    const mode = automationConfig.rules.aiMode || 'twitter_cta';
+    try {
+      if (aiConfig.provider === 'openai') {
+        aiText = await rewriteWithOpenAi(candidate, aiConfig.openai, mode);
+      } else if (aiConfig.provider === 'gemini') {
+        aiText = await rewriteWithGemini(candidate, aiConfig.gemini, aiConfig.openai?.maxChars || 600, mode);
+      } else if (aiConfig.provider === 'copilot') {
+        aiText = await rewriteWithCopilot(candidate, aiConfig.copilot, aiConfig.openai?.maxChars || 600, mode);
+      }
+    } catch (err) {
+      aiText = '';
+    }
+  }
+  const baseText = aiText || tweetText;
+  tweetText = appendSuffix(baseText, buildAutomationSuffix(candidate));
   await client.v2.tweet(tweetText);
 
-  const postedId = candidate.link || candidate.guid || candidate.title;
+  const postedId = getAutomationItemId(candidate);
   automationState.lastPostedAt = now.toISOString();
   automationState.dailyCount += 1;
-  automationState.postedIds = [postedId, ...(automationState.postedIds || [])].slice(0, 500);
+  if (postedId) {
+    automationState.postedIds = [postedId, ...(automationState.postedIds || [])].slice(0, 500);
+  }
   saveState(automationState);
   logEvent({
     level: 'info',
@@ -5455,7 +5608,7 @@ app.get('/automation', (req, res) => {
 
 app.put('/automation', (req, res) => {
   const next = req.body || {};
-  automationConfig = {
+  automationConfig = normalizeAutomation({
     credentials: {
       apiKey: next.credentials?.apiKey || '',
       apiSecret: next.credentials?.apiSecret || '',
@@ -5465,6 +5618,9 @@ app.put('/automation', (req, res) => {
     rules: {
       enabled: !!next.rules?.enabled,
       feedIds: Array.isArray(next.rules?.feedIds) ? next.rules.feedIds : [],
+      useWatchTopics: !!next.rules?.useWatchTopics,
+      useAiSummary: !!next.rules?.useAiSummary,
+      aiMode: next.rules?.aiMode || 'twitter_cta',
       requireWords: Array.isArray(next.rules?.requireWords) ? next.rules.requireWords : [],
       blockWords: Array.isArray(next.rules?.blockWords) ? next.rules.blockWords : [],
       onlyWithLink: next.rules?.onlyWithLink !== undefined ? !!next.rules.onlyWithLink : true,
@@ -5477,7 +5633,7 @@ app.put('/automation', (req, res) => {
       },
       template: next.rules?.template || '{title} {link}'
     }
-  };
+  });
   saveAutomation(automationConfig);
   res.json({ ok: true });
 });
