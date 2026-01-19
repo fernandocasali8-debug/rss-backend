@@ -3369,10 +3369,10 @@ function resolveWatchReportRange(rangeKey) {
 }
 
 function getWatchReportRangeLabel(rangeKey) {
-  if (rangeKey === '2h') return 'ultimas 2 horas';
-  if (rangeKey === '3h') return 'ultimas 3 horas';
-  if (rangeKey === '24h') return 'ultimo dia';
-  return 'ultima hora';
+  if (rangeKey === '2h') return '??ltimas 2 horas';
+  if (rangeKey === '3h') return '??ltimas 3 horas';
+  if (rangeKey === '24h') return '??ltimo dia';
+  return '??ltima hora';
 }
 
 function getWatchReportItems(rangeKey, maxItems) {
@@ -3399,7 +3399,7 @@ function getWatchReportItems(rangeKey, maxItems) {
 
 function buildWatchReportFallback(items, rangeKey, maxChars) {
   const label = getWatchReportRangeLabel(rangeKey);
-  const header = `Relatorio de acompanhamentos (${label})`;
+  const header = `Relat??rio de acompanhamentos (${label})`;
   const lines = items.map((item) => {
     const parts = getAutomationDateParts(item);
     const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
