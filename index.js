@@ -430,7 +430,22 @@ const parseSpacesMarkdown = (markdown) => {
         return true;
       });
     const sortedCandidates = titleCandidates.sort((a, b) => b.length - a.length);
-    const title = sortedCandidates[0] || 'Space ao vivo';
+    const inferredTitle = (() => {
+      if (!detailUrl) return '';
+      try {
+        const path = new URL(detailUrl).pathname;
+        const slug = path.split('/').filter(Boolean).pop() || '';
+        const cleaned = decodeURIComponent(slug)
+          .replace(/[-_]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (!cleaned) return '';
+        return cleaned.replace(/(^|\s)([a-z])/g, (match) => match.toUpperCase());
+      } catch (err) {
+        return '';
+      }
+    })();
+    const title = sortedCandidates[0] || inferredTitle || 'Space ao vivo';
     const hostHandleMatch = segment.match(/\[@([^\]]+)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)/);
     const hostHandle = hostHandleMatch?.[1] || '';
     const hostNameMatch = segment.match(/\n\[(.*?)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)\s*\n\s*\[@/);
@@ -461,7 +476,7 @@ const parseSpacesMarkdown = (markdown) => {
       startedAt,
       source: 'spacesdashboard',
       titleHistory: [title],
-      fallbackTitle: title
+      fallbackTitle: inferredTitle || title
     });
   }
   const map = new Map();
