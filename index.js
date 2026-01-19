@@ -418,10 +418,11 @@ const parseSpacesMarkdown = (markdown) => {
     const spaceUrl = matches[i][1];
     const detailMatch = segment.match(/\]\((https:\/\/spacesdashboard\.com\/space\/[^)\s]+)\)/);
     const detailUrl = detailMatch?.[1] || '';
-    const titleMatch = detailUrl
-      ? segment.match(new RegExp(`\\[([^\\]]+)\\]\\(${escapeRegex(detailUrl)}\\)`))
-      : segment.match(/\[([^\]]+)\]\(https:\/\/spacesdashboard\.com\/space\/[^)]+\)/);
-    const title = titleMatch?.[1]?.trim() || 'Space ao vivo';
+    const titleCandidates = [...segment.matchAll(/\[([^\]]{3,})\]\(https:\/\/spacesdashboard\.com\/space\/[^)]+\)/g)]
+      .map(match => String(match[1] || '').trim())
+      .filter(Boolean);
+    const sortedCandidates = titleCandidates.sort((a, b) => b.length - a.length);
+    const title = sortedCandidates[0] || 'Space ao vivo';
     const hostHandleMatch = segment.match(/\[@([^\]]+)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)/);
     const hostHandle = hostHandleMatch?.[1] || '';
     const hostNameMatch = segment.match(/\n\[(.*?)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)\s*\n\s*\[@/);
@@ -449,6 +450,7 @@ const parseSpacesMarkdown = (markdown) => {
       startedAt,
       source: 'spacesdashboard',
       titleHistory: [title]
+      fallbackTitle: title
     });
   }
   const map = new Map();
