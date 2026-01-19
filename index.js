@@ -409,15 +409,16 @@ const parseSpacesMarkdown = (markdown) => {
   const text = extractMarkdownSection(markdown);
   if (!text) return [];
   const items = [];
-  const matches = [...text.matchAll(/\[LIVE\]\((https:\/\/x\.com\/i\/spaces\/[^)]+)\)/g)];
-  if (!matches.length) return [];
-  for (let i = 0; i < matches.length; i += 1) {
-    const start = matches[i].index || 0;
-    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+  const detailMatches = [...text.matchAll(/\]\((https:\/\/spacesdashboard\.com\/space\/[^)\s]+)\)/g)];
+  if (!detailMatches.length) return [];
+  for (let i = 0; i < detailMatches.length; i += 1) {
+    const start = detailMatches[i].index || 0;
+    const end = i + 1 < detailMatches.length ? detailMatches[i + 1].index : text.length;
     const segment = text.slice(start, end);
-    const spaceUrl = matches[i][1];
-    const detailMatch = segment.match(/\]\((https:\/\/spacesdashboard\.com\/space\/[^)\s]+)\)/);
-    const detailUrl = detailMatch?.[1] || '';
+    const detailUrl = detailMatches[i][1];
+    const spaceUrlMatch = segment.match(/\[LIVE\]\((https:\/\/x\.com\/i\/spaces\/[^)]+)\)/);
+    const spaceUrl = spaceUrlMatch?.[1] || '';
+    if (!spaceUrl) continue;
     const titleCandidates = [...segment.matchAll(/\[([^\]]{3,})\]\(https:\/\/spacesdashboard\.com\/space\/[^)]+\)/g)]
       .map(match => String(match[1] || '').trim())
       .filter(Boolean)
