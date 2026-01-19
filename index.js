@@ -2347,6 +2347,16 @@ function buildClippingPrompt(items, maxChars) {
 }
 
 
+function trimReportText(text, maxChars) {
+  const safe = String(text || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  if (safe.length <= maxChars) return safe;
+  const tail = maxChars > 10 ? '...' : '';
+  return safe.slice(0, Math.max(0, maxChars - tail.length)) + tail;
+}
+
 function trimText(text, maxChars) {
   const cleaned = String(text || '').replace(/\\s+/g, ' ').trim();
   if (cleaned.length <= maxChars) return cleaned;
@@ -3369,10 +3379,10 @@ function resolveWatchReportRange(rangeKey) {
 }
 
 function getWatchReportRangeLabel(rangeKey) {
-  if (rangeKey === '2h') return '??ltimas 2 horas';
-  if (rangeKey === '3h') return '??ltimas 3 horas';
-  if (rangeKey === '24h') return '??ltimo dia';
-  return '??ltima hora';
+  if (rangeKey === '2h') return '\u00faltimas 2 horas';
+  if (rangeKey === '3h') return '\u00faltimas 3 horas';
+  if (rangeKey === '24h') return '\u00faltimo dia';
+  return '\u00faltima hora';
 }
 
 function getWatchReportItems(rangeKey, maxItems) {
@@ -3399,7 +3409,7 @@ function getWatchReportItems(rangeKey, maxItems) {
 
 function buildWatchReportFallback(items, rangeKey, maxChars) {
   const label = getWatchReportRangeLabel(rangeKey);
-  const header = `Relat??rio de acompanhamentos (${label})`;
+  const header = `Relat\u00f3rio de acompanhamentos (${label})`;
   const lines = items.map((item) => {
     const parts = getAutomationDateParts(item);
     const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
@@ -3410,11 +3420,18 @@ function buildWatchReportFallback(items, rangeKey, maxChars) {
     if (parts.dateText) metaParts.push(parts.dateText);
     if (parts.timeText) metaParts.push(parts.timeText);
     if (item.topicName) metaParts.push(item.topicName);
-    const meta = metaParts.length ? '(' + metaParts.join(' - ') + ')' : '';
-    const lineParts = ['-', title, summary ? '-- ' + summary : '', meta].filter(Boolean);
-    return lineParts.join('\n').replace(/\s+/g, ' ').trim();
+    const meta = metaParts.length ? metaParts.join(' - ') : '';
+    const block = [
+      `- ${title}`,
+      summary ? `  ${summary}` : '',
+      meta ? `  Fonte: ${meta}` : ''
+    ].filter(Boolean);
+    return block.join('
+');
   });
-  return trimText([header, ...lines].join('\n'), maxChars);
+  return trimReportText([header, ...lines].join('
+
+'), maxChars);
 }
 
 function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
@@ -3433,20 +3450,26 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
     return (index + 1) + '. ' + title + ' | ' + snippet + ' | ' + meta;
   });
   const limit = Math.max(400, Math.min(10000, Number(maxChars) || 4000));
-  const rewriteText = aiRewrite ? 'Reescreva o texto e organize em formato de report.' : 'Mantenha o texto fiel e objetivo.';
+  const rewriteText = aiRewrite ? 'Reescreva e organize como report editorial.' : 'Mantenha o texto fiel e objetivo.';
   return [
     'Voce e um editor de clipping.',
-    `Crie um relatorio em pt-BR para acompanhamentos (${label}).`,
+    `Crie um relatório em pt-BR para acompanhamentos (${label}).`,
+    'Evite erros ortograficos e use acentos corretamente.',
     rewriteText,
-    'Cada item deve conter: manchete, um resumo curto (1 frase), e Fonte + data + hora + tema.',
-    'Nao inclua links. Use bullets. Tom informativo e profissional.',
+    'Formato:',
+    '- Manchete',
+    '  Resumo curto (1 frase)',
+    '  Fonte: veiculo - data - hora - tema',
+    'Separe os itens com uma linha em branco.',
+    'Nao inclua links. Tom informativo e profissional.',
     'Limite maximo: ' + limit + ' caracteres.',
     '',
     ...lines
-  ].join('\n');
+  ].join('
+');
 }
 
-async function generateWatchReport(options) {
+function generateWatchReport(options) {
   const settings = options || {};
   const rangeKey = settings.range || '1h';
   const maxItems = settings.maxItems || 5;
@@ -3468,7 +3491,7 @@ async function generateWatchReport(options) {
       aiText = await runPromptWithCopilot(prompt, aiConfig.copilot);
     }
     if (aiText) {
-      report = trimText(aiText, maxChars);
+      report = trimReportText(aiText, maxChars);
     }
   }
 
