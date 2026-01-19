@@ -3426,12 +3426,9 @@ function buildWatchReportFallback(items, rangeKey, maxChars) {
       summary ? `  ${summary}` : '',
       meta ? `  Fonte: ${meta}` : ''
     ].filter(Boolean);
-    return block.join('
-');
+    return block.join('\n');
   });
-  return trimReportText([header, ...lines].join('
-
-'), maxChars);
+  return trimReportText([header, ...lines].join('\n'), maxChars);
 }
 
 function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
@@ -3465,8 +3462,7 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
     'Limite maximo: ' + limit + ' caracteres.',
     '',
     ...lines
-  ].join('
-');
+  ].join('\n');
 }
 
 function generateWatchReport(options) {
