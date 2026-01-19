@@ -245,7 +245,6 @@ const isPublicRoute = (req) => {
     if (req.path.startsWith('/live/rooms/')) return true;
   }
   if (req.path === '/live/ws') return true;
-  if (req.path === '/spaces/ws') return true;
   return false;
 };
 
@@ -356,7 +355,6 @@ app.get('/system/status', (req, res) => {
 });
 
 const liveRooms = new Map();
-const spacesChatRooms = new Map();
 
 const SPACES_DASHBOARD_URL = 'https://spacesdashboard.com/?lang=pt&mode=top';
 const SPACES_DASHBOARD_JINA = 'https://r.jina.ai/http://spacesdashboard.com/?lang=pt&mode=top';
@@ -639,17 +637,6 @@ const getLiveRoom = (code) => {
   return room;
 };
 
-const getSpacesRoom = (spaceId) => {
-  if (!spaceId) return null;
-  if (!spacesChatRooms.has(spaceId)) {
-    spacesChatRooms.set(spaceId, {
-      spaceId,
-      clients: new Set(),
-      messages: []
-    });
-  }
-  return spacesChatRooms.get(spaceId);
-};
 
 app.post('/live/rooms', (req, res) => {
   if (!req.user?.email) {
@@ -7594,104 +7581,10 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-const spacesWss = new WebSocketServer({ server, path: '/spaces/ws' });
-
-const sanitizeChatText = (value, max = 400) => {
-  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
-};
-
-spacesWss.on('connection', (ws) => {
-  ws.isAlive = true;
-  ws.roomId = '';
-  ws.displayName = '';
-  ws.lastMessageAt = 0;
-
-  ws.on('pong', () => {
-    ws.isAlive = true;
-  });
-
-  ws.on('message', (message) => {
-    let payload = null;
-    try {
-      payload = JSON.parse(message.toString());
-    } catch (err) {
-      return;
-    }
-    if (!payload?.type) return;
-    if (payload.type === 'join') {
-      const roomId = sanitizeChatText(payload.spaceId, 160);
-      const name = sanitizeChatText(payload.name, 40) || 'Participante';
-      if (!roomId) return;
-      const room = getSpacesRoom(roomId);
-      ws.roomId = roomId;
-      ws.displayName = name;
-      room.clients.add(ws);
-      ws.send(JSON.stringify({
-        type: 'history',
-        roomId,
-        items: room.messages.slice(-50)
-      }));
-      return;
-    }
-    if (payload.type === 'message') {
-      if (!ws.roomId) return;
-      const room = getSpacesRoom(ws.roomId);
-      const now = Date.now();
-      if (now - ws.lastMessageAt < 800) return;
-      ws.lastMessageAt = now;
-      const text = sanitizeChatText(payload.text);
-      if (!text) return;
-      const item = {
-        id: `${now}-${Math.floor(Math.random() * 9999)}`,
-        name: ws.displayName || 'Participante',
-        text,
-        timestamp: new Date(now).toISOString()
-      };
-      room.messages.push(item);
-      if (room.messages.length > 200) {
-        room.messages = room.messages.slice(-200);
-      }
-      room.clients.forEach((client) => {
-        if (client.readyState === 1) {
-          client.send(JSON.stringify({ type: 'message', item }));
-        }
-      });
-    }
-  });
-
-  ws.on('close', () => {
-    if (!ws.roomId) return;
-    const room = getSpacesRoom(ws.roomId);
-    if (!room) return;
-    room.clients.delete(ws);
-    if (!room.clients.size && room.messages.length > 200) {
-      room.messages = room.messages.slice(-50);
-    }
-  });
-});
-
 server.listen(port, () => {
   console.log(`Servidor RSS backend rodando em http://localhost:${port}`);
 });
 
-setInterval(() => {
-  spacesWss.clients.forEach((client) => {
-    if (!client.isAlive) {
-      try {
-        client.terminate();
-      } catch (err) {
-        // ignore
-      }
-      return;
-    }
-    client.isAlive = false;
-    try {
-      client.ping();
-    } catch (err) {
-      // ignore
-    }
-  });
-}, 30000);
 
 setInterval(() => {
   const now = Date.now();
