@@ -1670,8 +1670,8 @@ function buildRssItemsXml(items, fallbackDate) {
       authorTag,
       imageTag,
       '</item>'
-    ].join('');
-  }).join('');
+    ].join('\n');
+  }).join('\n');
 }
 
 async function generateSmartRss(targetUrl, options = {}) {
@@ -1764,7 +1764,7 @@ async function generateSmartRss(targetUrl, options = {}) {
       itemXml,
       '</channel>',
       '</rss>'
-    ].join(''),
+    ].join('\n'),
     itemsCount: items.length,
     title: siteTitle
   };
@@ -2316,7 +2316,7 @@ function buildClippingFallback(items, maxChars) {
     if (parts.timeText) metaParts.push(parts.timeText);
     const meta = metaParts.length ? '(' + metaParts.join(' - ') + ')' : '';
     const lineParts = ['-', title, summary ? '-- ' + summary : '', meta].filter(Boolean);
-    lines.push(lineParts.join(' ').replace(/\s+/g, ' ').trim());
+    lines.push(lineParts.join('\n').replace(/\s+/g, ' ').trim());
   });
   return trimText(lines.join('\n'), maxChars);
 }
@@ -3412,10 +3412,9 @@ function buildWatchReportFallback(items, rangeKey, maxChars) {
     if (item.topicName) metaParts.push(item.topicName);
     const meta = metaParts.length ? '(' + metaParts.join(' - ') + ')' : '';
     const lineParts = ['-', title, summary ? '-- ' + summary : '', meta].filter(Boolean);
-    return lineParts.join(' ').replace(/\s+/g, ' ').trim();
+    return lineParts.join('\n').replace(/\s+/g, ' ').trim();
   });
-  return trimText([header, ...lines].join('
-'), maxChars);
+  return trimText([header, ...lines].join('\n'), maxChars);
 }
 
 function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
@@ -3444,8 +3443,7 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
     'Limite maximo: ' + limit + ' caracteres.',
     '',
     ...lines
-  ].join('
-');
+  ].join('\n');
 }
 
 async function generateWatchReport(options) {
@@ -3915,7 +3913,7 @@ function normalizePolymarketItem(item) {
   });
   const yesRaw = yesIndex >= 0 ? prices[yesIndex] : item.yesPrice || item.probability || item.probabilityYes;
   const probability = parsePolymarketProbability(yesRaw);
-  const textForCategory = normalizePolymarketText(`${title} ${item.category || ''} ${(item.tags || []).join(' ')}`);
+  const textForCategory = normalizePolymarketText(`${title} ${item.category || ''} ${(item.tags || []).join('\n')}`);
   const category = detectPolymarketCategory(textForCategory);
   return {
     id: String(item.id || item.marketId || item.conditionId || slug || title),
@@ -3941,7 +3939,7 @@ function buildPolymarketSearchText(item) {
     item.originalTitle,
     item.seriesTitle,
     item.eventTitle
-  ].filter(Boolean).join(' '));
+  ].filter(Boolean).join('\n'));
 }
 
 function normalizeKalshiItem(item) {
@@ -3983,7 +3981,7 @@ function buildKalshiSearchText(item) {
     item.title,
     item.seriesTitle,
     item.eventTitle
-  ].filter(Boolean).join(' '));
+  ].filter(Boolean).join('\n'));
 }
 
 async function fetchKalshiEvents(limit, category) {
@@ -4302,12 +4300,12 @@ function buildAiPrompts(item, maxChars, mode) {
     'Use apenas as informacoes fornecidas pela manchete e trecho.',
     'Nao invente fatos, numeros ou nomes.',
     'Se nao houver dados suficientes, responda exatamente com SEM_DADOS.'
-  ].join(' ');
+  ].join('\n');
   let style = [
     `Escreva um texto jornalistico curto (2 a 4 frases), em pt-BR,`,
     `com no maximo ${limit} caracteres.`,
     'Sem listas, sem markdown, sem titulo extra.'
-  ].join(' ');
+  ].join('\n');
   if (mode === 'twitter') {
     style = [
       `Escreva um texto curto para X/Twitter (2 a 3 frases), em pt-BR,`,
@@ -4315,14 +4313,14 @@ function buildAiPrompts(item, maxChars, mode) {
       `Use no maximo ${twitterLimit} caracteres.`,
       'Sem listas, sem markdown, sem emojis excessivos.',
       'Se fizer sentido, inclua o link ao final.'
-    ].join(' ');
+    ].join('\n');
   } else if (mode === 'twitter_short') {
     style = [
       `Escreva um texto curto para X/Twitter (1 a 2 frases), em pt-BR,`,
       'com tom direto.',
       `Use no maximo ${Math.min(200, twitterLimit)} caracteres.`,
       'Sem listas, sem markdown, sem emojis.'
-    ].join(' ');
+    ].join('\n');
   } else if (mode === 'twitter_cta') {
     style = [
       `Escreva um texto curto para X/Twitter (2 a 3 frases), em pt-BR,`,
@@ -4331,7 +4329,7 @@ function buildAiPrompts(item, maxChars, mode) {
       'Sem listas, sem markdown, sem emojis excessivos.',
       'Inclua uma chamada final do tipo "Leia mais" ou "Saiba mais".',
       'Inclua o link ao final, se possivel.'
-    ].join(' ');
+    ].join('\n');
   } else if (mode === 'twitter_nolink') {
     style = [
       `Escreva um texto curto para X/Twitter (2 a 3 frases), em pt-BR,`,
@@ -4339,7 +4337,7 @@ function buildAiPrompts(item, maxChars, mode) {
       `Use no maximo ${twitterLimit} caracteres.`,
       'Sem listas, sem markdown, sem emojis.',
       'Nao inclua o link no texto.'
-    ].join(' ');
+    ].join('\n');
   }
   const userPrompt = [
     `Manchete: ${title || 'N/A'}`,
@@ -4877,9 +4875,9 @@ async function generateRssFromSite(targetUrl) {
         `<pubDate>${now}</pubDate>`,
         `<description>${cdata(item.title)}</description>`,
         '</item>'
-      ].join('');
+      ].join('\n');
     })
-    .join('');
+    .join('\n');
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -4891,7 +4889,7 @@ async function generateRssFromSite(targetUrl) {
     itemXml,
     '</channel>',
     '</rss>'
-  ].join('');
+  ].join('\n');
 }
 
 const normalizeXHandle = (input) => {
