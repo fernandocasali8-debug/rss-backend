@@ -420,13 +420,24 @@ const parseSpacesMarkdown = (markdown) => {
     const detailUrl = detailMatch?.[1] || '';
     const titleCandidates = [...segment.matchAll(/\[([^\]]{3,})\]\(https:\/\/spacesdashboard\.com\/space\/[^)]+\)/g)]
       .map(match => String(match[1] || '').trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter((label) => {
+        const lowered = label.toLowerCase();
+        if (lowered.includes('image ')) return false;
+        if (lowered === 'live') return false;
+        if (lowered.startsWith('@')) return false;
+        if (label.includes('http')) return false;
+        return true;
+      });
     const sortedCandidates = titleCandidates.sort((a, b) => b.length - a.length);
     const title = sortedCandidates[0] || 'Space ao vivo';
     const hostHandleMatch = segment.match(/\[@([^\]]+)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)/);
     const hostHandle = hostHandleMatch?.[1] || '';
     const hostNameMatch = segment.match(/\n\[(.*?)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)\s*\n\s*\[@/);
-    const hostName = hostNameMatch?.[1]?.trim() || '';
+    const rawHostName = hostNameMatch?.[1]?.trim() || '';
+    const hostName = /image\s+\d+:/i.test(rawHostName) || rawHostName.includes('http')
+      ? ''
+      : rawHostName;
     const avatarMatch = segment.match(/\[!\[Image \d+: [^\]]+\]\((https:\/\/pbs\.twimg\.com\/profile_images\/[^)]+)\)\]/);
     const hostAvatar = avatarMatch?.[1] || '';
     const startedMatch = segment.match(/\[Started: ([^\]]+)\]/);
