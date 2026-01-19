@@ -1,4 +1,4 @@
-﻿// Backend bÃ¡sico Node.js/Express para gerenciar feeds RSS
+// Backend básico Node.js/Express para gerenciar feeds RSS
 
 require('dotenv').config();
 
@@ -1322,7 +1322,7 @@ app.post('/google/drive/backup', async (req, res) => {
 
 
 
-// PersistÃªncia em arquivo
+// Persistência em arquivo
 const { loadFeeds, saveFeeds } = require('./feedsStorage');
 const normalizeFeedLanguage = (value) => (value === 'auto' ? 'auto' : 'pt');
 const normalizeFeed = (feed) => ({
@@ -1375,6 +1375,8 @@ const DEFAULT_AUTOMATION_CONFIG = {
     useWatchTopics: false,
     useAiSummary: false,
     aiMode: 'twitter_cta',
+    maxChars: 4000,
+    maxItemsPerPost: 5,
     requireWords: [],
     blockWords: [],
     onlyWithLink: true,
@@ -2275,6 +2277,12 @@ function getAutomationDateParts(item) {
   return { dateText, timeText };
 }
 
+function getAutomationMaxChars() {
+  const maxChars = Number(automationConfig?.rules?.maxChars);
+  if (!Number.isFinite(maxChars)) return 4000;
+  return Math.max(280, Math.min(10000, Math.round(maxChars)));
+}
+
 function buildAutomationSuffix(item) {
   const { dateText, timeText } = getAutomationDateParts(item);
   const source = (item.feedName || item.sourceName || '').replace(/\\s+/g, ' ').trim();
@@ -2285,20 +2293,73 @@ function buildAutomationSuffix(item) {
   return parts.length ? `Fonte: ${parts.join(' - ')}` : '';
 }
 
-function trimTweet(text) {
-  const cleaned = String(text || '').replace(/\\s+/g, ' ').trim();
-  if (cleaned.length <= 280) return cleaned;
-  return cleaned.slice(0, 277) + '...';
+function getClippingSummary(item) {
+  const snippet = stripHtml(item.contentSnippet || item.snippet || '');
+  if (!snippet) return '';
+  const sentence = snippet.split('.').find(Boolean) || snippet;
+  const cleaned = sentence.replace(/\s+/g, ' ').trim();
+  return cleaned.length > 160 ? cleaned.slice(0, 157) + '...' : cleaned;
 }
 
-function appendSuffix(baseText, suffix) {
-  if (!suffix) return trimTweet(baseText);
+function buildClippingFallback(items, maxChars) {
+  const lines = [];
+  items.forEach((item) => {
+    const parts = getAutomationDateParts(item);
+    const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
+    const title = (item.title || '').replace(/\s+/g, ' ').trim();
+    const summary = getClippingSummary(item);
+    const metaParts = [];
+    if (source) metaParts.push(source);
+    if (parts.dateText) metaParts.push(parts.dateText);
+    if (parts.timeText) metaParts.push(parts.timeText);
+    const meta = metaParts.length ? '(' + metaParts.join(' - ') + ')' : '';
+    const lineParts = ['-', title, summary ? '-- ' + summary : '', meta].filter(Boolean);
+    lines.push(lineParts.join(' ').replace(/\s+/g, ' ').trim());
+  });
+  return trimText(lines.join('\n'), maxChars);
+}
+
+function buildClippingPrompt(items, maxChars) {
+  const lines = items.map((item, index) => {
+    const parts = getAutomationDateParts(item);
+    const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
+    const title = normalizeAiInput(item.title);
+    const snippet = normalizeAiInput(item.contentSnippet || item.snippet || '');
+    const metaParts = [];
+    if (source) metaParts.push(source);
+    if (parts.dateText) metaParts.push(parts.dateText);
+    if (parts.timeText) metaParts.push(parts.timeText);
+    const meta = metaParts.length ? metaParts.join(' - ') : '';
+    return (index + 1) + '. ' + title + ' | ' + snippet + ' | ' + meta;
+  });
+  const limit = Math.max(400, Math.min(10000, Number(maxChars) || 4000));
+  return [
+    'Voce e um editor de clipping.',
+    'Crie um post unico em pt-BR com ate 5 itens.',
+    'Cada item deve conter: manchete, um resumo curto (1 frase), e Fonte + data + hora.',
+    'Nao inclua links. Use bullets. Tom informativo e profissional.',
+    'Limite maximo: ' + limit + ' caracteres.',
+    '',
+    ...lines
+  ].join('\n');
+}
+
+
+function trimText(text, maxChars) {
+  const cleaned = String(text || '').replace(/\\s+/g, ' ').trim();
+  if (cleaned.length <= maxChars) return cleaned;
+  const tail = maxChars > 10 ? '...' : '';
+  return cleaned.slice(0, Math.max(0, maxChars - tail.length)) + tail;
+}
+
+function appendSuffix(baseText, suffix, maxChars) {
+  if (!suffix) return trimText(baseText, maxChars);
   const glue = baseText.includes('\\n') ? '\\n' : ' ';
   const combined = `${baseText}${glue}${suffix}`.trim();
-  if (combined.length <= 280) return combined;
-  const available = 280 - (suffix.length + glue.length);
-  if (available <= 0) return trimTweet(suffix);
-  const trimmedBase = trimTweet(baseText).slice(0, available).trim();
+  if (combined.length <= maxChars) return combined;
+  const available = maxChars - (suffix.length + glue.length);
+  if (available <= 0) return trimText(suffix, maxChars);
+  const trimmedBase = trimText(baseText, Math.max(0, available)).trim();
   return `${trimmedBase}${glue}${suffix}`.trim();
 }
 
@@ -2316,10 +2377,11 @@ function renderTemplate(template, item) {
     .replace('{time}', timeText)
     .replace('{topic}', safeTopic)
     .trim();
-  if (text.length <= 280) return text;
+  const maxChars = getAutomationMaxChars();
+  if (text.length <= maxChars) return text;
   const reserved = safeLink ? (safeLink.length + 1) : 0;
-  const maxTitle = Math.max(0, 280 - reserved - 1);
-  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}â€¦` : safeTitle;
+  const maxTitle = Math.max(0, maxChars - reserved - 1);
+  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}…` : safeTitle;
   text = template
     .replace('{title}', trimmedTitle)
     .replace('{link}', safeLink)
@@ -2328,7 +2390,7 @@ function renderTemplate(template, item) {
     .replace('{time}', timeText)
     .replace('{topic}', safeTopic)
     .trim();
-  return text.length > 280 ? text.slice(0, 277) + 'â€¦' : text;
+  return text.length > maxChars ? trimText(text, maxChars) : text;
 }
 
 function getDailyKey(date) {
@@ -2684,7 +2746,7 @@ async function runDailySummary() {
   logEvent({
     level: 'info',
     source: 'summary',
-    message: 'Resumo diÃ¡rio gerado.',
+    message: 'Resumo diário gerado.',
     detail: `Itens: ${items.length}`
   });
 }
@@ -2761,14 +2823,14 @@ async function runAlerts() {
 
 function getAutomationEligibility() {
   if (!automationConfig.rules.enabled) {
-    return { ok: false, reason: 'AutomaÃ§Ã£o desativada.' };
+    return { ok: false, reason: 'Automação desativada.' };
   }
   if (!hasTwitterCredentials(automationConfig)) {
     return { ok: false, reason: 'Credenciais incompletas.' };
   }
   const now = new Date();
   if (withinQuietHours(automationConfig.rules.quietHours, now)) {
-    return { ok: false, reason: 'Dentro do horÃ¡rio silencioso.' };
+    return { ok: false, reason: 'Dentro do horário silencioso.' };
   }
 
   if (!automationState.dailyDate || automationState.dailyDate !== getDailyKey(now)) {
@@ -2777,7 +2839,7 @@ function getAutomationEligibility() {
   }
 
   if (automationState.dailyCount >= automationConfig.rules.maxPerDay) {
-    return { ok: false, reason: 'Limite diÃ¡rio atingido.' };
+    return { ok: false, reason: 'Limite diário atingido.' };
   }
 
   if (automationState.lastPostedAt) {
@@ -2786,27 +2848,28 @@ function getAutomationEligibility() {
       ? Math.max(automationConfig.rules.minIntervalMinutes, 180)
       : automationConfig.rules.minIntervalMinutes;
     if (elapsed < minInterval) {
-      return { ok: false, reason: 'Aguardando intervalo mÃ­nimo.' };
+      return { ok: false, reason: 'Aguardando intervalo mínimo.' };
     }
   }
 
   return { ok: true, reason: '' };
 }
 
-async function getAutomationCandidate() {
+async function getAutomationCandidates(limit = 1) {
   const eligibility = getAutomationEligibility();
-  if (!eligibility.ok) return { candidate: null, reason: eligibility.reason };
+  if (!eligibility.ok) return { candidates: [], reason: eligibility.reason };
 
   const aggregated = await buildAggregatedItems();
 
   if (automationConfig.rules.useWatchTopics) {
     updateWatchAlerts(aggregated);
     if (!watchTopics.length) {
-      return { candidate: null, reason: 'Nenhum acompanhamento configurado.' };
+      return { candidates: [], reason: 'Nenhum acompanhamento configurado.' };
     }
     const postedSet = new Set(automationState.postedIds || []);
-    const candidateAlert = (watchAlerts || []).find(alert => {
-      if (!alert || !alert.item) return false;
+    const candidates = [];
+    for (const alert of watchAlerts || []) {
+      if (!alert || !alert.item) continue;
       const enriched = {
         ...alert.item,
         topicId: alert.topicId,
@@ -2815,22 +2878,15 @@ async function getAutomationCandidate() {
         key: alert.key
       };
       const id = getAutomationItemId(enriched);
-      if (!id || postedSet.has(id)) return false;
-      return matchRules(enriched, automationConfig.rules);
-    });
-    if (!candidateAlert) {
-      return { candidate: null, reason: 'Nenhum item novo elegivel.' };
+      if (!id || postedSet.has(id)) continue;
+      if (!matchRules(enriched, automationConfig.rules)) continue;
+      candidates.push(enriched);
+      if (candidates.length >= limit) break;
     }
-    return {
-      candidate: {
-        ...candidateAlert.item,
-        topicId: candidateAlert.topicId,
-        topicName: candidateAlert.topicName,
-        matchedAt: candidateAlert.matchedAt,
-        key: candidateAlert.key
-      },
-      reason: ''
-    };
+    if (!candidates.length) {
+      return { candidates: [], reason: 'Nenhum item novo elegivel.' };
+    }
+    return { candidates, reason: '' };
   }
 
   let items = aggregated;
@@ -2843,16 +2899,22 @@ async function getAutomationCandidate() {
 
   items = items.filter(item => matchRules(item, automationConfig.rules));
   const postedSet = new Set(automationState.postedIds || []);
-  const candidate = items.find(item => {
+  const candidates = items.filter(item => {
     const id = getAutomationItemId(item);
     return id && !postedSet.has(id);
-  });
+  }).slice(0, limit);
 
-  if (!candidate) {
-    return { candidate: null, reason: 'Nenhum item novo elegivel.' };
+  if (!candidates.length) {
+    return { candidates: [], reason: 'Nenhum item novo elegivel.' };
   }
 
-  return { candidate, reason: '' };
+  return { candidates, reason: '' };
+}
+
+async function getAutomationCandidate() {
+  const { candidates, reason } = await getAutomationCandidates(1);
+  if (!candidates.length) return { candidate: null, reason };
+  return { candidate: candidates[0], reason: '' };
 }
 
 async function tryPostAutomation() {
@@ -2906,7 +2968,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL invÃ¡lida.'));
+      return reject(new Error('URL inválida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -2928,7 +2990,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
           res.resume();
-          return reject(new Error('Falha ao carregar pÃ¡gina.'));
+          return reject(new Error('Falha ao carregar página.'));
         }
         let data = '';
         res.setEncoding('utf8');
@@ -2940,7 +3002,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     );
     req.on('error', reject);
     req.on('timeout', () => {
-      req.destroy(new Error('Timeout ao carregar pÃ¡gina.'));
+      req.destroy(new Error('Timeout ao carregar página.'));
     });
   });
 }
@@ -2954,7 +3016,7 @@ function fetchBuffer(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL invÃ¡lida.'));
+      return reject(new Error('URL inválida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -3090,8 +3152,8 @@ function fetchJson(targetUrl) {
 
 function weatherCodeToText(code) {
   const map = {
-    0: 'CÃ©u limpo',
-    1: 'PredomÃ­nio de sol',
+    0: 'Céu limpo',
+    1: 'Predomínio de sol',
     2: 'Parcialmente nublado',
     3: 'Nublado',
     45: 'Neblina',
@@ -3112,14 +3174,14 @@ function weatherCodeToText(code) {
     96: 'Tempestade com granizo',
     99: 'Tempestade intensa'
   };
-  return map[code] || 'Tempo instÃ¡vel';
+  return map[code] || 'Tempo instável';
 }
 
 async function getWeatherForCity(city) {
   const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`;
   const geo = await fetchJson(geoUrl);
   if (!geo || !geo.results || !geo.results.length) {
-    throw new Error('Cidade nÃ£o encontrada.');
+    throw new Error('Cidade não encontrada.');
   }
   const location = geo.results[0];
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo`;
@@ -4299,7 +4361,7 @@ function buildHashtagPrompt(text, maxTags) {
   const limit = Math.min(5, Math.max(1, Number(maxTags) || 3));
   return [
     `Gere ${limit} hashtags em portugues do Brasil, curtas e relevantes.`,
-    'Evite hashtags genÃ©ricas. Use termos especificos do tema.',
+    'Evite hashtags genéricas. Use termos especificos do tema.',
     'Responda apenas com um JSON array de strings.',
     `Texto: """${text}"""`
   ].join('\n');
@@ -4626,7 +4688,7 @@ async function generateRssFromSite(targetUrl) {
     urlObj.hostname;
   const description =
     $('meta[name="description"]').attr('content') ||
-    `NotÃ­cias recentes de ${urlObj.hostname}`;
+    `Notícias recentes de ${urlObj.hostname}`;
 
   const items = extractCandidates($, urlObj.toString())
     .slice(0, 20)
@@ -4723,7 +4785,7 @@ const bodyIndicatesNotFound = (body) => {
     || needle.includes('user not found')
     || needle.includes('does not exist')
     || needle.includes('non e stato trovato nulla')
-    || needle.includes('non è stato trovato nulla')
+    || needle.includes('non � stato trovato nulla')
   );
 };
 
@@ -4827,7 +4889,7 @@ app.post('/feeds/status', async (req, res) => {
 app.post('/feeds', (req, res) => {
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   if (!name || !url) {
-    return res.status(400).json({ error: 'Nome e URL sÃ£o obrigatÃ³rios.' });
+    return res.status(400).json({ error: 'Nome e URL são obrigatórios.' });
   }
   const newFeed = { id: uuidv4(), name, url, showOnTimeline: !!showOnTimeline, sourceUrl: sourceUrl || '', language: normalizeFeedLanguage(language) };
   feeds.push(newFeed);
@@ -4848,7 +4910,7 @@ app.put('/feeds/:id', (req, res) => {
   const { id } = req.params;
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   const feed = feeds.find(f => f.id === id);
-  if (!feed) return res.status(404).json({ error: 'Feed nÃ£o encontrado.' });
+  if (!feed) return res.status(404).json({ error: 'Feed não encontrado.' });
   if (name !== undefined) feed.name = name;
   if (url !== undefined) feed.url = url;
   if (showOnTimeline !== undefined) feed.showOnTimeline = !!showOnTimeline;
@@ -5625,6 +5687,8 @@ app.put('/automation', (req, res) => {
       blockWords: Array.isArray(next.rules?.blockWords) ? next.rules.blockWords : [],
       onlyWithLink: next.rules?.onlyWithLink !== undefined ? !!next.rules.onlyWithLink : true,
       maxPerDay: Number.isFinite(next.rules?.maxPerDay) ? next.rules.maxPerDay : 5,
+      maxChars: Number.isFinite(next.rules?.maxChars) ? next.rules.maxChars : 4000,
+      maxItemsPerPost: Number.isFinite(next.rules?.maxItemsPerPost) ? next.rules.maxItemsPerPost : 5,
       minIntervalMinutes: Number.isFinite(next.rules?.minIntervalMinutes) ? next.rules.minIntervalMinutes : 30,
       quietHours: {
         enabled: !!next.rules?.quietHours?.enabled,
@@ -5940,8 +6004,8 @@ app.post('/automation/test', async (req, res) => {
   try {
     const client = createTwitterClient(automationConfig);
     const stamp = new Date().toISOString();
-    const text = `Teste de automaÃ§Ã£o RSS (${stamp})`;
-    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + 'â€¦' : text);
+    const text = `Teste de automação RSS (${stamp})`;
+    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + '…' : text);
     logEvent({
       level: 'info',
       source: 'automation',
@@ -5974,7 +6038,7 @@ app.post('/automation/post', async (req, res) => {
   }
   try {
     const client = createTwitterClient(automationConfig);
-    const trimmed = text.length > 280 ? text.slice(0, 277) + 'â€¦' : text;
+    const trimmed = text.length > 280 ? text.slice(0, 277) + '…' : text;
     await client.v2.tweet(trimmed);
     const now = new Date();
     const postedId = payload.id || payload.link || payload.guid || payload.title;
@@ -6004,11 +6068,11 @@ app.post('/automation/post', async (req, res) => {
 
 app.get('/automation/preview', async (req, res) => {
   try {
-    const { candidate, reason } = await getAutomationCandidate();
-    if (!candidate) {
+    const { candidates, reason } = await getAutomationCandidates(5);
+    if (!candidates.length) {
       return res.json({ ok: false, reason });
     }
-    res.json({ ok: true, candidate });
+    res.json({ ok: true, candidates });
   } catch (err) {
     res.status(500).json({ ok: false, reason: 'Falha ao gerar preview.' });
   }
@@ -6401,7 +6465,7 @@ app.get('/site/:slug', (req, res) => {
   const slug = normalizeSlug(req.params.slug);
   const site = (siteStore.sites || []).find(entry => entry.slug === slug);
   if (!site) {
-    res.status(404).json({ ok: false, message: 'Site nÃ†o encontrado.' });
+    res.status(404).json({ ok: false, message: 'Site nÆo encontrado.' });
     return;
   }
   res.json(site);
@@ -6769,7 +6833,7 @@ app.put('/tags', (req, res) => {
   res.json({ ok: true });
 });
 
-// PrevisÃ£o do tempo
+// Previsão do tempo
 app.get('/weather', async (req, res) => {
   const citiesParam = req.query.cities || '';
   const cities = String(citiesParam)
@@ -6794,7 +6858,7 @@ app.get('/weather', async (req, res) => {
       logEvent({
         level: 'warning',
         source: 'weather',
-        message: 'Falha ao buscar previsÃ£o do tempo.',
+        message: 'Falha ao buscar previsão do tempo.',
         detail: `${city} | ${err.message || err}`
       });
     }
@@ -6857,7 +6921,7 @@ app.get('/public/watch', async (req, res) => {
   }
 });
 
-// Gerar RSS a partir de uma pÃ¡gina
+// Gerar RSS a partir de uma página
 const BILLING_PLANS = [
   {
     id: 'starter',
@@ -7066,7 +7130,7 @@ app.post('/billing/modal/seen', (req, res) => {
 app.get('/rss', async (req, res) => {
   const { url } = req.query;
   if (!url) {
-    return res.status(400).json({ error: 'URL Ã© obrigatÃ³ria.' });
+    return res.status(400).json({ error: 'URL é obrigatória.' });
   }
   try {
     const rss = await generateRssFromSite(url);
@@ -7094,14 +7158,14 @@ app.get('/rss', async (req, res) => {
       message: 'Falha ao gerar RSS a partir do site.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'NÃ£o foi possÃ­vel gerar RSS.' });
+    res.status(500).json({ error: 'Não foi possível gerar RSS.' });
   }
   });
 
 app.post('/rss/generate', async (req, res) => {
   const { url, maxItems, useAi, title, language } = req.body || {};
   if (!url) {
-    return res.status(400).json({ error: 'URL Ã© obrigatÃ³ria.' });
+    return res.status(400).json({ error: 'URL é obrigatória.' });
   }
   try {
     const robots = await fetchRobotsTxt(url);
@@ -7138,7 +7202,7 @@ app.post('/rss/generate', async (req, res) => {
       message: 'Falha ao gerar RSS inteligente.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'NÃ£o foi possÃ­vel gerar RSS.' });
+    res.status(500).json({ error: 'Não foi possível gerar RSS.' });
   }
 });
 
@@ -7154,11 +7218,11 @@ app.get('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS nÃ£o encontrado.' });
+    return res.status(404).json({ error: 'RSS não encontrado.' });
   }
   const filePath = path.join(GENERATED_RSS_DIR, entry.fileName);
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'Arquivo RSS nÃ£o encontrado.' });
+    return res.status(404).json({ error: 'Arquivo RSS não encontrado.' });
   }
   const xml = fs.readFileSync(filePath, 'utf-8');
   res.set('Content-Type', 'application/rss+xml; charset=utf-8');
@@ -7169,7 +7233,7 @@ app.delete('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS nÃ£o encontrado.' });
+    return res.status(404).json({ error: 'RSS não encontrado.' });
   }
   removeGeneratedFile(entry);
   generatedRssIndex = generatedRssIndex.filter(item => item.id !== id);
@@ -7187,7 +7251,7 @@ app.post('/saved', (req, res) => {
   const item = req.body || {};
   const id = item.id || item.link || item.guid || item.title;
   if (!id) {
-    return res.status(400).json({ error: 'Item invÃ¡lido.' });
+    return res.status(400).json({ error: 'Item inválido.' });
   }
   const existing = savedItems.find(saved => saved.id === id);
   if (existing) return res.status(200).json(existing);
@@ -7604,17 +7668,17 @@ app.get('/aggregate', async (req, res) => {
         message: 'Falha ao ler feed.',
         detail: `${feed.name} | ${feed.url} | ${e.message || e}`
       });
-      // Ignora feeds que nÃ£o puderam ser lidos
+      // Ignora feeds que não puderam ser lidos
     }
   }
-  // Ordena por data, se disponÃ­vel
+  // Ordena por data, se disponível
   aggregated.sort((a, b) => {
     const dateA = new Date(a.pubDate || a.isoDate || 0);
     const dateB = new Date(b.pubDate || b.isoDate || 0);
     return dateB - dateA;
   });
 
-  // DeduplicaÃ§Ã£o por tÃ­tulo normalizado
+  // Deduplicação por título normalizado
   const grouped = [];
   const seen = new Map();
   for (const item of aggregated) {
@@ -7806,7 +7870,7 @@ setInterval(() => {
     logEvent({
       level: 'error',
       source: 'summary',
-      message: 'Falha ao gerar resumo diÃ¡rio.',
+      message: 'Falha ao gerar resumo diário.',
       detail: err.message || String(err)
     });
   });

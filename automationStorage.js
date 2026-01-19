@@ -21,6 +21,8 @@ function loadAutomation() {
         useWatchTopics: false,
         useAiSummary: false,
         aiMode: 'twitter_cta',
+        maxChars: 4000,
+        maxItemsPerPost: 5,
         requireWords: [],
         blockWords: [],
         onlyWithLink: true,
