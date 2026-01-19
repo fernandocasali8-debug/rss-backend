@@ -355,6 +355,205 @@ app.get('/system/status', (req, res) => {
 
 const liveRooms = new Map();
 
+const SPACES_DASHBOARD_URL = 'https://spacesdashboard.com/?lang=pt&mode=top';
+const SPACES_DASHBOARD_JINA = 'https://r.jina.ai/http://spacesdashboard.com/?lang=pt&mode=top';
+const SPACES_CACHE_MS = Math.max(60000, (Number(process.env.SPACES_CACHE_MINUTES) || 10) * 60 * 1000);
+const SPACES_USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0'
+];
+const spacesCache = {
+  items: [],
+  updatedAt: 0,
+  source: 'none'
+};
+
+const buildSpacesHeaders = () => {
+  const agent = SPACES_USER_AGENTS[Math.floor(Math.random() * SPACES_USER_AGENTS.length)];
+  return {
+    'User-Agent': agent,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Referer': 'https://spacesdashboard.com/'
+  };
+};
+
+const parseSpaceCount = (value) => {
+  if (!value) return 0;
+  const cleaned = String(value).replace(/[^\d,\.]/g, '');
+  if (!cleaned) return 0;
+  if (cleaned.includes(',')) {
+    return Number(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+  }
+  return Number(cleaned) || 0;
+};
+
+const extractMarkdownSection = (raw) => {
+  if (!raw) return '';
+  const marker = 'Markdown Content:';
+  const index = raw.indexOf(marker);
+  if (index === -1) return raw.trim();
+  return raw.slice(index + marker.length).trim();
+};
+
+const escapeRegex = (value) => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const parseSpacesMarkdown = (markdown) => {
+  const text = extractMarkdownSection(markdown);
+  if (!text) return [];
+  const items = [];
+  const matches = [...text.matchAll(/\[LIVE\]\((https:\/\/x\.com\/i\/spaces\/[^)]+)\)/g)];
+  if (!matches.length) return [];
+  for (let i = 0; i < matches.length; i += 1) {
+    const start = matches[i].index || 0;
+    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+    const segment = text.slice(start, end);
+    const spaceUrl = matches[i][1];
+    const detailMatch = segment.match(/\]\((https:\/\/spacesdashboard\.com\/space\/[^)\s]+)\)/);
+    const detailUrl = detailMatch?.[1] || '';
+    const titleMatch = detailUrl
+      ? segment.match(new RegExp(`\\[([^\\]]+)\\]\\(${escapeRegex(detailUrl)}\\)`))
+      : segment.match(/\[([^\]]+)\]\(https:\/\/spacesdashboard\.com\/space\/[^)]+\)/);
+    const title = titleMatch?.[1]?.trim() || 'Space ao vivo';
+    const hostHandleMatch = segment.match(/\[@([^\]]+)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)/);
+    const hostHandle = hostHandleMatch?.[1] || '';
+    const hostNameMatch = segment.match(/\n\[(.*?)\]\(https:\/\/spacesdashboard\.com\/u\/[^)]+\)\s*\n\s*\[@/);
+    const hostName = hostNameMatch?.[1]?.trim() || '';
+    const avatarMatch = segment.match(/\[!\[Image \d+: [^\]]+\]\((https:\/\/pbs\.twimg\.com\/profile_images\/[^)]+)\)\]/);
+    const hostAvatar = avatarMatch?.[1] || '';
+    const startedMatch = segment.match(/\[Started: ([^\]]+)\]/);
+    const startedAt = startedMatch?.[1]?.trim() || '';
+    const statsMatch = segment.match(/Started: ([^-]+) - Speakers: ([0-9,.]+)\s*- Speaker followers: ([0-9,.]+)/);
+    const speakers = statsMatch ? parseSpaceCount(statsMatch[2]) : 0;
+    const speakerFollowers = statsMatch ? parseSpaceCount(statsMatch[3]) : 0;
+    const listenersMatch = segment.match(/\n\s*([0-9,.]+) \[Started:/);
+    const listeners = listenersMatch ? parseSpaceCount(listenersMatch[1]) : 0;
+    items.push({
+      id: detailUrl || spaceUrl,
+      title,
+      spaceUrl,
+      detailUrl,
+      hostHandle,
+      hostName,
+      hostAvatar,
+      listeners,
+      speakers,
+      speakerFollowers,
+      startedAt,
+      source: 'spacesdashboard'
+    });
+  }
+  return items.filter(item => item.spaceUrl);
+};
+
+const extractSpacesWithAi = async (rawText) => {
+  if (!canUseAiProvider(aiConfig)) return [];
+  const prompt = [
+    'Extraia uma lista de X Spaces ao vivo a partir do texto abaixo.',
+    'Responda apenas com JSON valido neste formato:',
+    '{ "items": [ { "title": "", "spaceUrl": "", "detailUrl": "", "hostHandle": "", "hostName": "", "listeners": 0, "startedAt": "" } ] }',
+    '',
+    rawText.slice(0, 12000)
+  ].join('\n');
+  let aiText = '';
+  if (aiConfig.provider === 'openai') {
+    aiText = await runPromptWithOpenAi(prompt, aiConfig.openai);
+  } else if (aiConfig.provider === 'gemini') {
+    aiText = await runPromptWithGemini(prompt, aiConfig.gemini);
+  } else if (aiConfig.provider === 'copilot') {
+    aiText = await runPromptWithCopilot(prompt, aiConfig.copilot);
+  }
+  try {
+    const parsed = JSON.parse(aiText);
+    const items = Array.isArray(parsed?.items) ? parsed.items : [];
+    return items
+      .map((item) => ({
+        id: item.detailUrl || item.spaceUrl || item.title,
+        title: String(item.title || '').trim(),
+        spaceUrl: String(item.spaceUrl || '').trim(),
+        detailUrl: String(item.detailUrl || '').trim(),
+        hostHandle: String(item.hostHandle || '').trim(),
+        hostName: String(item.hostName || '').trim(),
+        listeners: Number(item.listeners || 0) || 0,
+        startedAt: String(item.startedAt || '').trim(),
+        source: 'spacesdashboard'
+      }))
+      .filter((item) => item.spaceUrl && item.title);
+  } catch (err) {
+    return [];
+  }
+};
+
+const fetchSpacesDashboard = async () => {
+  let text = '';
+  try {
+    const response = await fetch(SPACES_DASHBOARD_URL, { headers: buildSpacesHeaders() });
+    if (response.ok) {
+      text = await response.text();
+      return { text, source: 'direct' };
+    }
+  } catch (err) {
+    // ignore
+  }
+  const response = await fetch(SPACES_DASHBOARD_JINA, { headers: buildSpacesHeaders() });
+  if (!response.ok) {
+    throw new Error(`Falha ao coletar spaces: ${response.status}`);
+  }
+  text = await response.text();
+  return { text, source: 'jina-ai' };
+};
+
+app.get('/spaces/live', async (req, res) => {
+  const now = Date.now();
+  if (spacesCache.items.length && now - spacesCache.updatedAt < SPACES_CACHE_MS) {
+    return res.json({
+      ok: true,
+      items: spacesCache.items,
+      updatedAt: spacesCache.updatedAt,
+      cached: true,
+      source: spacesCache.source
+    });
+  }
+  try {
+    const { text, source } = await fetchSpacesDashboard();
+    let items = parseSpacesMarkdown(text);
+    if (items.length < 3) {
+      const aiItems = await extractSpacesWithAi(text);
+      if (aiItems.length) {
+        items = aiItems;
+      }
+    }
+    const normalized = items.slice(0, 40);
+    spacesCache.items = normalized;
+    spacesCache.updatedAt = Date.now();
+    spacesCache.source = source;
+    return res.json({
+      ok: true,
+      items: normalized,
+      updatedAt: spacesCache.updatedAt,
+      cached: false,
+      source
+    });
+  } catch (err) {
+    if (spacesCache.items.length) {
+      return res.json({
+        ok: true,
+        items: spacesCache.items,
+        updatedAt: spacesCache.updatedAt,
+        cached: true,
+        stale: true,
+        source: spacesCache.source,
+        message: 'Falha ao atualizar agora. Exibindo cache.'
+      });
+    }
+    return res.status(502).json({ ok: false, message: 'Falha ao carregar spaces.' });
+  }
+});
+
 const generateLiveCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
