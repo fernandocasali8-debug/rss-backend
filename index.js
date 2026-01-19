@@ -444,10 +444,37 @@ const parseSpacesMarkdown = (markdown) => {
       speakers,
       speakerFollowers,
       startedAt,
-      source: 'spacesdashboard'
+      source: 'spacesdashboard',
+      titleHistory: [title]
     });
   }
-  return items.filter(item => item.spaceUrl);
+  const map = new Map();
+  items.forEach((item) => {
+    const key = item.spaceUrl;
+    if (!map.has(key)) {
+      map.set(key, item);
+      return;
+    }
+    const current = map.get(key);
+    const titles = Array.isArray(current.titleHistory) ? current.titleHistory.slice() : [current.title].filter(Boolean);
+    if (item.title && !titles.includes(item.title)) {
+      titles.push(item.title);
+    }
+    map.set(key, {
+      ...current,
+      title: item.title || current.title,
+      detailUrl: item.detailUrl || current.detailUrl,
+      hostHandle: item.hostHandle || current.hostHandle,
+      hostName: item.hostName || current.hostName,
+      hostAvatar: item.hostAvatar || current.hostAvatar,
+      listeners: Math.max(current.listeners || 0, item.listeners || 0),
+      speakers: Math.max(current.speakers || 0, item.speakers || 0),
+      speakerFollowers: Math.max(current.speakerFollowers || 0, item.speakerFollowers || 0),
+      startedAt: current.startedAt || item.startedAt,
+      titleHistory: titles
+    });
+  });
+  return Array.from(map.values()).filter(item => item.spaceUrl);
 };
 
 const extractSpacesWithAi = async (rawText) => {
