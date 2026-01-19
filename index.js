@@ -2855,9 +2855,11 @@ function getAutomationEligibility() {
   return { ok: true, reason: '' };
 }
 
-async function getAutomationCandidates(limit = 1) {
-  const eligibility = getAutomationEligibility();
-  if (!eligibility.ok) return { candidates: [], reason: eligibility.reason };
+async function getAutomationCandidates(limit = 1, ignoreEligibility = false) {
+  if (!ignoreEligibility) {
+    const eligibility = getAutomationEligibility();
+    if (!eligibility.ok) return { candidates: [], reason: eligibility.reason };
+  }
 
   const aggregated = await buildAggregatedItems();
 
@@ -6068,7 +6070,7 @@ app.post('/automation/post', async (req, res) => {
 
 app.get('/automation/preview', async (req, res) => {
   try {
-    const { candidates, reason } = await getAutomationCandidates(5);
+    const { candidates, reason } = await getAutomationCandidates(5, true);
     if (!candidates.length) {
       return res.json({ ok: false, reason });
     }
