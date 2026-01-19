@@ -449,7 +449,7 @@ const parseSpacesMarkdown = (markdown) => {
       speakerFollowers,
       startedAt,
       source: 'spacesdashboard',
-      titleHistory: [title]
+      titleHistory: [title],
       fallbackTitle: title
     });
   }
