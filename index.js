@@ -3583,16 +3583,25 @@ async function generateWatchReport(options) {
   let report = buildWatchReportFallback(items, rangeKey, maxChars);
   if (settings.useAi && aiConfig.enabled && canUseAiProvider(aiConfig)) {
     const prompt = buildWatchReportPrompt(items, rangeKey, maxChars, settings.aiRewrite !== false);
-    let aiText = '';
-    if (aiConfig.provider === 'openai') {
-      aiText = await runPromptWithOpenAi(prompt, aiConfig.openai);
-    } else if (aiConfig.provider === 'gemini') {
-      aiText = await runPromptWithGemini(prompt, aiConfig.gemini);
-    } else if (aiConfig.provider === 'copilot') {
-      aiText = await runPromptWithCopilot(prompt, aiConfig.copilot);
-    }
-    if (aiText) {
-      report = normalizeAiReportOutput(aiText, maxChars);
+    try {
+      let aiText = '';
+      if (aiConfig.provider === 'openai') {
+        aiText = await runPromptWithOpenAi(prompt, aiConfig.openai);
+      } else if (aiConfig.provider === 'gemini') {
+        aiText = await runPromptWithGemini(prompt, aiConfig.gemini);
+      } else if (aiConfig.provider === 'copilot') {
+        aiText = await runPromptWithCopilot(prompt, aiConfig.copilot);
+      }
+      if (aiText) {
+        report = normalizeAiReportOutput(aiText, maxChars);
+      }
+    } catch (err) {
+      logEvent({
+        level: 'warning',
+        source: 'watch-report',
+        message: 'Falha ao gerar relatorio com IA, usando fallback.',
+        detail: err.message || String(err)
+      });
     }
   }
 
@@ -7924,12 +7933,12 @@ app.get('/watch/topics', (req, res) => {
 });
 
 app.get('/watch/settings', (req, res) => {
-  const userId = req.query.userId || req.headers['x-user-id'];
+  const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
   res.json(getWatchSettingsForUser(userId));
 });
 
 app.put('/watch/settings', (req, res) => {
-  const userId = req.query.userId || req.headers['x-user-id'];
+  const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
   const next = normalizeWatchSettings(req.body || {});
   setWatchSettingsForUser(userId, next);
   res.json(getWatchSettingsForUser(userId));
@@ -8002,7 +8011,7 @@ app.get('/watch/alerts', (req, res) => {
 
 app.get('/watch/report/preview', async (req, res) => {
   try {
-    const userId = req.query.userId || req.headers['x-user-id'];
+    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
     const settings = getWatchSettingsForUser(userId);
     const reportSettings = normalizeWatchReportSettings({
       ...(settings.report || {}),
@@ -8023,7 +8032,7 @@ app.get('/watch/report/preview', async (req, res) => {
 
 app.post('/watch/report/post', async (req, res) => {
   try {
-    const userId = req.query.userId || req.headers['x-user-id'];
+    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
     const settings = getWatchSettingsForUser(userId);
     const reportSettings = normalizeWatchReportSettings({
       ...(settings.report || {}),
