@@ -3616,7 +3616,14 @@ async function postWatchReport(settings) {
   if (!hasTwitterCredentials(automationConfig)) {
     throw new Error('Credenciais do X/Twitter ausentes.');
   }
-  const result = await generateWatchReport(settings);\r\n  if (!result.items || !result.items.length) {\r\n    throw new Error('Sem itens para o periodo selecionado.');\r\n  }\r\n  if (!result.report) {\r\n    throw new Error('Relatorio vazio.');\r\n  }\r\n  const client = createTwitterClient(automationConfig);
+  const result = await generateWatchReport(settings);
+  if (!result.items || !result.items.length) {
+    throw new Error('Sem itens para o periodo selecionado.');
+  }
+  if (!result.report) {
+    throw new Error('Relatorio vazio.');
+  }
+  const client = createTwitterClient(automationConfig);
   let resp = null;
   try {
     resp = await client.v2.tweet(result.report);
@@ -3643,34 +3650,6 @@ async function postWatchReport(settings) {
   saveWatchReportState(watchReportState);
   return { postedId, report: result.report, items: result.items };
 }
-
-function formatTwitterPostError(err) {
-  const detailParts = [];
-  const rawMessage = err?.message || '';
-  const data = err?.data || err?.response?.data || null;
-  if (rawMessage) detailParts.push(rawMessage);
-  if (data?.title) detailParts.push(data.title);
-  if (data?.detail) detailParts.push(data.detail);
-  const apiErrors = Array.isArray(data?.errors) ? data.errors : [];
-  apiErrors.forEach((entry) => {
-    if (entry?.message) detailParts.push(entry.message);
-    if (entry?.detail) detailParts.push(entry.detail);
-  });
-  const detail = detailParts.filter(Boolean).join(' | ').trim();
-  const status = Number(err?.code || err?.status || data?.status) || 500;
-  const detailLower = detail.toLowerCase();
-  if (status === 429 || detailLower.includes('rate limit') || detailLower.includes('too many')) {
-    return { status: 429, message: 'Limite do X atingido. Tente novamente mais tarde.', detail };
-  }
-  if (status === 401 || status === 403 || detailLower.includes('unauthorized')) {
-    return { status: 401, message: 'Credenciais do X invalidas ou expiradas.', detail };
-  }
-  if (detailLower.includes('tweet text') || detailLower.includes('too long')) {
-    return { status: 400, message: 'Texto do relatorio excede o limite do X.', detail };
-  }
-  return { status, message: detail || 'Falha ao publicar relatorio.' };
-}
-
 function parseTimeToMinutes(value) {
   if (!value || typeof value !== 'string') return null;
   const parts = value.split(':');
