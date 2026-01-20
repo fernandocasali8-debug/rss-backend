@@ -2364,6 +2364,35 @@ function trimText(text, maxChars) {
   return cleaned.slice(0, Math.max(0, maxChars - tail.length)) + tail;
 }
 
+function normalizeAiReportOutput(raw, maxChars) {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  const looksJson = text.startsWith('{') || text.startsWith('[');
+  if (looksJson) {
+    try {
+      const parsed = JSON.parse(text);
+      const list = Array.isArray(parsed) ? parsed : parsed.relatorio;
+      if (Array.isArray(list)) {
+        const lines = list.map((item) => {
+          const title = (item.manchete || item.title || '').trim();
+          const summary = (item.resumo || item.summary || '').trim();
+          const source = (item.fonte || item.source || '').trim();
+          const block = [
+            title ? `- ${title}` : '',
+            summary ? `  ${summary}` : '',
+            source ? `  Fonte: ${source}` : ''
+          ].filter(Boolean);
+          return block.join('\n');
+        }).filter(Boolean);
+        return trimReportText(lines.join('\n\n'), maxChars);
+      }
+    } catch (e) {
+      // fall through
+    }
+  }
+  return trimReportText(text, maxChars);
+}
+
 function appendSuffix(baseText, suffix, maxChars) {
   if (!suffix) return trimText(baseText, maxChars);
   const glue = baseText.includes('\\n') ? '\\n' : ' ';
@@ -3458,7 +3487,7 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
     '  Resumo curto (1 frase)',
     '  Fonte: veiculo - data - hora - tema',
     'Separe os itens com uma linha em branco.',
-    'Nao inclua links. Tom informativo e profissional.',
+    'Nao inclua links. Responda somente em texto (nao use JSON). Tom informativo e profissional.',
     'Limite maximo: ' + limit + ' caracteres.',
     '',
     ...lines
@@ -3487,7 +3516,7 @@ async function generateWatchReport(options) {
       aiText = await runPromptWithCopilot(prompt, aiConfig.copilot);
     }
     if (aiText) {
-      report = trimReportText(aiText, maxChars);
+      report = normalizeAiReportOutput(aiText, maxChars);
     }
   }
 
