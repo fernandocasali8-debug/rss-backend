@@ -154,11 +154,13 @@ app.get('/auth/google', (req, res, next) => {
   if (!googleAuthEnabled) {
     return res.status(500).json({ error: 'Google OAuth nao configurado.' });
   }
+  const prompt = String(req.query.prompt || '').trim();
+  const promptValue = prompt === 'select_account' ? 'select_account' : '';
   if (req.session) {
     req.session.remember = req.query.remember === '1';
     req.session.oauthRedirect = normalizeRedirectPath(req.query.redirect || '/app');
   }
-  return passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  return passport.authenticate('google', { scope: ['profile', 'email'], prompt: promptValue || undefined })(req, res, next);
 });
 
 app.get('/auth/google/callback', (req, res, next) => {
@@ -169,7 +171,9 @@ app.get('/auth/google/callback', (req, res, next) => {
   return passport.authenticate('google', {
     failureRedirect: `${FRONTEND_URL}${appendQueryParam(redirectPath, 'auth', 'fail')}`
   })(req, res, () => {
-    if (req.session) {
+    const prompt = String(req.query.prompt || '').trim();
+  const promptValue = prompt === 'select_account' ? 'select_account' : '';
+  if (req.session) {
       if (req.session.remember) {
         req.session.cookie.maxAge = REMEMBER_MAX_AGE;
       } else {
@@ -265,7 +269,9 @@ app.post('/auth/logout', (req, res) => {
       if (err) {
         return res.status(500).json({ error: 'Falha ao sair.' });
       }
-      if (req.session) {
+      const prompt = String(req.query.prompt || '').trim();
+  const promptValue = prompt === 'select_account' ? 'select_account' : '';
+  if (req.session) {
         req.session.destroy(() => res.json({ ok: true }));
       } else {
         res.json({ ok: true });
@@ -273,6 +279,8 @@ app.post('/auth/logout', (req, res) => {
     });
     return;
   }
+  const prompt = String(req.query.prompt || '').trim();
+  const promptValue = prompt === 'select_account' ? 'select_account' : '';
   if (req.session) {
     req.session.destroy(() => res.json({ ok: true }));
     return;
@@ -794,6 +802,8 @@ app.get('/google/sheets/connect', (req, res) => {
   }
   const oauthClient = buildSheetsOAuthClient();
   const state = Buffer.from(JSON.stringify({ email, ts: Date.now() })).toString('base64url');
+  const prompt = String(req.query.prompt || '').trim();
+  const promptValue = prompt === 'select_account' ? 'select_account' : '';
   if (req.session) {
     req.session.sheetsState = state;
   }
@@ -1131,6 +1141,8 @@ app.get('/google/drive/connect', (req, res) => {
   }
   const oauthClient = buildDriveOAuthClient();
   const state = Buffer.from(JSON.stringify({ email, ts: Date.now() })).toString('base64url');
+  const prompt = String(req.query.prompt || '').trim();
+  const promptValue = prompt === 'select_account' ? 'select_account' : '';
   if (req.session) {
     req.session.driveState = state;
   }
