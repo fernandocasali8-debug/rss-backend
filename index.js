@@ -3465,7 +3465,7 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
   ].join('\n');
 }
 
-function generateWatchReport(options) {
+async function generateWatchReport(options) {
   const settings = options || {};
   const rangeKey = settings.range || '1h';
   const maxItems = settings.maxItems || 5;
