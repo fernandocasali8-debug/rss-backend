@@ -2273,9 +2273,24 @@ function getAutomationDateParts(item) {
   if (!raw) return { dateText: '', timeText: '' };
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return { dateText: '', timeText: '' };
-  const pad = (value) => String(value).padStart(2, '0');
-  const dateText = `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
-  const timeText = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const formatter = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    dateStyle: 'short',
+    timeStyle: 'short'
+  });
+  const parts = formatter.formatToParts(date);
+  const lookup = {};
+  parts.forEach(part => {
+    if (part.type !== 'literal') {
+      lookup[part.type] = part.value;
+    }
+  });
+  const dateText = lookup.day && lookup.month && lookup.year
+    ? `${lookup.day}/${lookup.month}/${lookup.year}`
+    : formatter.format(date).split(',')[0].trim();
+  const timeText = lookup.hour && lookup.minute
+    ? `${lookup.hour}:${lookup.minute}`
+    : (formatter.format(date).split(',')[1] || '').trim();
   return { dateText, timeText };
 }
 
