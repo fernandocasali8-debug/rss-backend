@@ -3618,7 +3618,23 @@ async function postWatchReport(settings) {
     throw new Error('Relatorio vazio.');
   }
   const client = createTwitterClient(automationConfig);
-  const resp = await client.v2.tweet(result.report);
+  let resp = null;
+  try {
+    resp = await client.v2.tweet(result.report);
+  } catch (err) {
+    const formatted = formatTwitterPostError(err);
+    const detail = formatted.detail || formatted.message || 'Falha ao publicar no X.';
+    logEvent({
+      level: 'error',
+      source: 'watch-report',
+      message: 'Falha ao publicar no X/Twitter.',
+      detail
+    });
+    const error = new Error(formatted.message || 'Falha ao publicar relatorio.');
+    error.status = formatted.status || 500;
+    error.detail = detail;
+    throw error;
+  }
   const postedId = resp?.data?.id || null;
   watchReportState.lastPostedAt = new Date().toISOString();
   watchReportState.lastReport = result.report;
@@ -3627,6 +3643,33 @@ async function postWatchReport(settings) {
   if (postedId) watchReportState.lastTweetId = postedId;
   saveWatchReportState(watchReportState);
   return { postedId, report: result.report, items: result.items };
+}
+
+function formatTwitterPostError(err) {
+  const detailParts = [];
+  const rawMessage = err?.message || '';
+  const data = err?.data || err?.response?.data || null;
+  if (rawMessage) detailParts.push(rawMessage);
+  if (data?.title) detailParts.push(data.title);
+  if (data?.detail) detailParts.push(data.detail);
+  const apiErrors = Array.isArray(data?.errors) ? data.errors : [];
+  apiErrors.forEach((entry) => {
+    if (entry?.message) detailParts.push(entry.message);
+    if (entry?.detail) detailParts.push(entry.detail);
+  });
+  const detail = detailParts.filter(Boolean).join(' | ').trim();
+  const status = Number(err?.code || err?.status || data?.status) || 500;
+  const detailLower = detail.toLowerCase();
+  if (status === 429 || detailLower.includes('rate limit') || detailLower.includes('too many')) {
+    return { status: 429, message: 'Limite do X atingido. Tente novamente mais tarde.', detail };
+  }
+  if (status === 401 || status === 403 || detailLower.includes('unauthorized')) {
+    return { status: 401, message: 'Credenciais do X invalidas ou expiradas.', detail };
+  }
+  if (detailLower.includes('tweet text') || detailLower.includes('too long')) {
+    return { status: 400, message: 'Texto do relatorio excede o limite do X.', detail };
+  }
+  return { status, message: detail || 'Falha ao publicar relatorio.' };
 }
 
 function parseTimeToMinutes(value) {
@@ -8031,31 +8074,7 @@ app.get('/watch/report/preview', async (req, res) => {
   }
 });
 
-app.post('/watch/report/post', async (req, res) => {
-  try {
-    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
-    const settings = getWatchSettingsForUser(userId);
-    const reportSettings = normalizeWatchReportSettings({
-      ...(settings.report || {}),
-      ...(req.body || {})
-    });
-    const result = await postWatchReport(reportSettings);
-    logEvent({
-      level: 'info',
-      source: 'watch-report',
-      message: 'Relatorio publicado no X/Twitter.',
-      detail: `Itens: ${result.items.length}`
-    });
-    res.json({
-      ok: true,
-      postedId: result.postedId,
-      items: result.items,
-      report: result.report
-    });
-  } catch (err) {
-    res.status(500).json({ ok: false, message: err.message || 'Falha ao publicar relatorio.' });
-  }
-});
+app.post('/watch/report/post', async (req, res) => {\r\n  try {\r\n    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;\r\n    const settings = getWatchSettingsForUser(userId);\r\n    const reportSettings = normalizeWatchReportSettings({\r\n      ...(settings.report || {}),\r\n      ...(req.body || {})\r\n    });\r\n    const result = await postWatchReport(reportSettings);\r\n    logEvent({\r\n      level: 'info',\r\n      source: 'watch-report',\r\n      message: 'Relatorio publicado no X/Twitter.',\r\n      detail: `Itens: ${result.items.length}` \r\n    });\r\n    res.json({\r\n      ok: true,\r\n      postedId: result.postedId,\r\n      items: result.items,\r\n      report: result.report\r\n    });\r\n  } catch (err) {\r\n    const status = err.status || 500;\r\n    const message = err.message || 'Falha ao publicar relatorio.';\r\n    res.status(status).json({ ok: false, message });\r\n  }\r\n});
 
 app.post('/watch/refresh', async (req, res) => {
   try {
