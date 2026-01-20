@@ -8116,20 +8116,87 @@ app.get('/watch/report/preview', async (req, res) => {
       ...(settings.report || {}),
       range: req.query.range || (settings.report && settings.report.range) || '1h'
     });
-    const result = await generateWatchReport(reportSettings);\r\n    appendWatchReportLog({\r\n      level: 'info',\r\n      action: 'preview',\r\n      source: 'manual',\r\n      range: reportSettings.range,\r\n      itemsCount: Array.isArray(result.items) ? result.items.length : 0,\r\n      message: 'Preview gerado.'\r\n    });\r\n    res.json({\r\n      ok: true,\r\n      range: reportSettings.range,\r\n      generatedAt: new Date().toISOString(),\r\n      items: result.items,\r\n      report: result.report\r\n    });
+    const result = await generateWatchReport(reportSettings);
+    appendWatchReportLog({
+      level: 'info',
+      action: 'preview',
+      source: 'manual',
+      range: reportSettings.range,
+      itemsCount: Array.isArray(result.items) ? result.items.length : 0,
+      message: 'Preview gerado.'
+    });
+    res.json({
+      ok: true,
+      range: reportSettings.range,
+      generatedAt: new Date().toISOString(),
+      items: result.items,
+      report: result.report
+    });
   } catch (err) {
-    res.status(500).json({ ok: false, message: 'Falha ao gerar relatorio.' });
+    appendWatchReportLog({
+      level: 'error',
+      action: 'preview',
+      source: 'manual',
+      range: (req.query && req.query.range) ? req.query.range : '1h',
+      message: 'Falha ao gerar preview.',
+      detail: err.message || ''
+    });
+    const status = err.status || 500;
+    const message = err.message || 'Falha ao gerar relatorio.';
+    res.status(status).json({ ok: false, message });
   }
 });
 
-app.post('/watch/report/post', async (req, res) => {\r\n  try {\r\n    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;\r\n    const settings = getWatchSettingsForUser(userId);\r\n    const reportSettings = normalizeWatchReportSettings({\r\n      ...(settings.report || {}),\r\n      ...(req.body || {})\r\n    });\r\n    const result = await postWatchReport(reportSettings);\r\n    appendWatchReportLog({\r\n      level: 'info',\r\n      action: 'post',\r\n      source: 'manual',\r\n      range: reportSettings.range,\r\n      itemsCount: Array.isArray(result.items) ? result.items.length : 0,\r\n      postedId: result.postedId || '',\r\n      message: 'Relatorio publicado no X.'\r\n    });\r\n    logEvent({\r\n      level: 'info',\r\n      source: 'watch-report',\r\n      message: 'Relatorio publicado no X/Twitter.',\r\n      detail: 'Itens: ' + result.items.length\r\n    });\r\n    res.json({\r\n      ok: true,\r\n      postedId: result.postedId,\r\n      items: result.items,\r\n      report: result.report\r\n    });\r\n  } catch (err) {\r\n    appendWatchReportLog({\r\n      level: 'error',\r\n      action: 'post',\r\n      source: 'manual',\r\n      range: (req.body && req.body.range) ? req.body.range : '1h',\r\n      message: 'Falha ao publicar relatorio.',\r\n      detail: err.message || ''\r\n    });\r\n    const status = err.status || 500;\r\n    const message = err.message || 'Falha ao publicar relatorio.';\r\n    res.status(status).json({ ok: false, message });\r\n  }\r\n});
+app.post('/watch/report/post', async (req, res) => {
+  try {
+    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
+    const settings = getWatchSettingsForUser(userId);
+    const reportSettings = normalizeWatchReportSettings({
+      ...(settings.report || {}),
+      ...(req.body || {})
+    });
+    const result = await postWatchReport(reportSettings);
+    appendWatchReportLog({
+      level: 'info',
+      action: 'post',
+      source: 'manual',
+      range: reportSettings.range,
+      itemsCount: Array.isArray(result.items) ? result.items.length : 0,
+      postedId: result.postedId || '',
+      message: 'Relatorio publicado no X.'
+    });
+    logEvent({
+      level: 'info',
+      source: 'watch-report',
+      message: 'Relatorio publicado no X/Twitter.',
+      detail: 'Itens: ' + result.items.length
+    });
+    res.json({
+      ok: true,
+      postedId: result.postedId,
+      items: result.items,
+      report: result.report
+    });
   } catch (err) {
+    appendWatchReportLog({
+      level: 'error',
+      action: 'post',
+      source: 'manual',
+      range: (req.body && req.body.range) ? req.body.range : '1h',
+      message: 'Falha ao publicar relatorio.',
+      detail: err.message || ''
+    });
     const status = err.status || 500;
     const message = err.message || 'Falha ao publicar relatorio.';
     res.status(status).json({ ok: false, message });
   }
 });
-app.get('/watch/report/logs', (req, res) => {\r\n  res.json({ ok: true, logs: getWatchReportLogs() });\r\n});\r\n\r\napp.post('/watch/refresh', async (req, res) => {
+
+app.get('/watch/report/logs', (req, res) => {
+  res.json({ ok: true, logs: getWatchReportLogs() });
+});
+
+app.post('/watch/refresh', async (req, res) => {
   try {
     const items = await buildAggregatedItems();
     const added = updateWatchAlerts(items);
