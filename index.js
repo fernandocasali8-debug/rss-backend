@@ -98,7 +98,7 @@ app.use((req, res, next) => {
 
 
 const issueAuthToken = (user, remember) => {
-  if (!user || !user.email) return '';
+  if (!user || (!user.email && !user.id)) return '';
   const payload = {
     user: {
       id: user.id || '',
