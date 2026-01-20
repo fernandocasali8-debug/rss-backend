@@ -3318,7 +3318,9 @@ function normalizeWatchReportSettings(payload) {
     useAi: next.useAi !== false,
     aiRewrite: next.aiRewrite !== false,
     autoEnabled: !!next.autoEnabled,
-    autoIntervalHours: clampNumber(next.autoIntervalHours, 1, 24, 3)
+    autoIntervalHours: clampNumber(next.autoIntervalHours, 1, 24, 3),
+    activeStart: typeof next.activeStart === 'string' ? next.activeStart : '08:00',
+    activeEnd: typeof next.activeEnd === 'string' ? next.activeEnd : '22:00'
   };
 }
 
@@ -3553,12 +3555,37 @@ async function postWatchReport(settings) {
   return { postedId, report: result.report, items: result.items };
 }
 
+function parseTimeToMinutes(value) {
+  if (!value || typeof value !== 'string') return null;
+  const parts = value.split(':');
+  if (parts.length < 2) return null;
+  const hour = Number(parts[0]);
+  const minute = Number(parts[1]);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  return Math.max(0, Math.min(23, hour)) * 60 + Math.max(0, Math.min(59, minute));
+}
+
+function isWithinReportWindow(startValue, endValue, nowDate) {
+  const start = parseTimeToMinutes(startValue);
+  const end = parseTimeToMinutes(endValue);
+  if (start == null || end == null) return true;
+  const nowMinutes = nowDate.getHours() * 60 + nowDate.getMinutes();
+  if (start == end) return true;
+  if (start < end) {
+    return nowMinutes >= start && nowMinutes <= end;
+  }
+  return nowMinutes >= start || nowMinutes <= end;
+}
+
 async function runWatchReportAutomation() {
   const settings = getWatchSettingsForUser();
   const reportSettings = settings.report || {};
   if (!reportSettings.autoEnabled) return;
   if (!hasTwitterCredentials(automationConfig)) return;
   const now = new Date();
+  if (!isWithinReportWindow(reportSettings.activeStart, reportSettings.activeEnd, now)) {
+    return;
+  }
   const last = watchReportState.lastPostedAt ? new Date(watchReportState.lastPostedAt) : null;
   const intervalHours = reportSettings.autoIntervalHours || 3;
   if (last && (now.getTime() - last.getTime()) < (intervalHours * 60 * 60 * 1000)) {
