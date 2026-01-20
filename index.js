@@ -3422,11 +3422,6 @@ function getWatchReportItems(rangeKey, maxItems) {
       const date = new Date(alert.matchedAt || alert.item?.pubDate || alert.item?.isoDate || 0).getTime();
       return Number.isFinite(date) && date >= cutoff;
     })
-    .sort((a, b) => {
-      const dateA = new Date(a.matchedAt || a.item?.pubDate || a.item?.isoDate || 0).getTime();
-      const dateB = new Date(b.matchedAt || b.item?.pubDate || b.item?.isoDate || 0).getTime();
-      return (dateB || 0) - (dateA || 0);
-    })
     .slice(0, Math.max(1, maxItems || 5));
 
   return items.map(alert => ({
