@@ -182,7 +182,8 @@ app.get('/auth/google/callback', (req, res, next) => {
       }
       delete req.session.oauthRedirect;
     }
-    const authToken = issueAuthToken(req.user, req.session && req.session.remember);
+    const tokenUser = req.user || req.session?.passport?.user;
+    const authToken = issueAuthToken(tokenUser, req.session && req.session.remember);
     let redirectUrl = `${FRONTEND_URL}${appendQueryParam(redirectPath, 'auth', 'ok')}`;
     if (authToken) {
       redirectUrl = appendQueryParam(redirectUrl, 'token', authToken);
