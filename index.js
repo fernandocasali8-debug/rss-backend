@@ -21,6 +21,7 @@ const { WebSocketServer } = require('ws');
 const { URL } = require('url');
 const iconv = require('iconv-lite');
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = 4000;
@@ -56,6 +57,9 @@ const GOOGLE_DRIVE_CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID || GOOGLE_CLIE
 const GOOGLE_DRIVE_CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET || GOOGLE_CLIENT_SECRET;
 const GOOGLE_DRIVE_REDIRECT_URL = process.env.GOOGLE_DRIVE_REDIRECT_URL || `http://localhost:${port}/google/drive/callback`;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'rss-session-secret';
+const JWT_SECRET = process.env.JWT_SECRET || SESSION_SECRET;
+const TOKEN_TTL = '7d';
+const TOKEN_TTL_REMEMBER = '30d';
 const REMEMBER_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
 const KALSHI_BASE_URL = process.env.KALSHI_BASE_URL || 'https://api.elections.kalshi.com/trade-api/v2';
 const KALSHI_API_KEY = process.env.KALSHI_API_KEY || '';
@@ -78,7 +82,49 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+  const token = getAuthTokenFromRequest(req);
+  if (!token) return next();
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded && decoded.user) {
+      req.user = decoded.user;
+    }
+  } catch (err) {
+    // ignore token errors
+  }
+  return next();
+});
 
+
+const issueAuthToken = (user, remember) => {
+  if (!user || !user.email) return '';
+  const payload = {
+    user: {
+      id: user.id || '',
+      name: user.name || '',
+      email: user.email || '',
+      photo: user.photo || ''
+    }
+  };
+  const expiresIn = remember ? TOKEN_TTL_REMEMBER : TOKEN_TTL;
+  try {
+    return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  } catch (err) {
+    return '';
+  }
+};
+
+const getAuthTokenFromRequest = (req) => {
+  const header = String(req.headers['authorization'] || '').trim();
+  if (header.toLowerCase().startsWith('bearer ')) {
+    return header.slice(7).trim();
+  }
+  if (req.query && typeof req.query.token === 'string') {
+    return req.query.token.trim();
+  }
+  return '';
+};
 const googleAuthEnabled = Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET);
 
 passport.serializeUser((user, done) => done(null, user));
@@ -132,7 +178,12 @@ app.get('/auth/google/callback', (req, res, next) => {
       }
       delete req.session.oauthRedirect;
     }
-    res.redirect(`${FRONTEND_URL}${appendQueryParam(redirectPath, 'auth', 'ok')}`);
+    const authToken = issueAuthToken(req.user, req.session && req.session.remember);
+    let redirectUrl = ${FRONTEND_URL};
+    if (authToken) {
+      redirectUrl = appendQueryParam(redirectUrl, 'token', authToken);
+    }
+    res.redirect(redirectUrl);
   });
 });
 
@@ -251,6 +302,7 @@ const isPublicRoute = (req) => {
 app.use((req, res, next) => {
   if (isPublicRoute(req)) return next();
   if (req.isAuthenticated && req.isAuthenticated()) return next();
+  if (req.user) return next();
   return res.status(401).json({ error: 'Nao autorizado.' });
 });
 
