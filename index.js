@@ -3686,6 +3686,7 @@ function normalizeSiteInput(input, fallback) {
 }
 
 const trendsCache = { updatedAt: 0, items: [] };
+const trendsTermsCache = { updatedAt: 0, items: [] };
 const POLYMARKET_CACHE_TTL_MS = 5 * 60 * 1000;
 const polymarketCache = new Map();
 const POLYMARKET_DEFAULT_KEYWORDS = [
@@ -4332,6 +4333,39 @@ async function fetchTrendsItems(config) {
   }));
   trendsCache.updatedAt = now;
   trendsCache.items = items;
+  return items.slice(0, config.maxItems || 10);
+}
+
+async function fetchTrendsTermsItems(config) {
+  if (!config.enabled) return [];
+  const ttl = (Number(config.refreshMinutes) || 10) * 60 * 1000;
+  const now = Date.now();
+  if (trendsTermsCache.items.length && (now - trendsTermsCache.updatedAt) < ttl) {
+    return trendsTermsCache.items.slice(0, config.maxItems || 10);
+  }
+  const html = await fetchHtml('https://trends24.in/brazil/');
+  const $ = cheerio.load(html);
+  const items = [];
+  $('.trend-card').each((cardIndex, card) => {
+    const category = $(card).find('h2').first().text().trim();
+    $(card).find('ol li').each((idx, li) => {
+      const linkEl = $(li).find('a').first();
+      const title = linkEl.text().trim();
+      if (!title) return;
+      let link = linkEl.attr('href') || '';
+      if (link && link.startsWith('/')) {
+        link = `https://trends24.in${link}`;
+      }
+      items.push({
+        title,
+        link,
+        category: category || '',
+        position: idx + 1
+      });
+    });
+  });
+  trendsTermsCache.updatedAt = now;
+  trendsTermsCache.items = items;
   return items.slice(0, config.maxItems || 10);
 }
 
@@ -6514,6 +6548,20 @@ app.get('/trends', async (req, res) => {
   }
 });
 
+app.get('/trends/terms', async (req, res) => {
+  try {
+    const items = await fetchTrendsTermsItems(trendsConfig);
+    res.json({ ok: true, items, updatedAt: new Date().toISOString(), source: 'trends24' });
+  } catch (err) {
+    logEvent({
+      level: 'error',
+      source: 'trends',
+      message: 'Falha ao carregar termos.',
+      detail: err.message || String(err)
+    });
+    res.status(500).json({ ok: false, message: 'Falha ao carregar termos.' });
+  }
+});
 app.get('/polymarket/events', async (req, res) => {
   const limit = Number(req.query.limit) || 40;
   const query = String(req.query.q || '').trim();
