@@ -3499,20 +3499,23 @@ function getWatchReportRangeLabel(rangeKey) {
 function getWatchReportItems(rangeKey, maxItems) {
   const hours = resolveWatchReportRange(rangeKey);
   const cutoff = Date.now() - (hours * 60 * 60 * 1000);
-  const items = (watchAlerts || [])
-    .filter(alert => {
-      const date = new Date(alert.matchedAt || alert.item?.pubDate || alert.item?.isoDate || 0).getTime();
-      return Number.isFinite(date) && date >= cutoff;
-    })
-    .slice(0, Math.max(1, maxItems || 5));
-
-  return items.map(alert => ({
-    ...alert.item,
-    topicName: alert.topicName || '',
-    matchedAt: alert.matchedAt
+  const limit = Math.max(1, maxItems || 5);
+  const entries = (watchAlerts || []).map(alert => {
+    const rawDate = alert.matchedAt || alert.item?.pubDate || alert.item?.isoDate || '';
+    const ts = new Date(rawDate || 0).getTime();
+    return { alert, ts: Number.isFinite(ts) ? ts : 0 };
+  });
+  entries.sort((a, b) => b.ts - a.ts);
+  let filtered = entries.filter(entry => entry.ts >= cutoff).slice(0, limit);
+  if (!filtered.length && entries.length) {
+    filtered = entries.slice(0, limit);
+  }
+  return filtered.map(entry => ({
+    ...entry.alert.item,
+    topicName: entry.alert.topicName || '',
+    matchedAt: entry.alert.matchedAt
   }));
 }
-
 function buildWatchReportFallback(items, rangeKey, maxChars) {
   const label = getWatchReportRangeLabel(rangeKey);
   const header = `Relat\u00f3rio de acompanhamentos (${label})`;
@@ -3613,11 +3616,7 @@ async function postWatchReport(settings) {
   if (!hasTwitterCredentials(automationConfig)) {
     throw new Error('Credenciais do X/Twitter ausentes.');
   }
-  const result = await generateWatchReport(settings);
-  if (!result.report) {
-    throw new Error('Relatorio vazio.');
-  }
-  const client = createTwitterClient(automationConfig);
+  const result = await generateWatchReport(settings);\r\n  if (!result.items || !result.items.length) {\r\n    throw new Error('Sem itens para o periodo selecionado.');\r\n  }\r\n  if (!result.report) {\r\n    throw new Error('Relatorio vazio.');\r\n  }\r\n  const client = createTwitterClient(automationConfig);
   let resp = null;
   try {
     resp = await client.v2.tweet(result.report);
