@@ -1512,6 +1512,36 @@ const { loadWatchSettings, saveWatchSettings } = require('./watchSettingsStorage
 let watchSettings = loadWatchSettings();
 const { loadWatchReportState, saveWatchReportState } = require('./watchReportStateStorage');
 let watchReportState = loadWatchReportState();
+if (!watchReportState || typeof watchReportState !== 'object') {
+  watchReportState = {};
+}
+if (!Array.isArray(watchReportState.logs)) {
+  watchReportState.logs = [];
+}
+const MAX_WATCH_REPORT_LOGS = 200;
+
+function appendWatchReportLog(entry) {
+  const payload = entry && typeof entry === 'object' ? entry : {};
+  const logItem = {
+    id: uuidv4(),
+    timestamp: new Date().toISOString(),
+    level: payload.level || 'info',
+    action: payload.action || 'event',
+    source: payload.source || 'manual',
+    message: payload.message || '',
+    detail: payload.detail || '',
+    range: payload.range || '',
+    itemsCount: Number.isFinite(payload.itemsCount) ? payload.itemsCount : null,
+    postedId: payload.postedId || ''
+  };
+  watchReportState.logs = [logItem, ...(watchReportState.logs || [])].slice(0, MAX_WATCH_REPORT_LOGS);
+  saveWatchReportState(watchReportState);
+  return logItem;
+}
+
+function getWatchReportLogs() {
+  return Array.isArray(watchReportState.logs) ? watchReportState.logs : [];
+}
 const MAX_WATCH_ALERTS = 500;
 const watchAlertKeys = new Set();
 const { loadInfluencers, saveInfluencers } = require('./influencerStorage');
@@ -2359,6 +2389,32 @@ function getAutomationDateParts(item) {
   return { dateText, timeText };
 }
 
+
+function getWatchReportDateParts(item) {
+  const raw = item.matchedAt || item.createdAt || item.pubDate || item.isoDate;
+  if (!raw) return { dateText: '', timeText: '' };
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return { dateText: '', timeText: '' };
+  const formatter = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    dateStyle: 'short',
+    timeStyle: 'short'
+  });
+  const parts = formatter.formatToParts(date);
+  const lookup = {};
+  parts.forEach(part => {
+    if (part.type !== 'literal') {
+      lookup[part.type] = part.value;
+    }
+  });
+  const dateText = lookup.day && lookup.month && lookup.year
+    ? `${lookup.day}/${lookup.month}/${lookup.year}`
+    : formatter.format(date).split(',')[0].trim();
+  const timeText = lookup.hour && lookup.minute
+    ? `${lookup.hour}:${lookup.minute}`
+    : (formatter.format(date).split(',')[1] || '').trim();
+  return { dateText, timeText };
+}
 function getAutomationMaxChars() {
   const maxChars = Number(automationConfig?.rules?.maxChars);
   if (!Number.isFinite(maxChars)) return 4000;
@@ -3520,7 +3576,7 @@ function buildWatchReportFallback(items, rangeKey, maxChars) {
   const label = getWatchReportRangeLabel(rangeKey);
   const header = `Relat\u00f3rio de acompanhamentos (${label})`;
   const lines = items.map((item) => {
-    const parts = getAutomationDateParts(item);
+    const parts = getWatchReportDateParts(item);
     const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
     const title = (item.title || '').replace(/\s+/g, ' ').trim();
     const summary = getClippingSummary(item);
@@ -3543,7 +3599,7 @@ function buildWatchReportFallback(items, rangeKey, maxChars) {
 function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
   const label = getWatchReportRangeLabel(rangeKey);
   const lines = items.map((item, index) => {
-    const parts = getAutomationDateParts(item);
+    const parts = getWatchReportDateParts(item);
     const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
     const title = normalizeAiInput(item.title);
     const snippet = normalizeAiInput(item.contentSnippet || item.snippet || '');
@@ -3686,7 +3742,28 @@ async function runWatchReportAutomation() {
   if (last && (now.getTime() - last.getTime()) < (intervalHours * 60 * 60 * 1000)) {
     return;
   }
-  await postWatchReport(reportSettings);
+  try {
+    const result = await postWatchReport(reportSettings);
+    appendWatchReportLog({
+      level: 'info',
+      action: 'auto-post',
+      source: 'auto',
+      range: reportSettings.range,
+      itemsCount: Array.isArray(result.items) ? result.items.length : 0,
+      postedId: result.postedId || '',
+      message: 'Relatorio automatico publicado.'
+    });
+  } catch (err) {
+    appendWatchReportLog({
+      level: 'error',
+      action: 'auto-post',
+      source: 'auto',
+      range: reportSettings.range,
+      message: 'Falha no relatorio automatico.',
+      detail: err.message || ''
+    });
+    throw err;
+  }
 }
 
 function computeTags(item) {
@@ -8039,47 +8116,20 @@ app.get('/watch/report/preview', async (req, res) => {
       ...(settings.report || {}),
       range: req.query.range || (settings.report && settings.report.range) || '1h'
     });
-    const result = await generateWatchReport(reportSettings);
-    res.json({
-      ok: true,
-      range: reportSettings.range,
-      generatedAt: new Date().toISOString(),
-      items: result.items,
-      report: result.report
-    });
+    const result = await generateWatchReport(reportSettings);\r\n    appendWatchReportLog({\r\n      level: 'info',\r\n      action: 'preview',\r\n      source: 'manual',\r\n      range: reportSettings.range,\r\n      itemsCount: Array.isArray(result.items) ? result.items.length : 0,\r\n      message: 'Preview gerado.'\r\n    });\r\n    res.json({\r\n      ok: true,\r\n      range: reportSettings.range,\r\n      generatedAt: new Date().toISOString(),\r\n      items: result.items,\r\n      report: result.report\r\n    });
   } catch (err) {
     res.status(500).json({ ok: false, message: 'Falha ao gerar relatorio.' });
   }
 });
 
-app.post('/watch/report/post', async (req, res) => {
-  try {
-    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
-    const settings = getWatchSettingsForUser(userId);
-    const reportSettings = normalizeWatchReportSettings({
-      ...(settings.report || {}),
-      ...(req.body || {})
-    });
-    const result = await postWatchReport(reportSettings);
-    logEvent({
-      level: 'info',
-      source: 'watch-report',
-      message: 'Relatorio publicado no X/Twitter.',
-      detail: 'Itens: ' + result.items.length
-    });
-    res.json({
-      ok: true,
-      postedId: result.postedId,
-      items: result.items,
-      report: result.report
-    });
+app.post('/watch/report/post', async (req, res) => {\r\n  try {\r\n    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;\r\n    const settings = getWatchSettingsForUser(userId);\r\n    const reportSettings = normalizeWatchReportSettings({\r\n      ...(settings.report || {}),\r\n      ...(req.body || {})\r\n    });\r\n    const result = await postWatchReport(reportSettings);\r\n    appendWatchReportLog({\r\n      level: 'info',\r\n      action: 'post',\r\n      source: 'manual',\r\n      range: reportSettings.range,\r\n      itemsCount: Array.isArray(result.items) ? result.items.length : 0,\r\n      postedId: result.postedId || '',\r\n      message: 'Relatorio publicado no X.'\r\n    });\r\n    logEvent({\r\n      level: 'info',\r\n      source: 'watch-report',\r\n      message: 'Relatorio publicado no X/Twitter.',\r\n      detail: 'Itens: ' + result.items.length\r\n    });\r\n    res.json({\r\n      ok: true,\r\n      postedId: result.postedId,\r\n      items: result.items,\r\n      report: result.report\r\n    });\r\n  } catch (err) {\r\n    appendWatchReportLog({\r\n      level: 'error',\r\n      action: 'post',\r\n      source: 'manual',\r\n      range: (req.body && req.body.range) ? req.body.range : '1h',\r\n      message: 'Falha ao publicar relatorio.',\r\n      detail: err.message || ''\r\n    });\r\n    const status = err.status || 500;\r\n    const message = err.message || 'Falha ao publicar relatorio.';\r\n    res.status(status).json({ ok: false, message });\r\n  }\r\n});
   } catch (err) {
     const status = err.status || 500;
     const message = err.message || 'Falha ao publicar relatorio.';
     res.status(status).json({ ok: false, message });
   }
 });
-app.post('/watch/refresh', async (req, res) => {
+app.get('/watch/report/logs', (req, res) => {\r\n  res.json({ ok: true, logs: getWatchReportLogs() });\r\n});\r\n\r\napp.post('/watch/refresh', async (req, res) => {
   try {
     const items = await buildAggregatedItems();
     const added = updateWatchAlerts(items);
