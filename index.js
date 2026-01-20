@@ -8074,8 +8074,33 @@ app.get('/watch/report/preview', async (req, res) => {
   }
 });
 
-app.post('/watch/report/post', async (req, res) => {\r\n  try {\r\n    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;\r\n    const settings = getWatchSettingsForUser(userId);\r\n    const reportSettings = normalizeWatchReportSettings({\r\n      ...(settings.report || {}),\r\n      ...(req.body || {})\r\n    });\r\n    const result = await postWatchReport(reportSettings);\r\n    logEvent({\r\n      level: 'info',\r\n      source: 'watch-report',\r\n      message: 'Relatorio publicado no X/Twitter.',\r\n      detail: "Itens: " + result.items.length\r\n    });\r\n    res.json({\r\n      ok: true,\r\n      postedId: result.postedId,\r\n      items: result.items,\r\n      report: result.report\r\n    });\r\n  } catch (err) {\r\n    const status = err.status || 500;\r\n    const message = err.message || 'Falha ao publicar relatorio.';\r\n    res.status(status).json({ ok: false, message });\r\n  }\r\n});
-
+app.post('/watch/report/post', async (req, res) => {
+  try {
+    const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
+    const settings = getWatchSettingsForUser(userId);
+    const reportSettings = normalizeWatchReportSettings({
+      ...(settings.report || {}),
+      ...(req.body || {})
+    });
+    const result = await postWatchReport(reportSettings);
+    logEvent({
+      level: 'info',
+      source: 'watch-report',
+      message: 'Relatorio publicado no X/Twitter.',
+      detail: 'Itens: ' + result.items.length
+    });
+    res.json({
+      ok: true,
+      postedId: result.postedId,
+      items: result.items,
+      report: result.report
+    });
+  } catch (err) {
+    const status = err.status || 500;
+    const message = err.message || 'Falha ao publicar relatorio.';
+    res.status(status).json({ ok: false, message });
+  }
+});
 app.post('/watch/refresh', async (req, res) => {
   try {
     const items = await buildAggregatedItems();
