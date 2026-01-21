@@ -3474,7 +3474,7 @@ function normalizeWatchReportSettings(payload) {
     useAi: next.useAi !== false,
     aiRewrite: next.aiRewrite !== false,
     autoEnabled: !!next.autoEnabled,
-    autoIntervalHours: clampNumber(next.autoIntervalHours, 1, 24, 3),
+    autoIntervalMinutes: clampNumber(next.autoIntervalMinutes || (next.autoIntervalHours ? Number(next.autoIntervalHours) * 60 : 0), 1, 360, 60),
     activeStart: typeof next.activeStart === 'string' ? next.activeStart : '08:00',
     activeEnd: typeof next.activeEnd === 'string' ? next.activeEnd : '22:00'
   };
@@ -3802,8 +3802,8 @@ async function runWatchReportAutomation() {
     return;
   }
   const last = watchReportState.lastPostedAt ? new Date(watchReportState.lastPostedAt) : null;
-  const intervalHours = reportSettings.autoIntervalHours || 3;
-  if (last && (now.getTime() - last.getTime()) < (intervalHours * 60 * 60 * 1000)) {
+  const intervalMinutes = reportSettings.autoIntervalMinutes || 60;
+  if (last && (now.getTime() - last.getTime()) < (intervalMinutes * 60 * 1000)) {
     appendWatchReportAutoSkip('Intervalo minimo ainda nao atingido.', `Ultimo post: ${last.toISOString()}`);
     return;
   }

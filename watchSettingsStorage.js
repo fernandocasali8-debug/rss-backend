@@ -18,7 +18,7 @@ const DEFAULT_REPORT = {
   useAi: true,
   aiRewrite: true,
   autoEnabled: false,
-  autoIntervalHours: 3,
+  autoIntervalMinutes: 60,
   activeStart: '08:00',
   activeEnd: '22:00'
 };
