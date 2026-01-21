@@ -1510,78 +1510,6 @@ const { loadWatchAlerts, saveWatchAlerts } = require('./watchAlertsStorage');
 let watchAlerts = loadWatchAlerts();
 const { loadWatchSettings, saveWatchSettings } = require('./watchSettingsStorage');
 let watchSettings = loadWatchSettings();
-const { loadWatchReportState, saveWatchReportState } = require('./watchReportStateStorage');
-let watchReportState = loadWatchReportState();
-if (!watchReportState || typeof watchReportState !== 'object') {
-  watchReportState = {};
-}
-if (!Array.isArray(watchReportState.logs)) {
-  watchReportState.logs = [];
-}
-const MAX_WATCH_REPORT_LOGS = 200;
-
-function appendWatchReportLog(entry) {
-  const payload = entry && typeof entry === 'object' ? entry : {};
-  const logItem = {
-    id: uuidv4(),
-    timestamp: new Date().toISOString(),
-    level: payload.level || 'info',
-    action: payload.action || 'event',
-    source: payload.source || 'manual',
-    message: payload.message || '',
-    detail: payload.detail || '',
-    range: payload.range || '',
-    itemsCount: Number.isFinite(payload.itemsCount) ? payload.itemsCount : null,
-    postedId: payload.postedId || ''
-  };
-  watchReportState.logs = [logItem, ...(watchReportState.logs || [])].slice(0, MAX_WATCH_REPORT_LOGS);
-  saveWatchReportState(watchReportState);
-  return logItem;
-}
-
-
-function appendWatchReportAutoSkip(reason, detail) {
-  const nowMs = Date.now();
-  const lastAt = watchReportState.lastAutoLogAt
-    ? new Date(watchReportState.lastAutoLogAt).getTime()
-    : 0;
-  const sameReason = watchReportState.lastAutoLogReason === reason;
-  if (sameReason && (nowMs - lastAt) < 10 * 60 * 1000) return;
-  watchReportState.lastAutoLogAt = new Date(nowMs).toISOString();
-  watchReportState.lastAutoLogReason = reason;
-  appendWatchReportLog({
-    level: 'info',
-    action: 'auto-skip',
-    source: 'auto',
-    message: reason,
-    detail: detail || ''
-  });
-}
-
-function getReportAutomationCandidate() {
-  if (watchReportState && watchReportState.lastAutoConfig && watchReportState.lastAutoConfig.autoEnabled) {
-    return {
-      settings: { report: watchReportState.lastAutoConfig },
-      userId: watchReportState.lastAutoConfigUserId || null
-    };
-  }
-  const base = getWatchSettingsForUser();
-  const users = watchSettings.users || {};
-  const userIds = Object.keys(users);
-  for (let i = 0; i < userIds.length; i += 1) {
-    const userId = userIds[i];
-    const candidate = getWatchSettingsForUser(userId);
-    if (candidate && candidate.report && candidate.report.autoEnabled) {
-      return { settings: candidate, userId };
-    }
-  }
-  if (base && base.report && base.report.autoEnabled) {
-    return { settings: base, userId: null };
-  }
-  return { settings: base || {}, userId: null };
-}function getWatchReportLogs() {
-  return Array.isArray(watchReportState.logs) ? watchReportState.logs : [];
-}
 const MAX_WATCH_ALERTS = 500;
 const watchAlertKeys = new Set();
 const { loadInfluencers, saveInfluencers } = require('./influencerStorage');
@@ -3470,6 +3398,11 @@ function normalizeWatchKeywords(list) {
 }
 
 const WATCH_REPORT_RANGES = ['1h', '2h', '3h', '24h'];
+const REPORT_AUTOMATION_MAX_LOGS = 200;
+const REPORT_AUTOMATION_LOCK_MS = 2 * 60 * 1000;
+const REPORT_AUTOMATION_RATE_LIMIT_MINUTES = 60;
+const REPORT_AUTOMATION_MIN_INTERVAL_MINUTES = 5;
+const { loadWatchReportState, saveWatchReportState } = require('./watchReportStateStorage');
 
 function normalizeWatchReportSettings(payload) {
   const next = payload && typeof payload === 'object' ? payload : {};
@@ -3479,106 +3412,74 @@ function normalizeWatchReportSettings(payload) {
     useAi: next.useAi !== false,
     aiRewrite: next.aiRewrite !== false,
     autoEnabled: !!next.autoEnabled,
-    autoIntervalMinutes: clampNumber(next.autoIntervalMinutes || (next.autoIntervalHours ? Number(next.autoIntervalHours) * 60 : 0), 1, 360, 60),
-    activeStart: typeof next.activeStart === 'string' ? next.activeStart : '08:00',
-    activeEnd: typeof next.activeEnd === 'string' ? next.activeEnd : '22:00'
+    autoIntervalMinutes: clampNumber(
+      next.autoIntervalMinutes,
+      REPORT_AUTOMATION_MIN_INTERVAL_MINUTES,
+      1440,
+      60
+    ),
+    activeStart: typeof next.activeStart === 'string' ? next.activeStart : '06:00',
+    activeEnd: typeof next.activeEnd === 'string' ? next.activeEnd : '23:00'
   };
 }
 
-function normalizeWatchSettings(payload) {
-  const next = payload || {};
-  return {
-    recencyWeight: clampNumber(next.recencyWeight, 0, 100, 70),
-    viewMode: ['list', 'grid', 'compact'].includes(next.viewMode) ? next.viewMode : 'list',
-    timeRange: ['24h', '7d', 'all'].includes(next.timeRange) ? next.timeRange : '24h',
-    sortMode: ['recent', 'relevant'].includes(next.sortMode) ? next.sortMode : 'recent',
-    topicFilter: typeof next.topicFilter === 'string' ? next.topicFilter : 'all',
-    newOnly: !!next.newOnly,
-    report: normalizeWatchReportSettings(next.report)
+let reportAutomationState = loadWatchReportState() || {};
+if (!Array.isArray(reportAutomationState.logs)) reportAutomationState.logs = [];
+if (!reportAutomationState.config) reportAutomationState.config = null;
+
+function saveReportAutomationState() {
+  saveWatchReportState(reportAutomationState);
+}
+
+function appendReportAutomationLog(entry) {
+  const payload = entry && typeof entry === 'object' ? entry : {};
+  const logItem = {
+    id: uuidv4(),
+    timestamp: new Date().toISOString(),
+    level: payload.level || 'info',
+    action: payload.action || 'info',
+    message: payload.message || '',
+    detail: payload.detail || '',
+    range: payload.range || '',
+    itemsCount: typeof payload.itemsCount === 'number' ? payload.itemsCount : null,
+    postedId: payload.postedId || ''
   };
+  reportAutomationState.logs = [logItem, ...reportAutomationState.logs].slice(0, REPORT_AUTOMATION_MAX_LOGS);
+  reportAutomationState.updatedAt = logItem.timestamp;
+  saveReportAutomationState();
+  return logItem;
 }
 
-function getWatchSettingsForUser(userId) {
-  if (userId && watchSettings.users && watchSettings.users[userId]) {
-    return { ...watchSettings.default, ...watchSettings.users[userId] };
-  }
-  return watchSettings.default || watchSettings;
+function appendReportAutomationSkip(reason, detail) {
+  appendReportAutomationLog({
+    level: 'info',
+    action: 'auto-skip',
+    message: reason || 'Automacao ignorada.',
+    detail: detail || ''
+  });
 }
 
-function setWatchSettingsForUser(userId, payload) {
-  if (userId) {
-    watchSettings.users = watchSettings.users || {};
-    watchSettings.users[userId] = { ...watchSettings.users[userId], ...payload };
-  } else {
-    watchSettings.default = { ...watchSettings.default, ...payload };
-  }
-  saveWatchSettings(watchSettings);
+function getWatchReportLogs() {
+  return Array.isArray(reportAutomationState.logs) ? reportAutomationState.logs : [];
 }
 
-function matchesWatchTopic(item, topic) {
-  if (!topic || topic.enabled === false) return false;
-  const keywords = normalizeWatchKeywords(topic.keywords);
-  if (!keywords.length) return false;
-  const text = `${stripHtml(item.title || '')} ${stripHtml(item.contentSnippet || '')} ${stripHtml(item.feedName || '')}`.toLowerCase();
-  if (topic.matchMode === 'all') {
-    return keywords.every(word => text.includes(word.toLowerCase()));
-  }
-  return keywords.some(word => text.includes(word.toLowerCase()));
+function setReportAutomationConfig(userId, config) {
+  const normalized = normalizeWatchReportSettings(config || {});
+  reportAutomationState.config = normalized;
+  if (userId) reportAutomationState.userId = userId;
+  reportAutomationState.nextRunAt = null;
+  reportAutomationState.updatedAt = new Date().toISOString();
+  appendReportAutomationLog({
+    level: 'info',
+    action: 'config',
+    message: 'Configuracao da automacao atualizada.',
+    detail: `Intervalo: ${normalized.autoIntervalMinutes} min | Horario: ${normalized.activeStart} - ${normalized.activeEnd}`
+  });
+  saveReportAutomationState();
+  return normalized;
 }
 
-function initWatchAlertKeys() {
-  watchAlertKeys.clear();
-  let changed = false;
-  watchAlerts = (watchAlerts || []).map(alert => {
-    if (!alert) return alert;
-    if (!alert.key && alert.item && alert.topicId) {
-      alert.key = buildWatchAlertKey(alert.topicId, alert.item);
-      changed = true;
-    }
-    if (alert.key) {
-      watchAlertKeys.add(alert.key);
-    }
-    return alert;
-  }).filter(Boolean);
-  if (changed) {
-    saveWatchAlerts(watchAlerts);
-  }
-}
-
-function updateWatchAlerts(items) {
-  if (!Array.isArray(items) || !watchTopics.length) return 0;
-  const nextAlerts = [];
-  for (const item of items) {
-    for (const topic of watchTopics) {
-      if (!matchesWatchTopic(item, topic)) continue;
-      const key = buildWatchAlertKey(topic.id, item);
-      if (watchAlertKeys.has(key)) continue;
-      const alert = {
-        id: uuidv4(),
-        key,
-        topicId: topic.id,
-        topicName: topic.name,
-        matchedAt: new Date().toISOString(),
-        item: {
-          title: item.title || '',
-          link: item.link || '',
-          feedName: item.feedName || '',
-          contentSnippet: item.contentSnippet || '',
-          pubDate: item.pubDate || '',
-          isoDate: item.isoDate || ''
-        }
-      };
-      watchAlertKeys.add(key);
-      nextAlerts.push(alert);
-    }
-  }
-  if (!nextAlerts.length) return 0;
-  watchAlerts = [...nextAlerts, ...watchAlerts].slice(0, MAX_WATCH_ALERTS);
-  saveWatchAlerts(watchAlerts);
-  return nextAlerts.length;
-}
-
-function resolveWatchReportRange(rangeKey) {
+function getReportRangeHours(rangeKey) {
   if (rangeKey === '2h') return 2;
   if (rangeKey === '3h') return 3;
   if (rangeKey === '24h') return 24;
@@ -3586,37 +3487,125 @@ function resolveWatchReportRange(rangeKey) {
 }
 
 function getWatchReportRangeLabel(rangeKey) {
-  if (rangeKey === '2h') return '\u00faltimas 2 horas';
-  if (rangeKey === '3h') return '\u00faltimas 3 horas';
-  if (rangeKey === '24h') return '\u00faltimo dia';
-  return '\u00faltima hora';
+  if (rangeKey === '2h') return 'ultimas 2 horas';
+  if (rangeKey === '3h') return 'ultimas 3 horas';
+  if (rangeKey === '24h') return 'ultimo dia';
+  return 'ultima hora';
+}
+
+function parseTimeToMinutes(value) {
+  if (!value || typeof value !== 'string') return null;
+  const parts = value.split(':');
+  if (parts.length < 2) return null;
+  const hour = Number(parts[0]);
+  const minute = Number(parts[1]);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  return Math.max(0, Math.min(23, hour)) * 60 + Math.max(0, Math.min(59, minute));
+}
+
+function getSaoPauloDate(now) {
+  return new Date(new Date(now || Date.now()).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+}
+
+function buildSpDate(spNow, minutes) {
+  const d = new Date(spNow);
+  d.setHours(0, 0, 0, 0);
+  d.setMinutes(minutes);
+  return d;
+}
+
+function isWithinReportWindow(startValue, endValue, now) {
+  const startMinutes = parseTimeToMinutes(startValue);
+  const endMinutes = parseTimeToMinutes(endValue);
+  if (startMinutes == null || endMinutes == null) return true;
+  const spNow = getSaoPauloDate(now);
+  const minutes = spNow.getHours() * 60 + spNow.getMinutes();
+  if (startMinutes <= endMinutes) {
+    return minutes >= startMinutes && minutes <= endMinutes;
+  }
+  return minutes >= startMinutes || minutes <= endMinutes;
+}
+
+function computeNextRunAt(now, settings) {
+  const spNow = getSaoPauloDate(now);
+  const minutesNow = spNow.getHours() * 60 + spNow.getMinutes();
+  const startMinutes = parseTimeToMinutes(settings.activeStart) ?? 0;
+  const endMinutes = parseTimeToMinutes(settings.activeEnd) ?? 1439;
+  const interval = Math.max(REPORT_AUTOMATION_MIN_INTERVAL_MINUTES, settings.autoIntervalMinutes || 60);
+  const windowLength = startMinutes <= endMinutes
+    ? endMinutes - startMinutes
+    : (1440 - startMinutes + endMinutes);
+  const inWindow = isWithinReportWindow(settings.activeStart, settings.activeEnd, spNow);
+
+  const baseStart = buildSpDate(spNow, startMinutes);
+  let windowStart = baseStart;
+
+  if (startMinutes <= endMinutes) {
+    if (minutesNow > endMinutes) {
+      windowStart = new Date(baseStart.getTime() + 24 * 60 * 60 * 1000);
+    }
+  } else {
+    if (!inWindow && minutesNow < startMinutes) {
+      windowStart = baseStart;
+    } else if (inWindow && minutesNow < startMinutes) {
+      windowStart = new Date(baseStart.getTime() - 24 * 60 * 60 * 1000);
+    }
+  }
+
+  if (!inWindow) {
+    return windowStart;
+  }
+
+  const diffFromStart = startMinutes <= endMinutes
+    ? (minutesNow - startMinutes)
+    : (minutesNow >= startMinutes ? minutesNow - startMinutes : minutesNow + 1440 - startMinutes);
+  let nextOffset = (Math.floor(diffFromStart / interval) + 1) * interval;
+  if (nextOffset > windowLength) {
+    return new Date(windowStart.getTime() + 24 * 60 * 60 * 1000);
+  }
+  return new Date(windowStart.getTime() + nextOffset * 60 * 1000);
+}
+
+function formatReportDateTime(value) {
+  const date = new Date(value || 0);
+  if (Number.isNaN(date.getTime())) {
+    return { dateText: '', timeText: '' };
+  }
+  const dateText = date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  const timeText = date.toLocaleTimeString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  return { dateText, timeText };
 }
 
 function getWatchReportItems(rangeKey, maxItems) {
-  const hours = resolveWatchReportRange(rangeKey);
+  const hours = getReportRangeHours(rangeKey);
   const cutoff = Date.now() - (hours * 60 * 60 * 1000);
   const limit = Math.max(1, maxItems || 5);
   const entries = (watchAlerts || []).map(alert => {
-    const rawDate = alert.matchedAt || alert.item?.pubDate || alert.item?.isoDate || '';
+    const rawDate = alert.matchedAt || alert.item?.matchedAt || alert.item?.pubDate || alert.item?.isoDate || '';
     const ts = new Date(rawDate || 0).getTime();
     return { alert, ts: Number.isFinite(ts) ? ts : 0 };
   });
-  entries.sort((a, b) => b.ts - a.ts);
-  let filtered = entries.filter(entry => entry.ts >= cutoff).slice(0, limit);
-  if (!filtered.length && entries.length) {
-    filtered = entries.slice(0, limit);
-  }
+  const filtered = entries
+    .filter(entry => entry.ts >= cutoff)
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, limit);
   return filtered.map(entry => ({
     ...entry.alert.item,
     topicName: entry.alert.topicName || '',
-    matchedAt: entry.alert.matchedAt
+    matchedAt: entry.alert.matchedAt || entry.alert.item?.matchedAt || entry.alert.item?.pubDate || entry.alert.item?.isoDate || null
   }));
 }
+
 function buildWatchReportFallback(items, rangeKey, maxChars) {
   const label = getWatchReportRangeLabel(rangeKey);
-  const header = `Relat\u00f3rio de acompanhamentos (${label})`;
+  const header = `Relatorio de acompanhamentos (${label})`;
   const lines = items.map((item) => {
-    const parts = getWatchReportDateParts(item);
+    const parts = formatReportDateTime(item.matchedAt || item.pubDate || item.isoDate || '');
     const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
     const title = (item.title || '').replace(/\s+/g, ' ').trim();
     const summary = getClippingSummary(item);
@@ -3639,7 +3628,7 @@ function buildWatchReportFallback(items, rangeKey, maxChars) {
 function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
   const label = getWatchReportRangeLabel(rangeKey);
   const lines = items.map((item, index) => {
-    const parts = getWatchReportDateParts(item);
+    const parts = formatReportDateTime(item.matchedAt || item.pubDate || item.isoDate || '');
     const source = (item.feedName || item.sourceName || '').replace(/\s+/g, ' ').trim();
     const title = normalizeAiInput(item.title);
     const snippet = normalizeAiInput(item.contentSnippet || item.snippet || '');
@@ -3655,7 +3644,7 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
   const rewriteText = aiRewrite ? 'Reescreva e organize como report editorial.' : 'Mantenha o texto fiel e objetivo.';
   return [
     'Voce e um editor de clipping.',
-    `Crie um relat¾rio em pt-BR para acompanhamentos (${label}).`,
+    `Crie um relatorio em pt-BR para acompanhamentos (${label}).`,
     'Evite erros ortograficos e use acentos corretamente.',
     rewriteText,
     'Formato:',
@@ -3708,7 +3697,6 @@ async function generateWatchReport(options) {
   return { items, report };
 }
 
-
 function formatTwitterPostError(err) {
   const status = err?.status || err?.statusCode || err?.response?.status || 500;
   let message = 'Falha ao publicar relatorio.';
@@ -3727,6 +3715,7 @@ function formatTwitterPostError(err) {
   if (!detail) detail = 'Falha ao publicar no X.';
   return { status, message, detail };
 }
+
 async function postWatchReport(settings) {
   if (!hasTwitterCredentials(automationConfig)) {
     throw new Error('Credenciais do X/Twitter ausentes.');
@@ -3739,127 +3728,108 @@ async function postWatchReport(settings) {
     throw new Error('Relatorio vazio.');
   }
   const client = createTwitterClient(automationConfig);
-  let resp = null;
+  let postedId = '';
+  let resp;
   try {
     resp = await client.v2.tweet(result.report);
+    postedId = resp && resp.data ? resp.data.id : '';
   } catch (err) {
-    const formatted = formatTwitterPostError(err);
-    const detail = formatted.detail || formatted.message || 'Falha ao publicar no X.';
-    logEvent({
-      level: 'error',
-      source: 'watch-report',
-      message: 'Falha ao publicar no X/Twitter.',
-      detail
-    });
-    const error = new Error(formatted.message || 'Falha ao publicar relatorio.');
-    error.status = formatted.status || 500;
-    error.detail = detail;
-    throw error;
+    const info = formatTwitterPostError(err);
+    const apiError = new Error(info.message);
+    apiError.status = info.status;
+    apiError.detail = info.detail;
+    throw apiError;
   }
-  const postedId = resp?.data?.id || null;
-  watchReportState.lastPostedAt = new Date().toISOString();
-  watchReportState.lastReport = result.report;
-  watchReportState.lastRange = settings.range || '1h';
-  watchReportState.lastItemCount = result.items.length;
-  if (postedId) watchReportState.lastTweetId = postedId;
-  saveWatchReportState(watchReportState);
+  reportAutomationState.lastManualPostAt = new Date().toISOString();
+  reportAutomationState.lastPostAt = reportAutomationState.lastManualPostAt;
+  reportAutomationState.lastPostType = 'manual';
+  saveReportAutomationState();
   return { postedId, report: result.report, items: result.items };
-}
-function parseTimeToMinutes(value) {
-  if (!value || typeof value !== 'string') return null;
-  const parts = value.split(':');
-  if (parts.length < 2) return null;
-  const hour = Number(parts[0]);
-  const minute = Number(parts[1]);
-  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
-  return Math.max(0, Math.min(23, hour)) * 60 + Math.max(0, Math.min(59, minute));
-}
-
-
-function getSaoPauloMinutes(nowDate) {
-  const formatter = new Intl.DateTimeFormat('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
-  const parts = formatter.formatToParts(nowDate);
-  const lookup = {};
-  parts.forEach(part => {
-    if (part.type !== 'literal') {
-      lookup[part.type] = part.value;
-    }
-  });
-  const hour = Number(lookup.hour);
-  const minute = Number(lookup.minute);
-  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
-  return Math.max(0, Math.min(23, hour)) * 60 + Math.max(0, Math.min(59, minute));
-}
-function isWithinReportWindow(startValue, endValue, nowDate) {
-  const start = parseTimeToMinutes(startValue);
-  const end = parseTimeToMinutes(endValue);
-  if (start == null || end == null) return true;
-  const nowMinutes = getSaoPauloMinutes(nowDate);
-  if (nowMinutes == null) return true;
-  if (start == end) return true;
-  if (start < end) {
-    return nowMinutes >= start && nowMinutes <= end;
-  }
-  return nowMinutes >= start || nowMinutes <= end;
 }
 
 async function runWatchReportAutomation() {
-  const candidate = getReportAutomationCandidate();
-  const settings = candidate.settings || {};
-  const reportSettings = settings.report || {};
-  if (!reportSettings.autoEnabled) {
-    appendWatchReportAutoSkip('Automatizacao desativada.');
+  let reportSettings = reportAutomationState.config;
+  if (!reportSettings && typeof getWatchSettingsForUser === 'function') {
+    const fallbackSettings = getWatchSettingsForUser(reportAutomationState.userId || '');
+    reportSettings = normalizeWatchReportSettings(
+      (fallbackSettings && fallbackSettings.default && fallbackSettings.default.report) || fallbackSettings.report || {}
+    );
+    reportAutomationState.config = reportSettings;
+    reportAutomationState.nextRunAt = null;
+    saveReportAutomationState();
+  }
+  if (!reportSettings || !reportSettings.autoEnabled) {
     return;
   }
-  if (!hasTwitterCredentials(automationConfig)) {
-    appendWatchReportAutoSkip('Credenciais do X/Twitter ausentes.');
-    return;
-  }
+
   const now = new Date();
-  if (!isWithinReportWindow(reportSettings.activeStart, reportSettings.activeEnd, now)) {
-    appendWatchReportAutoSkip('Fora da janela configurada.', `Horario: ${reportSettings.activeStart || ''} - ${reportSettings.activeEnd || ''}`);
-    return;
-  }
-  const rateLimitUntil = watchReportState.rateLimitUntil
-    ? new Date(watchReportState.rateLimitUntil)
+  const lockUntil = reportAutomationState.lockUntil ? new Date(reportAutomationState.lockUntil) : null;
+  if (lockUntil && now < lockUntil) return;
+
+  const rateLimitUntil = reportAutomationState.rateLimitUntil
+    ? new Date(reportAutomationState.rateLimitUntil)
     : null;
-  if (rateLimitUntil && !Number.isNaN(rateLimitUntil.getTime()) && rateLimitUntil > now) {
-    appendWatchReportAutoSkip('Limite do X ativo.', 'Bloqueado ate ' + rateLimitUntil.toISOString());
+  if (rateLimitUntil && now < rateLimitUntil) {
     return;
   }
-  const last = watchReportState.lastPostedAt ? new Date(watchReportState.lastPostedAt) : null;
-  const intervalMinutes = reportSettings.autoIntervalMinutes || 60;
-  if (last && (now.getTime() - last.getTime()) < (intervalMinutes * 60 * 1000)) {
-    appendWatchReportAutoSkip('Intervalo minimo ainda nao atingido.', `Ultimo post: ${last.toISOString()}`);
+
+  if (!reportAutomationState.nextRunAt) {
+    const nextRun = computeNextRunAt(now, reportSettings);
+    reportAutomationState.nextRunAt = nextRun.toISOString();
+    saveReportAutomationState();
+  }
+
+  const scheduled = reportAutomationState.nextRunAt ? new Date(reportAutomationState.nextRunAt) : null;
+  if (scheduled && now < scheduled) {
     return;
   }
+
+  reportAutomationState.lockUntil = new Date(now.getTime() + REPORT_AUTOMATION_LOCK_MS).toISOString();
+  reportAutomationState.lastAutoAttemptAt = now.toISOString();
+  saveReportAutomationState();
+
   try {
     const result = await postWatchReport(reportSettings);
-    appendWatchReportLog({
+    reportAutomationState.lastAutoPostAt = new Date().toISOString();
+    reportAutomationState.lastPostAt = reportAutomationState.lastAutoPostAt;
+    reportAutomationState.lastPostType = 'auto';
+    reportAutomationState.rateLimitUntil = null;
+    reportAutomationState.nextRunAt = computeNextRunAt(new Date(), reportSettings).toISOString();
+    saveReportAutomationState();
+    appendReportAutomationLog({
       level: 'info',
       action: 'auto-post',
-      source: 'auto',
       range: reportSettings.range,
-      itemsCount: Array.isArray(result.items) ? result.items.length : 0,
-      postedId: result.postedId || '',
+      itemsCount: result.items.length,
       message: 'Relatorio automatico publicado.',
-      detail: candidate.userId ? `Usuario: ${candidate.userId}` : ''
+      detail: reportAutomationState.userId ? `Usuario: ${reportAutomationState.userId}` : ''
     });
   } catch (err) {
-    appendWatchReportLog({
+    const info = formatTwitterPostError(err);
+    appendReportAutomationLog({
       level: 'error',
       action: 'auto-post',
-      source: 'auto',
       range: reportSettings.range,
-      message: 'Falha ao publicar relatorio automatico.',
-      detail: err.detail || err.message || String(err)
+      message: info.message,
+      detail: info.detail
     });
+    if (info.status === 429) {
+      const until = new Date(now.getTime() + REPORT_AUTOMATION_RATE_LIMIT_MINUTES * 60 * 1000);
+      reportAutomationState.rateLimitUntil = until.toISOString();
+      reportAutomationState.nextRunAt = computeNextRunAt(until, reportSettings).toISOString();
+    } else {
+      reportAutomationState.nextRunAt = computeNextRunAt(new Date(now.getTime() + 60 * 1000), reportSettings).toISOString();
+    }
+    saveReportAutomationState();
+  } finally {
+    reportAutomationState.lockUntil = null;
+    reportAutomationState.updatedAt = new Date().toISOString();
+    saveReportAutomationState();
   }
+}
+
+function getWatchReportLogsResponse() {
+  return getWatchReportLogs();
 }
 
 function computeTags(item) {
@@ -8137,9 +8107,7 @@ app.put('/watch/settings', (req, res) => {
   const next = normalizeWatchSettings(req.body || {});
   setWatchSettingsForUser(userId, next);
   if (next.report && typeof next.report === 'object') {
-    watchReportState.lastAutoConfig = { ...next.report };
-    if (userId) watchReportState.lastAutoConfigUserId = userId;
-    saveWatchReportState(watchReportState);
+    setReportAutomationConfig(userId, next.report);
   }
   res.json(getWatchSettingsForUser(userId));
 });
