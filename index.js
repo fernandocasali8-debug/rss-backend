@@ -1539,6 +1539,41 @@ function appendWatchReportLog(entry) {
   return logItem;
 }
 
+
+function appendWatchReportAutoSkip(reason, detail) {
+  const nowMs = Date.now();
+  const lastAt = watchReportState.lastAutoLogAt
+    ? new Date(watchReportState.lastAutoLogAt).getTime()
+    : 0;
+  const sameReason = watchReportState.lastAutoLogReason === reason;
+  if (sameReason && (nowMs - lastAt) < 10 * 60 * 1000) return;
+  watchReportState.lastAutoLogAt = new Date(nowMs).toISOString();
+  watchReportState.lastAutoLogReason = reason;
+  appendWatchReportLog({
+    level: 'info',
+    action: 'auto-skip',
+    source: 'auto',
+    message: reason,
+    detail: detail || ''
+  });
+}
+
+function getReportAutomationCandidate() {
+  const base = getWatchSettingsForUser();
+  if (base && base.report && base.report.autoEnabled) {
+    return { settings: base, userId: null };
+  }
+  const users = watchSettings.users || {};
+  const userIds = Object.keys(users);
+  for (let i = 0; i < userIds.length; i += 1) {
+    const userId = userIds[i];
+    const candidate = getWatchSettingsForUser(userId);
+    if (candidate && candidate.report && candidate.report.autoEnabled) {
+      return { settings: candidate, userId };
+    }
+  }
+  return { settings: base || {}, userId: null };
+}
 function getWatchReportLogs() {
   return Array.isArray(watchReportState.logs) ? watchReportState.logs : [];
 }
@@ -3750,17 +3785,26 @@ function isWithinReportWindow(startValue, endValue, nowDate) {
 }
 
 async function runWatchReportAutomation() {
-  const settings = getWatchSettingsForUser();
+  const candidate = getReportAutomationCandidate();
+  const settings = candidate.settings || {};
   const reportSettings = settings.report || {};
-  if (!reportSettings.autoEnabled) return;
-  if (!hasTwitterCredentials(automationConfig)) return;
+  if (!reportSettings.autoEnabled) {
+    appendWatchReportAutoSkip('Automatizacao desativada.');
+    return;
+  }
+  if (!hasTwitterCredentials(automationConfig)) {
+    appendWatchReportAutoSkip('Credenciais do X/Twitter ausentes.');
+    return;
+  }
   const now = new Date();
   if (!isWithinReportWindow(reportSettings.activeStart, reportSettings.activeEnd, now)) {
+    appendWatchReportAutoSkip('Fora da janela configurada.', `Horario: ${reportSettings.activeStart || ''} - ${reportSettings.activeEnd || ''}`);
     return;
   }
   const last = watchReportState.lastPostedAt ? new Date(watchReportState.lastPostedAt) : null;
   const intervalHours = reportSettings.autoIntervalHours || 3;
   if (last && (now.getTime() - last.getTime()) < (intervalHours * 60 * 60 * 1000)) {
+    appendWatchReportAutoSkip('Intervalo minimo ainda nao atingido.', `Ultimo post: ${last.toISOString()}`);
     return;
   }
   try {
@@ -3772,7 +3816,8 @@ async function runWatchReportAutomation() {
       range: reportSettings.range,
       itemsCount: Array.isArray(result.items) ? result.items.length : 0,
       postedId: result.postedId || '',
-      message: 'Relatorio automatico publicado.'
+      message: 'Relatorio automatico publicado.',
+      detail: candidate.userId ? `Usuario: ${candidate.userId}` : ''
     });
   } catch (err) {
     appendWatchReportLog({
@@ -3780,10 +3825,9 @@ async function runWatchReportAutomation() {
       action: 'auto-post',
       source: 'auto',
       range: reportSettings.range,
-      message: 'Falha no relatorio automatico.',
-      detail: err.message || ''
+      message: 'Falha ao publicar relatorio automatico.',
+      detail: err.message || String(err)
     });
-    throw err;
   }
 }
 
