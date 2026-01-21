@@ -8261,7 +8261,18 @@ app.post('/watch/report/post', async (req, res) => {
 });
 
 app.get('/watch/report/logs', (req, res) => {
-  res.json({ ok: true, logs: getWatchReportLogs() });
+  res.json({
+    ok: true,
+    logs: getWatchReportLogs(),
+    state: {
+      nextRunAt: reportAutomationState.nextRunAt || null,
+      rateLimitUntil: reportAutomationState.rateLimitUntil || null,
+      lastAutoPostAt: reportAutomationState.lastAutoPostAt || null,
+      lastAutoAttemptAt: reportAutomationState.lastAutoAttemptAt || null,
+      lastPostAt: reportAutomationState.lastPostAt || null,
+      lastPostType: reportAutomationState.lastPostType || null
+    }
+  });
 });
 
 app.post('/watch/refresh', async (req, res) => {
