@@ -1512,6 +1512,15 @@ const { loadWatchSettings, saveWatchSettings } = require('./watchSettingsStorage
 let watchSettings = loadWatchSettings();
 const MAX_WATCH_ALERTS = 500;
 const watchAlertKeys = new Set();
+
+function initWatchAlertKeys() {
+  watchAlertKeys.clear();
+  (watchAlerts || []).forEach(alert => {
+    const key = alert.key || alert.alertKey || alert.id;
+    if (key) watchAlertKeys.add(key);
+  });
+}
+
 const { loadInfluencers, saveInfluencers } = require('./influencerStorage');
 let influencers = loadInfluencers();
 const { loadInfluencerQueues, saveInfluencerQueues } = require('./influencerQueueStorage');
