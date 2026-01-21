@@ -3716,11 +3716,32 @@ function parseTimeToMinutes(value) {
   return Math.max(0, Math.min(23, hour)) * 60 + Math.max(0, Math.min(59, minute));
 }
 
+
+function getSaoPauloMinutes(nowDate) {
+  const formatter = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(nowDate);
+  const lookup = {};
+  parts.forEach(part => {
+    if (part.type !== 'literal') {
+      lookup[part.type] = part.value;
+    }
+  });
+  const hour = Number(lookup.hour);
+  const minute = Number(lookup.minute);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  return Math.max(0, Math.min(23, hour)) * 60 + Math.max(0, Math.min(59, minute));
+}
 function isWithinReportWindow(startValue, endValue, nowDate) {
   const start = parseTimeToMinutes(startValue);
   const end = parseTimeToMinutes(endValue);
   if (start == null || end == null) return true;
-  const nowMinutes = nowDate.getHours() * 60 + nowDate.getMinutes();
+  const nowMinutes = getSaoPauloMinutes(nowDate);
+  if (nowMinutes == null) return true;
   if (start == end) return true;
   if (start < end) {
     return nowMinutes >= start && nowMinutes <= end;
