@@ -1,4 +1,4 @@
-// Backend b√°sico Node.js/Express para gerenciar feeds RSS
+// Backend b?Ìsico Node.js/Express para gerenciar feeds RSS
 
 require('dotenv').config();
 
@@ -1387,7 +1387,7 @@ app.post('/google/drive/backup', async (req, res) => {
 
 
 
-// Persist√™ncia em arquivo
+// Persist?¨ncia em arquivo
 const { loadFeeds, saveFeeds } = require('./feedsStorage');
 const normalizeFeedLanguage = (value) => (value === 'auto' ? 'auto' : 'pt');
 const normalizeFeed = (feed) => ({
@@ -2598,7 +2598,7 @@ function renderTemplate(template, item) {
   if (text.length <= maxChars) return text;
   const reserved = safeLink ? (safeLink.length + 1) : 0;
   const maxTitle = Math.max(0, maxChars - reserved - 1);
-  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}‚Ä¶` : safeTitle;
+  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}‘«™` : safeTitle;
   text = template
     .replace('{title}', trimmedTitle)
     .replace('{link}', safeLink)
@@ -2963,7 +2963,7 @@ async function runDailySummary() {
   logEvent({
     level: 'info',
     source: 'summary',
-    message: 'Resumo di√°rio gerado.',
+    message: 'Resumo di?Ìrio gerado.',
     detail: `Itens: ${items.length}`
   });
 }
@@ -3040,14 +3040,14 @@ async function runAlerts() {
 
 function getAutomationEligibility() {
   if (!automationConfig.rules.enabled) {
-    return { ok: false, reason: 'Automa√ß√£o desativada.' };
+    return { ok: false, reason: 'Automa?∫?˙o desativada.' };
   }
   if (!hasTwitterCredentials(automationConfig)) {
     return { ok: false, reason: 'Credenciais incompletas.' };
   }
   const now = new Date();
   if (withinQuietHours(automationConfig.rules.quietHours, now)) {
-    return { ok: false, reason: 'Dentro do hor√°rio silencioso.' };
+    return { ok: false, reason: 'Dentro do hor?Ìrio silencioso.' };
   }
 
   if (!automationState.dailyDate || automationState.dailyDate !== getDailyKey(now)) {
@@ -3056,7 +3056,7 @@ function getAutomationEligibility() {
   }
 
   if (automationState.dailyCount >= automationConfig.rules.maxPerDay) {
-    return { ok: false, reason: 'Limite di√°rio atingido.' };
+    return { ok: false, reason: 'Limite di?Ìrio atingido.' };
   }
 
   if (automationState.lastPostedAt) {
@@ -3065,7 +3065,7 @@ function getAutomationEligibility() {
       ? Math.max(automationConfig.rules.minIntervalMinutes, 180)
       : automationConfig.rules.minIntervalMinutes;
     if (elapsed < minInterval) {
-      return { ok: false, reason: 'Aguardando intervalo m√≠nimo.' };
+      return { ok: false, reason: 'Aguardando intervalo m?°nimo.' };
     }
   }
 
@@ -3187,7 +3187,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL inv√°lida.'));
+      return reject(new Error('URL inv?Ìlida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -3209,7 +3209,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
           res.resume();
-          return reject(new Error('Falha ao carregar p√°gina.'));
+          return reject(new Error('Falha ao carregar p?Ìgina.'));
         }
         let data = '';
         res.setEncoding('utf8');
@@ -3221,7 +3221,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     );
     req.on('error', reject);
     req.on('timeout', () => {
-      req.destroy(new Error('Timeout ao carregar p√°gina.'));
+      req.destroy(new Error('Timeout ao carregar p?Ìgina.'));
     });
   });
 }
@@ -3235,7 +3235,7 @@ function fetchBuffer(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL inv√°lida.'));
+      return reject(new Error('URL inv?Ìlida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -3371,8 +3371,8 @@ function fetchJson(targetUrl) {
 
 function weatherCodeToText(code) {
   const map = {
-    0: 'C√©u limpo',
-    1: 'Predom√≠nio de sol',
+    0: 'C?Æu limpo',
+    1: 'Predom?°nio de sol',
     2: 'Parcialmente nublado',
     3: 'Nublado',
     45: 'Neblina',
@@ -3393,14 +3393,14 @@ function weatherCodeToText(code) {
     96: 'Tempestade com granizo',
     99: 'Tempestade intensa'
   };
-  return map[code] || 'Tempo inst√°vel';
+  return map[code] || 'Tempo inst?Ìvel';
 }
 
 async function getWeatherForCity(city) {
   const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`;
   const geo = await fetchJson(geoUrl);
   if (!geo || !geo.results || !geo.results.length) {
-    throw new Error('Cidade n√£o encontrada.');
+    throw new Error('Cidade n?˙o encontrada.');
   }
   const location = geo.results[0];
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo`;
@@ -3655,7 +3655,7 @@ function buildWatchReportPrompt(items, rangeKey, maxChars, aiRewrite) {
   const rewriteText = aiRewrite ? 'Reescreva e organize como report editorial.' : 'Mantenha o texto fiel e objetivo.';
   return [
     'Voce e um editor de clipping.',
-    `Crie um relatÛrio em pt-BR para acompanhamentos (${label}).`,
+    `Crie um relatærio em pt-BR para acompanhamentos (${label}).`,
     'Evite erros ortograficos e use acentos corretamente.',
     rewriteText,
     'Formato:',
@@ -3823,6 +3823,13 @@ async function runWatchReportAutomation() {
   const now = new Date();
   if (!isWithinReportWindow(reportSettings.activeStart, reportSettings.activeEnd, now)) {
     appendWatchReportAutoSkip('Fora da janela configurada.', `Horario: ${reportSettings.activeStart || ''} - ${reportSettings.activeEnd || ''}`);
+    return;
+  }
+  const rateLimitUntil = watchReportState.rateLimitUntil
+    ? new Date(watchReportState.rateLimitUntil)
+    : null;
+  if (rateLimitUntil && !Number.isNaN(rateLimitUntil.getTime()) && rateLimitUntil > now) {
+    appendWatchReportAutoSkip('Limite do X ativo.', 'Bloqueado ate ' + rateLimitUntil.toISOString());
     return;
   }
   const last = watchReportState.lastPostedAt ? new Date(watchReportState.lastPostedAt) : null;
@@ -4908,7 +4915,7 @@ function buildHashtagPrompt(text, maxTags) {
   const limit = Math.min(5, Math.max(1, Number(maxTags) || 3));
   return [
     `Gere ${limit} hashtags em portugues do Brasil, curtas e relevantes.`,
-    'Evite hashtags gen√©ricas. Use termos especificos do tema.',
+    'Evite hashtags gen?Æricas. Use termos especificos do tema.',
     'Responda apenas com um JSON array de strings.',
     `Texto: """${text}"""`
   ].join('\n');
@@ -5235,7 +5242,7 @@ async function generateRssFromSite(targetUrl) {
     urlObj.hostname;
   const description =
     $('meta[name="description"]').attr('content') ||
-    `Not√≠cias recentes de ${urlObj.hostname}`;
+    `Not?°cias recentes de ${urlObj.hostname}`;
 
   const items = extractCandidates($, urlObj.toString())
     .slice(0, 20)
@@ -5332,7 +5339,7 @@ const bodyIndicatesNotFound = (body) => {
     || needle.includes('user not found')
     || needle.includes('does not exist')
     || needle.includes('non e stato trovato nulla')
-    || needle.includes('non Ë stato trovato nulla')
+    || needle.includes('non ﬁ stato trovato nulla')
   );
 };
 
@@ -5436,7 +5443,7 @@ app.post('/feeds/status', async (req, res) => {
 app.post('/feeds', (req, res) => {
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   if (!name || !url) {
-    return res.status(400).json({ error: 'Nome e URL s√£o obrigat√≥rios.' });
+    return res.status(400).json({ error: 'Nome e URL s?˙o obrigat??rios.' });
   }
   const newFeed = { id: uuidv4(), name, url, showOnTimeline: !!showOnTimeline, sourceUrl: sourceUrl || '', language: normalizeFeedLanguage(language) };
   feeds.push(newFeed);
@@ -5457,7 +5464,7 @@ app.put('/feeds/:id', (req, res) => {
   const { id } = req.params;
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   const feed = feeds.find(f => f.id === id);
-  if (!feed) return res.status(404).json({ error: 'Feed n√£o encontrado.' });
+  if (!feed) return res.status(404).json({ error: 'Feed n?˙o encontrado.' });
   if (name !== undefined) feed.name = name;
   if (url !== undefined) feed.url = url;
   if (showOnTimeline !== undefined) feed.showOnTimeline = !!showOnTimeline;
@@ -6551,8 +6558,8 @@ app.post('/automation/test', async (req, res) => {
   try {
     const client = createTwitterClient(automationConfig);
     const stamp = new Date().toISOString();
-    const text = `Teste de automa√ß√£o RSS (${stamp})`;
-    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + '‚Ä¶' : text);
+    const text = `Teste de automa?∫?˙o RSS (${stamp})`;
+    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + '‘«™' : text);
     logEvent({
       level: 'info',
       source: 'automation',
@@ -6585,7 +6592,7 @@ app.post('/automation/post', async (req, res) => {
   }
   try {
     const client = createTwitterClient(automationConfig);
-    const trimmed = text.length > 280 ? text.slice(0, 277) + '‚Ä¶' : text;
+    const trimmed = text.length > 280 ? text.slice(0, 277) + '‘«™' : text;
     await client.v2.tweet(trimmed);
     const now = new Date();
     const postedId = payload.id || payload.link || payload.guid || payload.title;
@@ -7026,7 +7033,7 @@ app.get('/site/:slug', (req, res) => {
   const slug = normalizeSlug(req.params.slug);
   const site = (siteStore.sites || []).find(entry => entry.slug === slug);
   if (!site) {
-    res.status(404).json({ ok: false, message: 'Site n√Üo encontrado.' });
+    res.status(404).json({ ok: false, message: 'Site n?Âo encontrado.' });
     return;
   }
   res.json(site);
@@ -7394,7 +7401,7 @@ app.put('/tags', (req, res) => {
   res.json({ ok: true });
 });
 
-// Previs√£o do tempo
+// Previs?˙o do tempo
 app.get('/weather', async (req, res) => {
   const citiesParam = req.query.cities || '';
   const cities = String(citiesParam)
@@ -7419,7 +7426,7 @@ app.get('/weather', async (req, res) => {
       logEvent({
         level: 'warning',
         source: 'weather',
-        message: 'Falha ao buscar previs√£o do tempo.',
+        message: 'Falha ao buscar previs?˙o do tempo.',
         detail: `${city} | ${err.message || err}`
       });
     }
@@ -7482,7 +7489,7 @@ app.get('/public/watch', async (req, res) => {
   }
 });
 
-// Gerar RSS a partir de uma p√°gina
+// Gerar RSS a partir de uma p?Ìgina
 const BILLING_PLANS = [
   {
     id: 'starter',
@@ -7691,7 +7698,7 @@ app.post('/billing/modal/seen', (req, res) => {
 app.get('/rss', async (req, res) => {
   const { url } = req.query;
   if (!url) {
-    return res.status(400).json({ error: 'URL √© obrigat√≥ria.' });
+    return res.status(400).json({ error: 'URL ?Æ obrigat??ria.' });
   }
   try {
     const rss = await generateRssFromSite(url);
@@ -7719,14 +7726,14 @@ app.get('/rss', async (req, res) => {
       message: 'Falha ao gerar RSS a partir do site.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'N√£o foi poss√≠vel gerar RSS.' });
+    res.status(500).json({ error: 'N?˙o foi poss?°vel gerar RSS.' });
   }
   });
 
 app.post('/rss/generate', async (req, res) => {
   const { url, maxItems, useAi, title, language } = req.body || {};
   if (!url) {
-    return res.status(400).json({ error: 'URL √© obrigat√≥ria.' });
+    return res.status(400).json({ error: 'URL ?Æ obrigat??ria.' });
   }
   try {
     const robots = await fetchRobotsTxt(url);
@@ -7763,7 +7770,7 @@ app.post('/rss/generate', async (req, res) => {
       message: 'Falha ao gerar RSS inteligente.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'N√£o foi poss√≠vel gerar RSS.' });
+    res.status(500).json({ error: 'N?˙o foi poss?°vel gerar RSS.' });
   }
 });
 
@@ -7779,11 +7786,11 @@ app.get('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS n√£o encontrado.' });
+    return res.status(404).json({ error: 'RSS n?˙o encontrado.' });
   }
   const filePath = path.join(GENERATED_RSS_DIR, entry.fileName);
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'Arquivo RSS n√£o encontrado.' });
+    return res.status(404).json({ error: 'Arquivo RSS n?˙o encontrado.' });
   }
   const xml = fs.readFileSync(filePath, 'utf-8');
   res.set('Content-Type', 'application/rss+xml; charset=utf-8');
@@ -7794,7 +7801,7 @@ app.delete('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS n√£o encontrado.' });
+    return res.status(404).json({ error: 'RSS n?˙o encontrado.' });
   }
   removeGeneratedFile(entry);
   generatedRssIndex = generatedRssIndex.filter(item => item.id !== id);
@@ -7812,7 +7819,7 @@ app.post('/saved', (req, res) => {
   const item = req.body || {};
   const id = item.id || item.link || item.guid || item.title;
   if (!id) {
-    return res.status(400).json({ error: 'Item inv√°lido.' });
+    return res.status(400).json({ error: 'Item inv?Ìlido.' });
   }
   const existing = savedItems.find(saved => saved.id === id);
   if (existing) return res.status(200).json(existing);
@@ -8321,17 +8328,17 @@ app.get('/aggregate', async (req, res) => {
         message: 'Falha ao ler feed.',
         detail: `${feed.name} | ${feed.url} | ${e.message || e}`
       });
-      // Ignora feeds que n√£o puderam ser lidos
+      // Ignora feeds que n?˙o puderam ser lidos
     }
   }
-  // Ordena por data, se dispon√≠vel
+  // Ordena por data, se dispon?°vel
   aggregated.sort((a, b) => {
     const dateA = new Date(a.pubDate || a.isoDate || 0);
     const dateB = new Date(b.pubDate || b.isoDate || 0);
     return dateB - dateA;
   });
 
-  // Deduplica√ß√£o por t√≠tulo normalizado
+  // Deduplica?∫?˙o por t?°tulo normalizado
   const grouped = [];
   const seen = new Map();
   for (const item of aggregated) {
@@ -8534,13 +8541,12 @@ setInterval(() => {
     logEvent({
       level: 'error',
       source: 'summary',
-      message: 'Falha ao gerar resumo di√°rio.',
+      message: 'Falha ao gerar resumo di?Ìrio.',
       detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
 const { loadTags, saveTags } = require('./tagStorage');
 let tagConfig = loadTags();
-
 
 
