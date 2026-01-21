@@ -2307,7 +2307,7 @@ async function runWhatsAppAutomation() {
       level: 'error',
       source: 'whatsapp',
       message: 'Falha ao enviar no WhatsApp.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   }
 }
@@ -2394,7 +2394,7 @@ async function runTelegramAutomation() {
       level: 'error',
       source: 'telegram',
       message: 'Falha ao enviar no Telegram.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   }
 }
@@ -3700,7 +3700,7 @@ async function generateWatchReport(options) {
         level: 'warning',
         source: 'watch-report',
         message: 'Falha ao gerar relatorio com IA, usando fallback.',
-        detail: err.message || String(err)
+        detail: err.detail || err.message || String(err)
       });
     }
   }
@@ -3850,7 +3850,7 @@ async function runWatchReportAutomation() {
       source: 'auto',
       range: reportSettings.range,
       message: 'Falha ao publicar relatorio automatico.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   }
 }
@@ -6564,7 +6564,7 @@ app.post('/automation/test', async (req, res) => {
       level: 'error',
       source: 'automation',
       message: 'Falha ao publicar post de teste.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
     res.status(500).json({ error: 'Falha ao publicar teste.' });
   }
@@ -6607,7 +6607,7 @@ app.post('/automation/post', async (req, res) => {
       level: 'error',
       source: 'automation',
       message: 'Falha ao publicar post manual.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
     res.status(500).json({ ok: false, message: err.message || 'Falha ao publicar.' });
   }
@@ -6659,7 +6659,7 @@ app.post('/telegram/test', async (req, res) => {
     logEvent({ level: 'info', source: 'telegram', message: 'Teste enviado no Telegram.' });
     res.json({ ok: true });
   } catch (err) {
-    logEvent({ level: 'error', source: 'telegram', message: 'Falha ao testar Telegram.', detail: err.message || String(err) });
+    logEvent({ level: 'error', source: 'telegram', message: 'Falha ao testar Telegram.', detail: err.detail || err.message || String(err) });
     res.status(500).json({ ok: false, message: 'Falha ao enviar teste.' });
   }
 });
@@ -6724,7 +6724,7 @@ app.post('/whatsapp/test', async (req, res) => {
     logEvent({ level: 'info', source: 'whatsapp', message: 'Teste enviado no WhatsApp.' });
     res.json({ ok: true });
   } catch (err) {
-    logEvent({ level: 'error', source: 'whatsapp', message: 'Falha ao testar WhatsApp.', detail: err.message || String(err) });
+    logEvent({ level: 'error', source: 'whatsapp', message: 'Falha ao testar WhatsApp.', detail: err.detail || err.message || String(err) });
     res.status(500).json({ ok: false, message: 'Falha ao enviar teste.' });
   }
 });
@@ -6803,7 +6803,7 @@ app.get('/trends', async (req, res) => {
       level: 'error',
       source: 'trends',
       message: 'Falha ao carregar trends.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
     res.status(500).json({ ok: false, message: 'Falha ao carregar trends.' });
   }
@@ -6818,7 +6818,7 @@ app.get('/trends/terms', async (req, res) => {
       level: 'error',
       source: 'trends',
       message: 'Falha ao carregar termos.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
     res.status(500).json({ ok: false, message: 'Falha ao carregar termos.' });
   }
@@ -6838,7 +6838,7 @@ app.get('/polymarket/events', async (req, res) => {
         level: 'warning',
         source: 'kalshi',
         message: 'Falha ao carregar Kalshi.',
-        detail: err.message || String(err)
+        detail: err.detail || err.message || String(err)
       });
     }
     const mergedItems = [...payload.items, ...kalshiItems];
@@ -6858,7 +6858,7 @@ app.get('/polymarket/events', async (req, res) => {
       level: 'error',
       source: 'polymarket',
       message: 'Falha ao carregar Polymarket.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
     res.status(500).json({ error: 'Falha ao carregar Polymarket.' });
   }
@@ -7000,7 +7000,7 @@ app.get('/youtube/search', async (req, res) => {
       level: 'error',
       source: 'youtube',
       message: 'Falha ao buscar videos.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
     res.status(500).json({ ok: false, message: 'Falha ao buscar videos.' });
   }
@@ -7306,7 +7306,7 @@ app.post('/influencers/:id/queue/:itemId/publish', async (req, res) => {
         level: 'error',
         source: 'influencer',
         message: 'Falha ao publicar no Twitter.',
-        detail: err.message || String(err)
+        detail: err.detail || err.message || String(err)
       });
     }
   }
@@ -7326,7 +7326,7 @@ app.post('/influencers/:id/queue/:itemId/publish', async (req, res) => {
         level: 'error',
         source: 'influencer',
         message: 'Falha ao publicar no Telegram.',
-        detail: err.message || String(err)
+        detail: err.detail || err.message || String(err)
       });
     }
   }
@@ -7344,7 +7344,7 @@ app.post('/influencers/:id/queue/:itemId/publish', async (req, res) => {
         level: 'error',
         source: 'influencer',
         message: 'Falha ao publicar no WhatsApp.',
-        detail: err.message || String(err)
+        detail: err.detail || err.message || String(err)
       });
     }
   }
@@ -8480,7 +8480,7 @@ setInterval(() => {
       level: 'error',
       source: 'automation',
       message: 'Falha ao publicar no X/Twitter.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
@@ -8491,7 +8491,7 @@ setInterval(() => {
       level: 'error',
       source: 'watch-report',
       message: 'Falha ao publicar relatorio.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
@@ -8502,7 +8502,7 @@ setInterval(() => {
       level: 'error',
       source: 'telegram',
       message: 'Falha ao executar Telegram.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
@@ -8513,7 +8513,7 @@ setInterval(() => {
       level: 'error',
       source: 'whatsapp',
       message: 'Falha ao executar WhatsApp.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
@@ -8524,7 +8524,7 @@ setInterval(() => {
       level: 'error',
       source: 'alert',
       message: 'Falha ao executar alertas.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
@@ -8535,7 +8535,7 @@ setInterval(() => {
       level: 'error',
       source: 'summary',
       message: 'Falha ao gerar resumo diário.',
-      detail: err.message || String(err)
+      detail: err.detail || err.message || String(err)
     });
   });
 }, 60000);
