@@ -3708,6 +3708,25 @@ async function generateWatchReport(options) {
   return { items, report };
 }
 
+
+function formatTwitterPostError(err) {
+  const status = err?.status || err?.statusCode || err?.response?.status || 500;
+  let message = 'Falha ao publicar relatorio.';
+  let detail = '';
+  if (err?.data?.detail) detail = String(err.data.detail);
+  if (err?.data?.title) detail = detail ? `${detail} | ${err.data.title}` : String(err.data.title);
+  if (err?.message) detail = detail ? `${detail} | ${err.message}` : String(err.message);
+  if (err?.data?.error) detail = detail ? `${detail} | ${err.data.error}` : String(err.data.error);
+  if (err?.data?.errors && Array.isArray(err.data.errors)) {
+    const joined = err.data.errors.map(item => item?.message || item?.detail || '').filter(Boolean).join(' | ');
+    if (joined) detail = detail ? `${detail} | ${joined}` : joined;
+  }
+  if (status === 429) {
+    message = 'Limite de postagens atingido no X.';
+  }
+  if (!detail) detail = 'Falha ao publicar no X.';
+  return { status, message, detail };
+}
 async function postWatchReport(settings) {
   if (!hasTwitterCredentials(automationConfig)) {
     throw new Error('Credenciais do X/Twitter ausentes.');
