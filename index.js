@@ -1559,10 +1559,13 @@ function appendWatchReportAutoSkip(reason, detail) {
 }
 
 function getReportAutomationCandidate() {
-  const base = getWatchSettingsForUser();
-  if (base && base.report && base.report.autoEnabled) {
-    return { settings: base, userId: null };
+  if (watchReportState && watchReportState.lastAutoConfig && watchReportState.lastAutoConfig.autoEnabled) {
+    return {
+      settings: { report: watchReportState.lastAutoConfig },
+      userId: watchReportState.lastAutoConfigUserId || null
+    };
   }
+  const base = getWatchSettingsForUser();
   const users = watchSettings.users || {};
   const userIds = Object.keys(users);
   for (let i = 0; i < userIds.length; i += 1) {
@@ -1572,9 +1575,11 @@ function getReportAutomationCandidate() {
       return { settings: candidate, userId };
     }
   }
+  if (base && base.report && base.report.autoEnabled) {
+    return { settings: base, userId: null };
+  }
   return { settings: base || {}, userId: null };
-}
-function getWatchReportLogs() {
+}function getWatchReportLogs() {
   return Array.isArray(watchReportState.logs) ? watchReportState.logs : [];
 }
 const MAX_WATCH_ALERTS = 500;
@@ -8105,9 +8110,13 @@ app.put('/watch/settings', (req, res) => {
   const userId = req.query.userId || req.headers['x-user-id'] || req.user?.id;
   const next = normalizeWatchSettings(req.body || {});
   setWatchSettingsForUser(userId, next);
+  if (next.report && typeof next.report === 'object') {
+    watchReportState.lastAutoConfig = { ...next.report };
+    if (userId) watchReportState.lastAutoConfigUserId = userId;
+    saveWatchReportState(watchReportState);
+  }
   res.json(getWatchSettingsForUser(userId));
 });
-
 app.post('/watch/topics', (req, res) => {
   const payload = req.body || {};
   const name = String(payload.name || '').trim();
