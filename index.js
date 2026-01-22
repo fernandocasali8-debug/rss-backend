@@ -3406,6 +3406,137 @@ function normalizeWatchKeywords(list) {
   return list.map(word => String(word || '').trim()).filter(Boolean);
 }
 
+// Watch settings/helpers
+function normalizeWatchSettings(input) {
+  const base = (watchSettings && watchSettings.default) ? watchSettings.default : {};
+  const payload = (input && typeof input === 'object') ? input : {};
+  const report = normalizeWatchReportSettings({
+    ...(base.report || {}),
+    ...(payload.report || {})
+  });
+  const viewMode = payload.viewMode === 'grid' || payload.viewMode === 'compact'
+    ? payload.viewMode
+    : (payload.viewMode === 'list' ? 'list' : (base.viewMode || 'list'));
+  const timeRange = ['1h', '2h', '3h', '24h', '7d'].includes(payload.timeRange)
+    ? payload.timeRange
+    : (base.timeRange || '24h');
+  const sortMode = payload.sortMode === 'relevant'
+    ? 'relevant'
+    : (payload.sortMode === 'recent' ? 'recent' : (base.sortMode || 'recent'));
+  const topicFilter = typeof payload.topicFilter === 'string'
+    ? payload.topicFilter
+    : (base.topicFilter || 'all');
+  const newOnly = typeof payload.newOnly === 'boolean'
+    ? payload.newOnly
+    : (base.newOnly || false);
+  const recencyWeight = clampNumber(
+    payload.recencyWeight,
+    0,
+    100,
+    (typeof base.recencyWeight === 'number') ? base.recencyWeight : 70
+  );
+  return {
+    recencyWeight,
+    viewMode,
+    timeRange,
+    sortMode,
+    topicFilter,
+    newOnly,
+    report
+  };
+}
+
+function getWatchSettingsForUser(userId) {
+  const base = (watchSettings && watchSettings.default) ? watchSettings.default : {};
+  if (!userId) return { ...base, report: { ...(base.report || {}) } };
+  const users = (watchSettings && watchSettings.users) ? watchSettings.users : {};
+  const userOverrides = users[userId] || {};
+  return {
+    ...base,
+    ...userOverrides,
+    report: {
+      ...(base.report || {}),
+      ...(userOverrides.report || {})
+    }
+  };
+}
+
+function setWatchSettingsForUser(userId, next) {
+  const normalized = normalizeWatchSettings(next);
+  if (!watchSettings || typeof watchSettings !== 'object') {
+    watchSettings = { default: normalized, users: {} };
+  }
+  if (!watchSettings.users || typeof watchSettings.users !== 'object') {
+    watchSettings.users = {};
+  }
+  if (userId) {
+    watchSettings.users[userId] = normalized;
+  } else {
+    watchSettings.default = normalized;
+  }
+  saveWatchSettings(watchSettings);
+  return normalized;
+}
+
+function matchesWatchTopic(item, topic) {
+  if (!topic || topic.enabled === false) return false;
+  const keywords = normalizeWatchKeywords(topic.keywords || []);
+  if (!keywords.length) return false;
+  const haystack = normalizeTitle([
+    item.title || '',
+    item.contentSnippet || '',
+    item.feedName || ''
+  ].join(' '));
+  if (!haystack) return false;
+  const normalizedKeywords = keywords
+    .map(word => normalizeTitle(word))
+    .filter(Boolean);
+  if (!normalizedKeywords.length) return false;
+  if (topic.matchMode === 'all') {
+    return normalizedKeywords.every(word => haystack.includes(word));
+  }
+  return normalizedKeywords.some(word => haystack.includes(word));
+}
+
+function updateWatchAlerts(items) {
+  if (!Array.isArray(items) || !items.length) return 0;
+  const topics = (watchTopics || []).filter(topic => topic.enabled !== false);
+  if (!topics.length) return 0;
+  let added = 0;
+  const matchedAt = new Date().toISOString();
+  for (const item of items) {
+    for (const topic of topics) {
+      if (!matchesWatchTopic(item, topic)) continue;
+      const key = buildWatchAlertKey(topic.id, item);
+      if (!key || watchAlertKeys.has(key)) continue;
+      watchAlertKeys.add(key);
+      watchAlerts.unshift({
+        id: uuidv4(),
+        key,
+        topicId: topic.id,
+        topicName: topic.name,
+        matchedAt,
+        item: {
+          title: item.title || '',
+          link: item.link || '',
+          feedName: item.feedName || '',
+          contentSnippet: item.contentSnippet || '',
+          pubDate: item.pubDate || '',
+          isoDate: item.isoDate || ''
+        }
+      });
+      added += 1;
+    }
+  }
+  if (added) {
+    if (watchAlerts.length > MAX_WATCH_ALERTS) {
+      watchAlerts = watchAlerts.slice(0, MAX_WATCH_ALERTS);
+    }
+    saveWatchAlerts(watchAlerts);
+  }
+  return added;
+}
+
 const WATCH_REPORT_RANGES = ['1h', '2h', '3h', '24h'];
 const REPORT_AUTOMATION_MAX_LOGS = 200;
 const REPORT_AUTOMATION_LOCK_MS = 2 * 60 * 1000;
