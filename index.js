@@ -8669,3 +8669,5 @@ const { loadTags, saveTags } = require('./tagStorage');
 let tagConfig = loadTags();
 
 
+
+// watch helpers restored
