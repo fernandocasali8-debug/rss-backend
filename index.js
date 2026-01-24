@@ -4880,36 +4880,27 @@ function buildFallbackTitle(title, snippet) {
 
 function finalizeRewriteText(raw, limit, includeTitle, title, snippet) {
   let cleaned = String(raw || '').trim();
-  cleaned = cleaned.replace(//g, '');
-  cleaned = cleaned.replace(/[ 	]+/g, ' ');
-  cleaned = cleaned.replace(/
-{3,}/g, '
-
-');
+  cleaned = cleaned.replace(/\r/g, '');
+  cleaned = cleaned.replace(/[ \t]+/g, ' ');
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
   const normalizedTitle = normalizeAiInput(title).toLowerCase();
 
   if (includeTitle) {
-    const lines = cleaned.split('
-').map(line => line.trim()).filter(Boolean);
+    const lines = cleaned.split('\n').map(line => line.trim()).filter(Boolean);
     let lineTitle = lines.length >= 2 ? lines[0] : '';
-    let body = lines.length >= 2 ? lines.slice(1).join('
-').trim() : cleaned;
+    let body = lines.length >= 2 ? lines.slice(1).join('\n').trim() : cleaned;
     const normalizedLineTitle = normalizeAiInput(lineTitle).toLowerCase();
-    if (!lineTitle || (normalizedTitle && normalizedLineTitle == normalizedTitle)) {
+    if (!lineTitle || (normalizedTitle && normalizedLineTitle === normalizedTitle)) {
       const fallbackTitle = buildFallbackTitle(title, snippet);
       lineTitle = fallbackTitle || lineTitle;
     }
-    cleaned = lineTitle ? `${lineTitle}
-
-${body}`.trim() : body;
+    cleaned = lineTitle ? `${lineTitle}\n\n${body}`.trim() : body;
   } else if (normalizedTitle) {
-    const lines = cleaned.split('
-').map(line => line.trim()).filter(Boolean);
+    const lines = cleaned.split('\n').map(line => line.trim()).filter(Boolean);
     if (lines.length >= 2) {
       const normalizedLineTitle = normalizeAiInput(lines[0]).toLowerCase();
-      if (normalizedLineTitle == normalizedTitle) {
-        cleaned = lines.slice(1).join('
-').trim();
+      if (normalizedLineTitle === normalizedTitle) {
+        cleaned = lines.slice(1).join('\n').trim();
       }
     }
   }
