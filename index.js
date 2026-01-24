@@ -4790,6 +4790,8 @@ function buildAiPrompts(item, maxChars, mode) {
   const snippet = normalizeAiInput(item.contentSnippet);
   const feedName = normalizeAiInput(item.feedName);
   const link = String(item.link || '').trim();
+  const includeEmojis = Boolean(item.includeEmojis);
+  const includeTitle = Boolean(item.includeTitle);
   const limit = Math.max(200, Math.min(1200, Number(maxChars) || 600));
   const twitterLimit = Math.min(280, limit);
   const systemPrompt = [
@@ -4798,17 +4800,27 @@ function buildAiPrompts(item, maxChars, mode) {
     'Nao invente fatos, numeros ou nomes.',
     'Se nao houver dados suficientes, responda exatamente com SEM_DADOS.'
   ].join('\n');
+  const titleRule = includeTitle
+    ? 'Inclua um titulo curto na primeira linha e depois uma linha em branco.'
+    : 'Nao inclua titulo extra.';
+  const emojiRule = includeEmojis
+    ? 'Use no maximo 2 emojis relevantes, sem excesso.'
+    : 'Nao use emojis.';
   let style = [
     `Escreva um texto jornalistico curto (2 a 4 frases), em pt-BR,`,
     `com no maximo ${limit} caracteres.`,
-    'Sem listas, sem markdown, sem titulo extra.'
+    'Sem listas, sem markdown.',
+    titleRule,
+    emojiRule
   ].join('\n');
   if (mode === 'twitter') {
     style = [
       `Escreva um texto curto para X/Twitter (2 a 3 frases), em pt-BR,`,
       'com tom informativo.',
       `Use no maximo ${twitterLimit} caracteres.`,
-      'Sem listas, sem markdown, sem emojis excessivos.',
+      'Sem listas, sem markdown.',
+      titleRule,
+      emojiRule,
       'Se fizer sentido, inclua o link ao final.'
     ].join('\n');
   } else if (mode === 'twitter_short') {
@@ -4816,14 +4828,18 @@ function buildAiPrompts(item, maxChars, mode) {
       `Escreva um texto curto para X/Twitter (1 a 2 frases), em pt-BR,`,
       'com tom direto.',
       `Use no maximo ${Math.min(200, twitterLimit)} caracteres.`,
-      'Sem listas, sem markdown, sem emojis.'
+      'Sem listas, sem markdown.',
+      titleRule,
+      emojiRule
     ].join('\n');
   } else if (mode === 'twitter_cta') {
     style = [
       `Escreva um texto curto para X/Twitter (2 a 3 frases), em pt-BR,`,
       'com tom informativo e uma chamada final.',
       `Use no maximo ${twitterLimit} caracteres.`,
-      'Sem listas, sem markdown, sem emojis excessivos.',
+      'Sem listas, sem markdown.',
+      titleRule,
+      emojiRule,
       'Inclua uma chamada final do tipo "Leia mais" ou "Saiba mais".',
       'Inclua o link ao final, se possivel.'
     ].join('\n');
@@ -4832,7 +4848,9 @@ function buildAiPrompts(item, maxChars, mode) {
       `Escreva um texto curto para X/Twitter (2 a 3 frases), em pt-BR,`,
       'com tom informativo.',
       `Use no maximo ${twitterLimit} caracteres.`,
-      'Sem listas, sem markdown, sem emojis.',
+      'Sem listas, sem markdown.',
+      titleRule,
+      emojiRule,
       'Nao inclua o link no texto.'
     ].join('\n');
   }
