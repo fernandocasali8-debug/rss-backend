@@ -1,7 +1,7 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
-const STATE_FILE = path.join(__dirname, 'automationState.json');
+const STORAGE_DIR = process.env.STORAGE_DIR || path.join(__dirname, 'data');\nfs.mkdirSync(STORAGE_DIR, { recursive: true });\nconst STATE_FILE = path.join(STORAGE_DIR, 'automationState.json');\n
 
 function loadState() {
   try {
@@ -22,3 +22,4 @@ function saveState(state) {
 }
 
 module.exports = { loadState, saveState };
+

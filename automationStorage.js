@@ -1,7 +1,7 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
-const AUTOMATION_FILE = path.join(__dirname, 'automation.json');
+const STORAGE_DIR = process.env.STORAGE_DIR || path.join(__dirname, 'data');\nfs.mkdirSync(STORAGE_DIR, { recursive: true });\nconst AUTOMATION_FILE = path.join(STORAGE_DIR, 'automation.json');\n
 
 function loadAutomation() {
   try {
@@ -45,3 +45,4 @@ function saveAutomation(data) {
 }
 
 module.exports = { loadAutomation, saveAutomation };
+
