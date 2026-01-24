@@ -1,7 +1,9 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 
-const STORAGE_DIR = process.env.STORAGE_DIR || path.join(__dirname, 'data');\nfs.mkdirSync(STORAGE_DIR, { recursive: true });\nconst STATE_FILE = path.join(STORAGE_DIR, 'automationState.json');\n
+const STORAGE_DIR = process.env.STORAGE_DIR || path.join(__dirname, 'data');
+fs.mkdirSync(STORAGE_DIR, { recursive: true });
+const STATE_FILE = path.join(STORAGE_DIR, 'automationState.json');
 
 function loadState() {
   try {
