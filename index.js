@@ -4801,7 +4801,7 @@ function buildAiPrompts(item, maxChars, mode) {
     'Se nao houver dados suficientes, responda exatamente com SEM_DADOS.'
   ].join('\n');
   const titleRule = includeTitle
-    ? 'Inclua um titulo curto na primeira linha e depois uma linha em branco.'
+    ? 'Crie um titulo curto reescrito (nao copie a manchete original) na primeira linha e depois uma linha em branco.'
     : 'Nao inclua titulo extra.';
   const emojiRule = includeEmojis
     ? 'Use no maximo 2 emojis relevantes, sem excesso.'
@@ -4866,6 +4866,60 @@ function buildAiPrompts(item, maxChars, mode) {
   return { systemPrompt, userPrompt, limit: outputLimit };
 }
 
+function buildFallbackTitle(title, snippet) {
+  const base = normalizeAiInput(snippet || title);
+  if (!base) return '';
+  const words = base.split(' ').filter(Boolean);
+  if (!words.length) return '';
+  const short = words.slice(0, 12).join(' ');
+  if (words.length > 12 && !/[.!?]$/.test(short)) {
+    return `${short}...`;
+  }
+  return short;
+}
+
+function finalizeRewriteText(raw, limit, includeTitle, title, snippet) {
+  let cleaned = String(raw || '').trim();
+  cleaned = cleaned.replace(//g, '');
+  cleaned = cleaned.replace(/[ 	]+/g, ' ');
+  cleaned = cleaned.replace(/
+{3,}/g, '
+
+');
+  const normalizedTitle = normalizeAiInput(title).toLowerCase();
+
+  if (includeTitle) {
+    const lines = cleaned.split('
+').map(line => line.trim()).filter(Boolean);
+    let lineTitle = lines.length >= 2 ? lines[0] : '';
+    let body = lines.length >= 2 ? lines.slice(1).join('
+').trim() : cleaned;
+    const normalizedLineTitle = normalizeAiInput(lineTitle).toLowerCase();
+    if (!lineTitle || (normalizedTitle && normalizedLineTitle == normalizedTitle)) {
+      const fallbackTitle = buildFallbackTitle(title, snippet);
+      lineTitle = fallbackTitle || lineTitle;
+    }
+    cleaned = lineTitle ? `${lineTitle}
+
+${body}`.trim() : body;
+  } else if (normalizedTitle) {
+    const lines = cleaned.split('
+').map(line => line.trim()).filter(Boolean);
+    if (lines.length >= 2) {
+      const normalizedLineTitle = normalizeAiInput(lines[0]).toLowerCase();
+      if (normalizedLineTitle == normalizedTitle) {
+        cleaned = lines.slice(1).join('
+').trim();
+      }
+    }
+  }
+
+  if (limit && cleaned.length > limit) {
+    cleaned = cleaned.slice(0, limit).trim();
+  }
+  return cleaned;
+}
+
 async function rewriteWithOpenAi(item, config, mode) {
   if (!config || !config.apiKey) {
     throw new Error('Chave da OpenAI ausente.');
@@ -4910,11 +4964,7 @@ async function rewriteWithOpenAi(item, config, mode) {
     throw new Error('Sem dados suficientes para reescrita.');
   }
 
-  let cleaned = content.replace(/\s+/g, ' ').trim();
-  if (cleaned.length > limit) {
-    cleaned = cleaned.slice(0, limit).trim();
-  }
-  return cleaned;
+  return finalizeRewriteText(content, limit, item.includeTitle, title, snippet);
 }
 
 async function rewriteWithGemini(item, config, maxChars, mode) {
@@ -4955,11 +5005,7 @@ async function rewriteWithGemini(item, config, maxChars, mode) {
   if (!content || content === 'SEM_DADOS') {
     throw new Error('Sem dados suficientes para reescrita.');
   }
-  let cleaned = content.replace(/\s+/g, ' ').trim();
-  if (cleaned.length > limit) {
-    cleaned = cleaned.slice(0, limit).trim();
-  }
-  return cleaned;
+  return finalizeRewriteText(content, limit, item.includeTitle, title, snippet);
 }
 
 async function rewriteWithCopilot(item, config, maxChars, mode) {
@@ -5001,11 +5047,7 @@ async function rewriteWithCopilot(item, config, maxChars, mode) {
   if (!content || content === 'SEM_DADOS') {
     throw new Error('Sem dados suficientes para reescrita.');
   }
-  let cleaned = content.replace(/\s+/g, ' ').trim();
-  if (cleaned.length > limit) {
-    cleaned = cleaned.slice(0, limit).trim();
-  }
-  return cleaned;
+  return finalizeRewriteText(content, limit, item.includeTitle, title, snippet);
 }
 
 function sanitizeHashtag(tag) {
@@ -6553,7 +6595,8 @@ app.put('/ai/config', (req, res) => {
   }
   try {
     const item = req.body || {};
-    const mode = item.mode === 'twitter' ? 'twitter' : 'default';
+    const allowedModes = new Set(['default', 'twitter', 'twitter_short', 'twitter_cta', 'twitter_nolink']);
+    const mode = allowedModes.has(item.mode) ? item.mode : 'default';
     let text = '';
     if (aiConfig.provider === 'openai') {
       text = await rewriteWithOpenAi(item, aiConfig.openai, mode);
