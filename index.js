@@ -1813,6 +1813,7 @@ async function generateSmartRss(targetUrl, options = {}) {
     article?.excerpt ||
     `Noticias recentes de ${siteTitle}`;
   const ogImage = $('meta[property="og:image"]').attr('content') || '';
+  const mainImage = extractBestImage($, baseUrl) || ogImage;
 
   const candidates = extractCandidates($, baseUrl);
   const maxItems = options.maxItems
@@ -1827,7 +1828,7 @@ async function generateSmartRss(targetUrl, options = {}) {
     title: item.title,
     link: item.link,
     description: item.title,
-    image: ogImage || '',
+    image: mainImage,
     date: new Date().toUTCString()
   }));
 
@@ -5477,6 +5478,9 @@ function extractImageFromItem(item) {
   const mediaUrl = mediaContent?.url || mediaContent?.$?.url;
   const thumbUrl = mediaThumb?.url || mediaThumb?.$?.url;
   const image = enclosureUrl || mediaUrl || thumbUrl || '';
+  if (!image) return '';
+  const lower = String(image).toLowerCase();
+  if (/(logo|favicon|sprite|placeholder|branding)/.test(lower)) return '';
   return image;
 }
 
