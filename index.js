@@ -2717,7 +2717,8 @@ async function buildAggregatedItems() {
         contentSnippet: stripHtml(item.contentSnippet),
         feedName: stripHtml(feed.name),
         feedUrl: feed.url,
-        tags: []
+        tags: [],
+        image: extractImageFromItem(item)
       }));
       if (shouldTranslateFeed(feed)) {
         const tasks = feedItems.map(item => async () => translateItemIfNeeded(item, feed));
@@ -5467,6 +5468,16 @@ function extractCandidates($, baseUrl) {
     if (candidates.length >= 25) break;
   }
   return candidates;
+}
+
+function extractImageFromItem(item) {
+  const enclosureUrl = item?.enclosure?.url || item?.enclosure?.url?.url;
+  const mediaContent = item?.['media:content'];
+  const mediaThumb = item?.['media:thumbnail'];
+  const mediaUrl = mediaContent?.url || mediaContent?.$?.url;
+  const thumbUrl = mediaThumb?.url || mediaThumb?.$?.url;
+  const image = enclosureUrl || mediaUrl || thumbUrl || '';
+  return image;
 }
 
 async function generateRssFromSite(targetUrl) {
@@ -8600,6 +8611,7 @@ app.get('/aggregate', async (req, res) => {
         contentSnippet: stripHtml(item.contentSnippet),
         feedName: stripHtml(feed.name),
         feedUrl: feed.url
+        , image: extractImageFromItem(item)
       })));
     } catch (e) {
       logEvent({
