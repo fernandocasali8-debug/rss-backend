@@ -5424,6 +5424,13 @@ async function runPromptWithCopilot(prompt, config) {
 
 function extractCandidates($, baseUrl) {
   const candidates = [];
+  const navTokens = new Set([
+    'home', 'início', 'inicio', 'sobre', 'about', 'contato', 'contatos', 'fale',
+    'conta', 'login', 'cadastre', 'termos', 'privacidade', 'ajuda', 'faq',
+    'assinatura', 'assinaturas', 'painel', 'dashboard', 'suporte', 'configurações',
+    'configuracoes', 'cookies', 'política', 'politica', 'perfil', 'minha conta',
+    'mercados', 'ferramentas', 'calendários', 'calendarios', 'análises', 'analises'
+  ]);
   const selectors = [
     'article a',
     'h1 a',
@@ -5446,7 +5453,14 @@ function extractCandidates($, baseUrl) {
       }
       if (seen.has(abs)) return;
       const text = $(el).text().replace(/\s+/g, ' ').trim();
-      if (text.length < 8) return;
+      if (text.length < 15) return;
+      const lower = text.toLowerCase();
+      const words = lower.split(/\s+/).filter(Boolean);
+      if (words.length < 3) return;
+      if (navTokens.has(lower)) return;
+      if (words.some(w => navTokens.has(w))) return;
+      const depth = (abs.match(/\//g) || []).length;
+      if (depth < 3) return; // links rasos costumam ser navegação
       seen.add(abs);
       candidates.push({ link: abs, title: text });
     });
