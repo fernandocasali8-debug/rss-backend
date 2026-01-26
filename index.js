@@ -8601,67 +8601,34 @@ app.post('/watch/refresh', async (req, res) => {
   }
 });
 
-
-// Agregar todos os feeds cadastrados
+// Agregar todos os feeds cadastrados (cache em memória)
 app.get('/aggregate', async (req, res) => {
-  const parser = new Parser();
-  let aggregated = [];
-  for (const feed of feeds.filter(f => f.showOnTimeline)) {
-    try {
-      const parsed = await parseFeedWithEncoding(feed.url, parser);
-      aggregated = aggregated.concat(parsed.items.map(item => ({
-        ...item,
-        title: stripHtml(item.title),
-        contentSnippet: stripHtml(item.contentSnippet),
-        feedName: stripHtml(feed.name),
-        feedUrl: feed.url
-        , image: extractImageFromItem(item)
-      })));
-    } catch (e) {
-      logEvent({
-        level: 'error',
-        source: 'rss',
-        message: 'Falha ao ler feed.',
-        detail: `${feed.name} | ${feed.url} | ${e.message || e}`
-      });
-      // Ignora feeds que n?Ãºo puderam ser lidos
+  try {
+    const cached = getAggregatedCache();
+    if (cached.items.length) {
+      if (cached.stale) {
+        buildAggregatedItems().catch((err) => {
+          logEvent({
+            level: 'error',
+            source: 'rss',
+            message: 'Falha ao atualizar cache agregado (bg).',
+            detail: err?.message || String(err)
+          });
+        });
+      }
+      return res.json(cached.items);
     }
-  }
-  // Ordena por data, se dispon?Â¡vel
-  aggregated.sort((a, b) => {
-    const dateA = new Date(a.pubDate || a.isoDate || 0);
-    const dateB = new Date(b.pubDate || b.isoDate || 0);
-    return dateB - dateA;
-  });
-
-  // Deduplica?Âº?Ãºo por t?Â¡tulo normalizado
-  const grouped = [];
-  const seen = new Map();
-  for (const item of aggregated) {
-    const key = normalizeTitle(item.title) || item.link || item.guid || item.title;
-    if (!key) {
-      grouped.push({ ...item, sources: [] });
-      continue;
-    }
-    if (!seen.has(key)) {
-      const entry = { ...item, sources: [] };
-      seen.set(key, entry);
-      grouped.push(entry);
-      continue;
-    }
-    const existing = seen.get(key);
-    existing.sources.push({
-      feedName: item.feedName,
-      feedUrl: item.feedUrl,
-      link: item.link,
-      pubDate: item.pubDate,
-      isoDate: item.isoDate
+    const fresh = await buildAggregatedItems();
+    return res.json(fresh);
+  } catch (err) {
+    logEvent({
+      level: 'error',
+      source: 'rss',
+      message: 'Falha ao gerar agregação.',
+      detail: err?.message || String(err)
     });
-    existing.tags = Array.from(new Set([...(existing.tags || []), ...(item.tags || [])]));
+    res.status(500).json({ error: 'Falha ao agregar feeds.' });
   }
-
-  updateWatchAlerts(grouped);
-  res.json(grouped);
 });
 
 const server = http.createServer(app);
