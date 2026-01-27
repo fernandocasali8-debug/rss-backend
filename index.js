@@ -2745,13 +2745,21 @@ async function buildAggregatedItems() {
   // Incluir RSS gerados pelo sistema (cache local em generated-rss)
   for (const entry of generatedRssIndex) {
     try {
-      const refreshed = await regenerateGeneratedRss(entry, { useAi: true }).catch(() => entry);
-      const filePath = path.join(GENERATED_RSS_DIR, refreshed.fileName || `${refreshed.id}.xml`);
-      let xml = '';
-      if (fs.existsSync(filePath)) {
-        xml = fs.readFileSync(filePath, 'utf-8');
+      const filePath = path.join(GENERATED_RSS_DIR, entry.fileName || `${entry.id}.xml`);
+      let xml = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+
+      let refreshed = entry;
+      try {
+        refreshed = await regenerateGeneratedRss(entry, { useAi: true });
+        const refreshedPath = path.join(GENERATED_RSS_DIR, refreshed.fileName || `${refreshed.id}.xml`);
+        if (fs.existsSync(refreshedPath)) {
+          xml = fs.readFileSync(refreshedPath, 'utf-8');
+        }
+      } catch (e) {
+        // se a regeneração falhar, usa XML existente se houver
       }
-      if (!xml) continue;
+
+      if (!xml) continue; // sem XML para consumir
       const parsed = await parser.parseString(xml);
       const feedItems = (parsed.items || []).map(item => ({
         ...item,
