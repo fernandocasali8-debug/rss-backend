@@ -1,4 +1,4 @@
-// Backend b?Ã­sico Node.js/Express para gerenciar feeds RSS
+﻿// Backend b?ÃƒÂ­sico Node.js/Express para gerenciar feeds RSS
 
 require('dotenv').config();
 
@@ -1387,7 +1387,7 @@ app.post('/google/drive/backup', async (req, res) => {
 
 
 
-// Persist?Â¬ncia em arquivo
+// Persist?Ã‚Â¬ncia em arquivo
 const { loadFeeds, saveFeeds } = require('./feedsStorage');
 const normalizeFeedLanguage = (value) => (value === 'auto' ? 'auto' : 'pt');
 const normalizeFeed = (feed) => ({
@@ -1672,7 +1672,7 @@ const generatedRssRefreshing = new Map();
 
 async function regenerateGeneratedRss(entry, opts = {}) {
   if (!entry || !entry.id || !entry.url) {
-    throw new Error('Entrada RSS invÃ¡lida.');
+    throw new Error('Entrada RSS invÃƒÂ¡lida.');
   }
   const cachedPromise = generatedRssRefreshing.get(entry.id);
   if (cachedPromise) return cachedPromise;
@@ -1872,6 +1872,17 @@ async function generateSmartRss(targetUrl, options = {}) {
     } catch (e) {
       // ignore, fallback to deterministic items
     }
+  }
+
+  if (!items.length) {
+    items = [{
+      title: article?.title || siteTitle,
+      link: targetUrl,
+      description: article?.excerpt || description || siteTitle,
+      author: '',
+      image: mainImage,
+      date: new Date().toUTCString()
+    }];
   }
 
   const itemXml = buildRssItemsXml(items, new Date().toUTCString());
@@ -2586,7 +2597,7 @@ function renderTemplate(template, item) {
   if (text.length <= maxChars) return text;
   const reserved = safeLink ? (safeLink.length + 1) : 0;
   const maxTitle = Math.max(0, maxChars - reserved - 1);
-  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}Ã”Ã‡Âª` : safeTitle;
+  const trimmedTitle = safeTitle.length > maxTitle ? `${safeTitle.slice(0, Math.max(0, maxTitle - 1))}Ãƒâ€Ãƒâ€¡Ã‚Âª` : safeTitle;
   text = template
     .replace('{title}', trimmedTitle)
     .replace('{link}', safeLink)
@@ -2952,7 +2963,7 @@ async function runDailySummary() {
   logEvent({
     level: 'info',
     source: 'summary',
-    message: 'Resumo di?Ã­rio gerado.',
+    message: 'Resumo di?ÃƒÂ­rio gerado.',
     detail: `Itens: ${items.length}`
   });
 }
@@ -3029,14 +3040,14 @@ async function runAlerts() {
 
 function getAutomationEligibility() {
   if (!automationConfig.rules.enabled) {
-    return { ok: false, reason: 'Automa?Âº?Ãºo desativada.' };
+    return { ok: false, reason: 'Automa?Ã‚Âº?ÃƒÂºo desativada.' };
   }
   if (!hasTwitterCredentials(automationConfig)) {
     return { ok: false, reason: 'Credenciais incompletas.' };
   }
   const now = new Date();
   if (withinQuietHours(automationConfig.rules.quietHours, now)) {
-    return { ok: false, reason: 'Dentro do hor?Ã­rio silencioso.' };
+    return { ok: false, reason: 'Dentro do hor?ÃƒÂ­rio silencioso.' };
   }
 
   if (!automationState.dailyDate || automationState.dailyDate !== getDailyKey(now)) {
@@ -3045,7 +3056,7 @@ function getAutomationEligibility() {
   }
 
   if (automationState.dailyCount >= automationConfig.rules.maxPerDay) {
-    return { ok: false, reason: 'Limite di?Ã­rio atingido.' };
+    return { ok: false, reason: 'Limite di?ÃƒÂ­rio atingido.' };
   }
 
   if (automationState.lastPostedAt) {
@@ -3054,7 +3065,7 @@ function getAutomationEligibility() {
       ? Math.max(automationConfig.rules.minIntervalMinutes, 180)
       : automationConfig.rules.minIntervalMinutes;
     if (elapsed < minInterval) {
-      return { ok: false, reason: 'Aguardando intervalo m?Â¡nimo.' };
+      return { ok: false, reason: 'Aguardando intervalo m?Ã‚Â¡nimo.' };
     }
   }
 
@@ -3176,7 +3187,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL inv?Ã­lida.'));
+      return reject(new Error('URL inv?ÃƒÂ­lida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -3198,7 +3209,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
           res.resume();
-          return reject(new Error('Falha ao carregar p?Ã­gina.'));
+          return reject(new Error('Falha ao carregar p?ÃƒÂ­gina.'));
         }
         let data = '';
         res.setEncoding('utf8');
@@ -3210,7 +3221,7 @@ function fetchHtml(targetUrl, redirectCount = 0) {
     );
     req.on('error', reject);
     req.on('timeout', () => {
-      req.destroy(new Error('Timeout ao carregar p?Ã­gina.'));
+      req.destroy(new Error('Timeout ao carregar p?ÃƒÂ­gina.'));
     });
   });
 }
@@ -3224,7 +3235,7 @@ function fetchBuffer(targetUrl, redirectCount = 0) {
     try {
       urlObj = new URL(targetUrl);
     } catch (err) {
-      return reject(new Error('URL inv?Ã­lida.'));
+      return reject(new Error('URL inv?ÃƒÂ­lida.'));
     }
     const lib = urlObj.protocol === 'https:' ? https : http;
     const req = lib.get(
@@ -3360,8 +3371,8 @@ function fetchJson(targetUrl) {
 
 function weatherCodeToText(code) {
   const map = {
-    0: 'C?Â®u limpo',
-    1: 'Predom?Â¡nio de sol',
+    0: 'C?Ã‚Â®u limpo',
+    1: 'Predom?Ã‚Â¡nio de sol',
     2: 'Parcialmente nublado',
     3: 'Nublado',
     45: 'Neblina',
@@ -3382,14 +3393,14 @@ function weatherCodeToText(code) {
     96: 'Tempestade com granizo',
     99: 'Tempestade intensa'
   };
-  return map[code] || 'Tempo inst?Ã­vel';
+  return map[code] || 'Tempo inst?ÃƒÂ­vel';
 }
 
 async function getWeatherForCity(city) {
   const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`;
   const geo = await fetchJson(geoUrl);
   if (!geo || !geo.results || !geo.results.length) {
-    throw new Error('Cidade n?Ãºo encontrada.');
+    throw new Error('Cidade n?ÃƒÂºo encontrada.');
   }
   const location = geo.results[0];
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo`;
@@ -5140,7 +5151,7 @@ function buildHashtagPrompt(text, maxTags) {
   const limit = Math.min(5, Math.max(1, Number(maxTags) || 3));
   return [
     `Gere ${limit} hashtags em portugues do Brasil, curtas e relevantes.`,
-    'Evite hashtags gen?Â®ricas. Use termos especificos do tema.',
+    'Evite hashtags gen?Ã‚Â®ricas. Use termos especificos do tema.',
     'Responda apenas com um JSON array de strings.',
     `Texto: """${text}"""`
   ].join('\n');
@@ -5427,11 +5438,11 @@ async function runPromptWithCopilot(prompt, config) {
 function extractCandidates($, baseUrl) {
   const candidates = [];
   const navTokens = new Set([
-    'home', 'início', 'inicio', 'sobre', 'about', 'contato', 'contatos', 'fale',
+    'home', 'inÃ­cio', 'inicio', 'sobre', 'about', 'contato', 'contatos', 'fale',
     'conta', 'login', 'cadastre', 'termos', 'privacidade', 'ajuda', 'faq',
-    'assinatura', 'assinaturas', 'painel', 'dashboard', 'suporte', 'configurações',
-    'configuracoes', 'cookies', 'política', 'politica', 'perfil', 'minha conta',
-    'mercados', 'ferramentas', 'calendários', 'calendarios', 'análises', 'analises'
+    'assinatura', 'assinaturas', 'painel', 'dashboard', 'suporte', 'configuraÃ§Ãµes',
+    'configuracoes', 'cookies', 'polÃ­tica', 'politica', 'perfil', 'minha conta',
+    'mercados', 'ferramentas', 'calendÃ¡rios', 'calendarios', 'anÃ¡lises', 'analises'
   ]);
   const selectors = [
     'article a',
@@ -5455,14 +5466,14 @@ function extractCandidates($, baseUrl) {
       }
       if (seen.has(abs)) return;
       const text = $(el).text().replace(/\s+/g, ' ').trim();
-      if (text.length < 15) return;
+      if (text.length < 10) return;
       const lower = text.toLowerCase();
       const words = lower.split(/\s+/).filter(Boolean);
-      if (words.length < 3) return;
+      if (words.length < 2) return;
       if (navTokens.has(lower)) return;
       if (words.some(w => navTokens.has(w))) return;
       const depth = (abs.match(/\//g) || []).length;
-      if (depth < 3) return; // links rasos costumam ser navegação
+      if (depth < 2) return; // links rasos costumam ser navegaÃ§Ã£o
       seen.add(abs);
       candidates.push({ link: abs, title: text });
     });
@@ -5494,7 +5505,7 @@ async function generateRssFromSite(targetUrl) {
     urlObj.hostname;
   const description =
     $('meta[name="description"]').attr('content') ||
-    `Not?Â¡cias recentes de ${urlObj.hostname}`;
+    `Not?Ã‚Â¡cias recentes de ${urlObj.hostname}`;
 
   const items = extractCandidates($, urlObj.toString())
     .slice(0, 20)
@@ -5591,7 +5602,7 @@ const bodyIndicatesNotFound = (body) => {
     || needle.includes('user not found')
     || needle.includes('does not exist')
     || needle.includes('non e stato trovato nulla')
-    || needle.includes('non Ãž stato trovato nulla')
+    || needle.includes('non ÃƒÅ¾ stato trovato nulla')
   );
 };
 
@@ -5695,7 +5706,7 @@ app.post('/feeds/status', async (req, res) => {
 app.post('/feeds', (req, res) => {
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   if (!name || !url) {
-    return res.status(400).json({ error: 'Nome e URL s?Ãºo obrigat??rios.' });
+    return res.status(400).json({ error: 'Nome e URL s?ÃƒÂºo obrigat??rios.' });
   }
   const newFeed = { id: uuidv4(), name, url, showOnTimeline: !!showOnTimeline, sourceUrl: sourceUrl || '', language: normalizeFeedLanguage(language) };
   feeds.push(newFeed);
@@ -5716,7 +5727,7 @@ app.put('/feeds/:id', (req, res) => {
   const { id } = req.params;
   const { name, url, showOnTimeline, sourceUrl, language } = req.body;
   const feed = feeds.find(f => f.id === id);
-  if (!feed) return res.status(404).json({ error: 'Feed n?Ãºo encontrado.' });
+  if (!feed) return res.status(404).json({ error: 'Feed n?ÃƒÂºo encontrado.' });
   if (name !== undefined) feed.name = name;
   if (url !== undefined) feed.url = url;
   if (showOnTimeline !== undefined) feed.showOnTimeline = !!showOnTimeline;
@@ -6811,8 +6822,8 @@ app.post('/automation/test', async (req, res) => {
   try {
     const client = createTwitterClient(automationConfig);
     const stamp = new Date().toISOString();
-    const text = `Teste de automa?Âº?Ãºo RSS (${stamp})`;
-    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + 'Ã”Ã‡Âª' : text);
+    const text = `Teste de automa?Ã‚Âº?ÃƒÂºo RSS (${stamp})`;
+    await client.v2.tweet(text.length > 280 ? text.slice(0, 277) + 'Ãƒâ€Ãƒâ€¡Ã‚Âª' : text);
     logEvent({
       level: 'info',
       source: 'automation',
@@ -6845,7 +6856,7 @@ app.post('/automation/post', async (req, res) => {
   }
   try {
     const client = createTwitterClient(automationConfig);
-    const trimmed = text.length > 280 ? text.slice(0, 277) + 'Ã”Ã‡Âª' : text;
+    const trimmed = text.length > 280 ? text.slice(0, 277) + 'Ãƒâ€Ãƒâ€¡Ã‚Âª' : text;
     await client.v2.tweet(trimmed);
     const now = new Date();
     const postedId = payload.id || payload.link || payload.guid || payload.title;
@@ -7286,7 +7297,7 @@ app.get('/site/:slug', (req, res) => {
   const slug = normalizeSlug(req.params.slug);
   const site = (siteStore.sites || []).find(entry => entry.slug === slug);
   if (!site) {
-    res.status(404).json({ ok: false, message: 'Site n?Ã¥o encontrado.' });
+    res.status(404).json({ ok: false, message: 'Site n?ÃƒÂ¥o encontrado.' });
     return;
   }
   res.json(site);
@@ -7654,7 +7665,7 @@ app.put('/tags', (req, res) => {
   res.json({ ok: true });
 });
 
-// Previs?Ãºo do tempo
+// Previs?ÃƒÂºo do tempo
 app.get('/weather', async (req, res) => {
   const citiesParam = req.query.cities || '';
   const cities = String(citiesParam)
@@ -7679,7 +7690,7 @@ app.get('/weather', async (req, res) => {
       logEvent({
         level: 'warning',
         source: 'weather',
-        message: 'Falha ao buscar previs?Ãºo do tempo.',
+        message: 'Falha ao buscar previs?ÃƒÂºo do tempo.',
         detail: `${city} | ${err.message || err}`
       });
     }
@@ -7742,7 +7753,7 @@ app.get('/public/watch', async (req, res) => {
   }
 });
 
-// Gerar RSS a partir de uma p?Ã­gina
+// Gerar RSS a partir de uma p?ÃƒÂ­gina
 const BILLING_PLANS = [
   {
     id: 'starter',
@@ -7951,7 +7962,7 @@ app.post('/billing/modal/seen', (req, res) => {
 app.get('/rss', async (req, res) => {
   const { url } = req.query;
   if (!url) {
-    return res.status(400).json({ error: 'URL ?Â® obrigat??ria.' });
+    return res.status(400).json({ error: 'URL ?Ã‚Â® obrigat??ria.' });
   }
   try {
     const rss = await generateRssFromSite(url);
@@ -7979,14 +7990,14 @@ app.get('/rss', async (req, res) => {
       message: 'Falha ao gerar RSS a partir do site.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'N?Ãºo foi poss?Â¡vel gerar RSS.' });
+    res.status(500).json({ error: 'N?ÃƒÂºo foi poss?Ã‚Â¡vel gerar RSS.' });
   }
   });
 
 app.post('/rss/generate', async (req, res) => {
   const { url, maxItems, useAi, title, language } = req.body || {};
   if (!url) {
-    return res.status(400).json({ error: 'URL ?Â® obrigat??ria.' });
+    return res.status(400).json({ error: 'URL ?Ã‚Â® obrigat??ria.' });
   }
   try {
     const robots = await fetchRobotsTxt(url);
@@ -8023,7 +8034,7 @@ app.post('/rss/generate', async (req, res) => {
       message: 'Falha ao gerar RSS inteligente.',
       detail: `${url} | ${err.message || err}`
     });
-    res.status(500).json({ error: 'N?Ãºo foi poss?Â¡vel gerar RSS.' });
+    res.status(500).json({ error: 'N?ÃƒÂºo foi poss?Ã‚Â¡vel gerar RSS.' });
   }
 });
 
@@ -8039,7 +8050,7 @@ app.get('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS não encontrado.' });
+    return res.status(404).json({ error: 'RSS nÃ£o encontrado.' });
   }
   const filePath = path.join(GENERATED_RSS_DIR, entry.fileName);
   const fileExists = fs.existsSync(filePath);
@@ -8074,7 +8085,7 @@ app.post('/rss/generated/:id/refresh', async (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS não encontrado.' });
+    return res.status(404).json({ error: 'RSS nÃ£o encontrado.' });
   }
   try {
     const updated = await regenerateGeneratedRss(entry, { useAi: req.body?.useAi });
@@ -8087,7 +8098,7 @@ app.delete('/rss/generated/:id', (req, res) => {
   const { id } = req.params;
   const entry = generatedRssIndex.find(item => item.id === id);
   if (!entry) {
-    return res.status(404).json({ error: 'RSS n?Ãºo encontrado.' });
+    return res.status(404).json({ error: 'RSS n?ÃƒÂºo encontrado.' });
   }
   removeGeneratedFile(entry);
   generatedRssIndex = generatedRssIndex.filter(item => item.id !== id);
@@ -8105,7 +8116,7 @@ app.post('/saved', (req, res) => {
   const item = req.body || {};
   const id = item.id || item.link || item.guid || item.title;
   if (!id) {
-    return res.status(400).json({ error: 'Item inv?Ã­lido.' });
+    return res.status(400).json({ error: 'Item inv?ÃƒÂ­lido.' });
   }
   const existing = savedItems.find(saved => saved.id === id);
   if (existing) return res.status(200).json(existing);
@@ -8601,7 +8612,7 @@ app.post('/watch/refresh', async (req, res) => {
   }
 });
 
-// Agregar todos os feeds cadastrados (cache em memória)
+// Agregar todos os feeds cadastrados (cache em memÃ³ria)
 app.get('/aggregate', async (req, res) => {
   try {
     const cached = getAggregatedCache();
@@ -8624,7 +8635,7 @@ app.get('/aggregate', async (req, res) => {
     logEvent({
       level: 'error',
       source: 'rss',
-      message: 'Falha ao gerar agregação.',
+      message: 'Falha ao gerar agregaÃ§Ã£o.',
       detail: err?.message || String(err)
     });
     res.status(500).json({ error: 'Falha ao agregar feeds.' });
@@ -8804,7 +8815,7 @@ setInterval(() => {
     logEvent({
       level: 'error',
       source: 'summary',
-      message: 'Falha ao gerar resumo di?Ã­rio.',
+      message: 'Falha ao gerar resumo di?ÃƒÂ­rio.',
       detail: err.detail || err.message || String(err)
     });
   });
@@ -8815,4 +8826,5 @@ let tagConfig = loadTags();
 
 
 // watch helpers restored
+
 
