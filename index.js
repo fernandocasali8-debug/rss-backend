@@ -1560,6 +1560,7 @@ const GENERATED_RSS_INDEX = path.join(GENERATED_RSS_DIR, 'index.json');
 const GENERATED_RSS_MAX = 200;
 const GENERATED_RSS_TTL_DAYS = 45;
 const GENERATED_RSS_REFRESH_MS = 30 * 60 * 1000; // regen a cada 30 min
+const GENERATED_RSS_REFRESH_MAX_AGE_MS = 3 * 60 * 60 * 1000; // força regen se tiver mais de 3h
 let generatedRssIndex = (() => {
   try {
     fs.mkdirSync(GENERATED_RSS_DIR, { recursive: true });
@@ -1588,6 +1589,12 @@ function pruneRssCache() {
 function saveGeneratedIndex() {
   fs.mkdirSync(GENERATED_RSS_DIR, { recursive: true });
   fs.writeFileSync(GENERATED_RSS_INDEX, JSON.stringify(generatedRssIndex, null, 2), 'utf-8');
+}
+
+function shouldRefreshGenerated(entry) {
+  const updated = Date.parse(entry.updatedAt || entry.createdAt || 0);
+  if (!Number.isFinite(updated)) return true;
+  return (Date.now() - updated) > GENERATED_RSS_REFRESH_MAX_AGE_MS;
 }
 
 function removeGeneratedFile(entry) {
@@ -1632,6 +1639,14 @@ function pruneGeneratedRssIndex() {
 }
 
 pruneGeneratedRssIndex();
+// tenta atualizar feeds gerados em background na subida
+setTimeout(() => {
+  generatedRssIndex.forEach((entry, idx) => {
+    setTimeout(() => {
+      regenerateGeneratedRss(entry, { useAi: true }).catch(() => null);
+    }, idx * 500);
+  });
+}, 2000);
 
 function normalizeRssSlug(value) {
   return String(value || '')
@@ -2749,14 +2764,17 @@ async function buildAggregatedItems() {
       let xml = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
 
       let refreshed = entry;
-      try {
-        refreshed = await regenerateGeneratedRss(entry, { useAi: true });
-        const refreshedPath = path.join(GENERATED_RSS_DIR, refreshed.fileName || `${refreshed.id}.xml`);
-        if (fs.existsSync(refreshedPath)) {
-          xml = fs.readFileSync(refreshedPath, 'utf-8');
+      const needsRefresh = shouldRefreshGenerated(entry) || !xml;
+      if (needsRefresh) {
+        try {
+          refreshed = await regenerateGeneratedRss(entry, { useAi: true });
+          const refreshedPath = path.join(GENERATED_RSS_DIR, refreshed.fileName || `${refreshed.id}.xml`);
+          if (fs.existsSync(refreshedPath)) {
+            xml = fs.readFileSync(refreshedPath, 'utf-8');
+          }
+        } catch (e) {
+          // se a regeneração falhar, segue com XML anterior (se houver)
         }
-      } catch (e) {
-        // se a regeneração falhar, usa XML existente se houver
       }
 
       if (!xml) continue; // sem XML para consumir
@@ -2769,9 +2787,9 @@ async function buildAggregatedItems() {
         feedUrl: `/rss/generated/${refreshed.id}`,
         tags: [],
         image: extractImageFromItem(item),
-        // normalizar datas para hoje para que apareçam na timeline atual
-        pubDate: new Date().toUTCString(),
-        isoDate: new Date().toISOString()
+        // Datas: usar as do feed; se ausentes, agora
+        pubDate: item.pubDate || new Date().toUTCString(),
+        isoDate: item.isoDate || new Date().toISOString()
       }));
       aggregated = aggregated.concat(feedItems);
     } catch (e) {
