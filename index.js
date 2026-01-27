@@ -1701,6 +1701,9 @@ async function regenerateGeneratedRss(entry, opts = {}) {
       maxItems: entry.itemsCount || undefined,
       useAi: opts.useAi !== false
     });
+    if (!result || !result.rss || !Array.isArray(result.items) || result.items.length === 0) {
+      throw new Error('Regeneração não retornou itens');
+    }
     const filePath = path.join(GENERATED_RSS_DIR, entry.fileName);
     fs.mkdirSync(GENERATED_RSS_DIR, { recursive: true });
     fs.writeFileSync(filePath, result.rss, 'utf-8');
@@ -8128,7 +8131,13 @@ app.get('/rss/generated/:id', (req, res) => {
 
   regenerateGeneratedRss(entry)
     .then(() => serveFile())
-    .catch(() => {
+    .catch((err) => {
+      logEvent({
+        level: 'warning',
+        source: 'rss-generator',
+        message: 'Falha ao regerar RSS (serve fallback se existir).',
+        detail: `${entry.url} | ${err?.message || err}`
+      });
       if (fileExists) {
         return serveFile();
       }
@@ -8144,6 +8153,9 @@ app.post('/rss/generated/:id/refresh', async (req, res) => {
   }
   try {
     const updated = await regenerateGeneratedRss(entry, { useAi: req.body?.useAi });
+    if (!updated) {
+      throw new Error('Regeneração retornou vazio');
+    }
     res.json({ ...updated, feedUrl: `/rss/generated/${updated.id}` });
   } catch (err) {
     res.status(500).json({ error: err.message || 'Falha ao regerar RSS.' });
