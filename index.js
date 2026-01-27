@@ -5553,6 +5553,31 @@ function extractImageFromItem(item) {
   return image;
 }
 
+function extractBestImage($, baseUrl) {
+  // 1) og:image
+  const og = $('meta[property="og:image"]').attr('content');
+  const candidates = [];
+  if (og) candidates.push(og);
+  // 2) images com width/height
+  $('img').each((_, el) => {
+    const src = $(el).attr('src') || '';
+    const w = Number($(el).attr('width') || 0);
+    const h = Number($(el).attr('height') || 0);
+    if (!src) return;
+    if (/(sprite|logo|favicon|placeholder)/i.test(src)) return;
+    if (w && h && w < 120 && h < 120) return;
+    candidates.push(src);
+  });
+  for (const src of candidates) {
+    try {
+      return new URL(src, baseUrl).toString();
+    } catch (e) {
+      continue; // eslint-disable-line no-continue
+    }
+  }
+  return '';
+}
+
 async function generateRssFromSite(targetUrl) {
   const html = await fetchHtml(targetUrl);
   const $ = cheerio.load(html);
