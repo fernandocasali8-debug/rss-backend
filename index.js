@@ -2741,6 +2741,41 @@ async function buildAggregatedItems() {
       // ignore
     }
   }
+
+  // Incluir RSS gerados pelo sistema (cache local em generated-rss)
+  for (const entry of generatedRssIndex) {
+    try {
+      const filePath = path.join(GENERATED_RSS_DIR, entry.fileName || `${entry.id}.xml`);
+      let xml = '';
+      if (fs.existsSync(filePath)) {
+        xml = fs.readFileSync(filePath, 'utf-8');
+      } else {
+        // tenta regenerar se o arquivo não existe
+        try {
+          await regenerateGeneratedRss(entry, { useAi: true });
+          if (fs.existsSync(filePath)) {
+            xml = fs.readFileSync(filePath, 'utf-8');
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      if (!xml) continue;
+      const parsed = await parser.parseString(xml);
+      const feedItems = (parsed.items || []).map(item => ({
+        ...item,
+        title: stripHtml(item.title),
+        contentSnippet: stripHtml(item.contentSnippet || item.description || ''),
+        feedName: `${stripHtml(entry.title || entry.url)} (GER)`,
+        feedUrl: `/rss/generated/${entry.id}`,
+        tags: [],
+        image: extractImageFromItem(item)
+      }));
+      aggregated = aggregated.concat(feedItems);
+    } catch (e) {
+      // ignore erro de feed gerado
+    }
+  }
   try {
     const telegramItems = await fetchTelegramFeedItems(telegramFeedsConfig, telegramFeedsState);
     if (telegramItems.length) {
