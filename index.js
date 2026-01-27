@@ -1697,13 +1697,26 @@ async function regenerateGeneratedRss(entry, opts = {}) {
     if (!isRobotsAllowed(robots, entry.url)) {
       throw new Error('Bloqueado por robots.txt.');
     }
-    const result = await generateSmartRss(entry.url, {
+    let result = await generateSmartRss(entry.url, {
       maxItems: entry.itemsCount || undefined,
       useAi: opts.useAi !== false
     });
+
+    // Fallback: se não veio nada, tenta extractor simples
     if (!result || !result.rss || !Array.isArray(result.items) || result.items.length === 0) {
-      throw new Error('Regeneração não retornou itens');
+      const fallbackRss = await generateRssFromSite(entry.url);
+      const count = (fallbackRss.match(/<item>/g) || []).length;
+      result = {
+        rss: fallbackRss,
+        items: new Array(count).fill(null),
+        itemsCount: count,
+        title: entry.title || entry.url
+      };
+      if (!count) {
+        throw new Error('Regeneração não retornou itens');
+      }
     }
+
     const filePath = path.join(GENERATED_RSS_DIR, entry.fileName);
     fs.mkdirSync(GENERATED_RSS_DIR, { recursive: true });
     fs.writeFileSync(filePath, result.rss, 'utf-8');
