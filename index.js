@@ -2768,7 +2768,10 @@ async function buildAggregatedItems() {
         feedName: `${stripHtml(refreshed.title || refreshed.url)} (GER)`,
         feedUrl: `/rss/generated/${refreshed.id}`,
         tags: [],
-        image: extractImageFromItem(item)
+        image: extractImageFromItem(item),
+        // normalizar datas para hoje para que apareçam na timeline atual
+        pubDate: new Date().toUTCString(),
+        isoDate: new Date().toISOString()
       }));
       aggregated = aggregated.concat(feedItems);
     } catch (e) {
