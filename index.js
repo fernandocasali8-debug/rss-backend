@@ -4999,6 +4999,15 @@ function buildAiPrompts(item, maxChars, mode) {
       emojiRule,
       'Nao inclua o link no texto.'
     ].join('\n');
+  } else if (mode === 'deep') {
+    style = [
+      'Reescreva a nota em tom jornalistico, neutro e conciso.',
+      'Em seguida, adicione um paragrafo curto de investigacao complementar (2-3 frases) baseado apenas no que esta na manchete/trecho:',
+      '- contextualize o fato (dados, historico, impacto);',
+      '- mencione fatores/hipoteses/proximos passos sem afirmar o que nao esta claro;',
+      '- nao invente fontes ou dados; se nao souber, use condicional ("pode indicar", "ainda nao ha confirmacao").',
+      'Mantenha portugues do Brasil. Sem opiniao. Sem emojis.'
+    ].join('\n');
   }
   const userPrompt = [
     `Manchete: ${title || 'N/A'}`,
@@ -6784,7 +6793,7 @@ app.put('/ai/config', (req, res) => {
   }
   try {
     const item = req.body || {};
-    const allowedModes = new Set(['default', 'twitter', 'twitter_short', 'twitter_cta', 'twitter_nolink']);
+    const allowedModes = new Set(['default', 'twitter', 'twitter_short', 'twitter_cta', 'twitter_nolink', 'deep']);
     const mode = allowedModes.has(item.mode) ? item.mode : 'default';
     let text = '';
     if (aiConfig.provider === 'openai') {
