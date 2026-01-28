@@ -63,6 +63,12 @@ const TOKEN_TTL_REMEMBER = '30d';
 const REMEMBER_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
 const KALSHI_BASE_URL = process.env.KALSHI_BASE_URL || 'https://api.elections.kalshi.com/trade-api/v2';
 const KALSHI_API_KEY = process.env.KALSHI_API_KEY || '';
+const DISABLE_AUTH = (() => {
+  const raw = String(process.env.DISABLE_AUTH || '').toLowerCase();
+  if (raw === '0' || raw === 'false') return false;
+  // padrao agora: auth desativada (sem login Google)
+  return true;
+})();
 
 app.use(cors({
   origin: FRONTEND_URL,
@@ -82,6 +88,23 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+if (DISABLE_AUTH) {
+  console.warn('[auth] Auth desabilitada (DISABLE_AUTH=1). Todas as rotas aceitarão usuario padrao.');
+}
+app.use((req, _res, next) => {
+  if (!DISABLE_AUTH) return next();
+  // injeta um usuario padrao para evitar checagens de permissao
+  req.user = req.user || {
+    id: 'guest',
+    name: 'Convidado',
+    email: 'guest@local',
+    photo: '',
+    plan: 'enterprise',
+    role: 'admin',
+    approved: true
+  };
+  return next();
+});
 app.use((req, res, next) => {
   const token = getAuthTokenFromRequest(req);
   if (!token) return next();
@@ -290,6 +313,7 @@ app.post('/auth/logout', (req, res) => {
 });
 
 const isPublicRoute = (req) => {
+  if (DISABLE_AUTH) return true;
   if (req.path.startsWith('/auth/')) return true;
   if (req.path === '/auth/google') return true;
   if (req.path === '/auth/me') return true;
@@ -309,6 +333,7 @@ const isPublicRoute = (req) => {
 };
 
 app.use((req, res, next) => {
+  if (DISABLE_AUTH) return next();
   if (isPublicRoute(req)) return next();
   if (req.isAuthenticated && req.isAuthenticated()) return next();
   if (req.user) return next();
@@ -316,6 +341,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  if (DISABLE_AUTH) return next();
   if (isPublicRoute(req)) return next();
   const email = String(req.user?.email || '').toLowerCase();
   if (!email) return res.status(401).json({ error: 'Nao autorizado.' });
